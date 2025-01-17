@@ -1,0 +1,10 @@
+<!-- templates/components/seccion_option.jinja -->
+{% macro sections_per(sections) %}
+<div class="sections_per">
+    {% for item in sections %}
+    <section class="section-item">
+        <a href="{{ item.url }}" class="section-link">{{ item.name }}</a>
+    </section>
+    {% endfor %}
+</div>
+{% endmacro %}

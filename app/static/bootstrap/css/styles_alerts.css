@@ -1,0 +1,18 @@
+.alert {
+    font-size: 1.1em; /* Tamaño de fuente más grande */
+}
+
+.alert-container {
+    margin: 20px 0; 
+}
+
+
+.alert-success {
+    background-color: #d4edda; 
+    border-color: #c3e6cb; 
+}
+
+.alert-danger {
+    background-color: #f8d7da; 
+    border-color: #f5c6cb; 
+}

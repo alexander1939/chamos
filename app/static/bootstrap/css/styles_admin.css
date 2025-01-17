@@ -1,0 +1,42 @@
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+
+h1 {
+    font-family: Arial, sans-serif;
+    font-size: 1.8em;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+
+.message-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.message-user {
+    font-weight: bold;
+    color: #007bff;
+    flex-basis: 25%;
+    text-align: left;
+}
+
+.message-content {
+    flex-basis: 70%;
+    padding-left: 10px;
+    color: #333;
+}
+
+.message-row:not(:last-child) {
+    margin-bottom: 5px;
+}

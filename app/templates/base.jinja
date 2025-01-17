@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Happy Box{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1 , maximum-scale=1, user-scalable=0">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/seccion_option.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/seccion_option-lista.css') }}">
+
+
+    <!-- Fin de la cabecera -->
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <div id="wrapper" class="wrapper">
+        <!-- Encabezado reutilizable -->
+        <header id="header" class="header">
+            soy el header
+        </header>
+
+        <!-- Cuerpo del contenido específico -->
+        <main id="main" class="main">
+            {% block content %}
+            {% endblock %}
+        </main>
+
+    </div>
+
+    <footer id="footer" class="footer">
+        <!-- footer.html -->
+        <footer id="footer" class="footer">
+            soy el footer
+        </footer>
+
+    </footer>
+</body>
+
+</html>

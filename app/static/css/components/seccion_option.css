@@ -1,0 +1,75 @@
+/* General: Contenedor de Secciones */
+.sections_per {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 51px auto;
+    padding: 10%;
+}
+
+.title_option {
+    text-align: center;
+    align-items: center;
+}
+
+/* Items de Sección */
+.section-item {
+    position: relative;
+    background-color: #f4f4f4;
+    border-radius: 10px;
+    padding: 20px;
+    width: 200px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, background-color 0.3s;
+    text-align: center;
+}
+
+.section-item:hover {
+    transform: translateY(-5px);
+    background-color: #e0e0e0;
+}
+
+/* Links dentro de Secciones */
+.section-link {
+    text-decoration: none;
+    color: #333;
+    font-size: 1.2em;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* Submenú dentro de .section-item */
+.section-item .submenu {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 200px;
+    width: 150px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    padding: 10px 0;
+    text-align: left;
+}
+
+.section-item .submenu a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 0.9em;
+    padding: 10px 20px;
+    display: block;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.section-item .submenu a:hover {
+    background-color: #f0f0f0;
+    color: #0056b3;
+}
+
+.section-item:hover .submenu {
+    display: block;
+}

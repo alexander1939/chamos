@@ -1,0 +1,151 @@
+/* sidebar.css */
+
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+.menu-container {
+  display: flex;
+}
+
+.sidebar {
+  margin-top: 0%;
+  width: 250px;
+  /* Cambiado a 100% para ocupar toda la izquierda */
+  background-color: #2c3e50;
+  color: #ecf0f1;
+  height: 100vh;
+  /* Cambiado a 100vh para que ocupe toda la altura de la pantalla */
+  position: fixed;
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+}
+
+.sidebar.collapsed {
+  transform: translateX(-100%);
+  /* Cambiado a -100% para desplazar la barra lateral fuera de la vista */
+}
+
+.sidebar-header {
+  padding: 15px;
+  font-size: 1.5rem;
+  text-align: center;
+  background-color: #34495e;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.close-menu {
+  background: none;
+  border: none;
+  color: #ecf0f1;
+  font-size: 1.2rem;
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  cursor: pointer;
+  display: none;
+  /* Oculto por defecto */
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu li {
+  position: relative;
+}
+
+.menu li a {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  color: #ecf0f1;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.menu li a i {
+  margin-right: 10px;
+}
+
+.menu li a:hover {
+  background-color: #1abc9c;
+}
+
+.dropdown-menu {
+  display: none;
+  background-color: #34495e;
+  padding-left: 15px;
+}
+
+.dropdown-btn.active+.dropdown-menu {
+  display: block;
+}
+
+.dropdown-icon {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-btn.active .dropdown-icon {
+  transform: rotate(180deg);
+}
+
+.content {
+  flex-grow: 1;
+  margin-left: 100%;
+  /* Cambiado a 100% para desplazar el contenido cuando la barra lateral ocupe todo el ancho */
+  padding: 20px;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.content .toggle-menu {
+  background: #1abc9c;
+  border: none;
+  color: #fff;
+  padding: 10px 15px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: none;
+  /* Oculto por defecto */
+}
+
+.content .toggle-menu:hover {
+  background: #16a085;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    /* Ocultamos la barra lateral al hacer responsiva */
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+    /* Mostramos la barra lateral cuando sea activa */
+  }
+
+  .content {
+    margin-left: 0;
+    /* Quitamos el margen para el contenido en pantalla pequeña */
+  }
+
+  .content .toggle-menu {
+    display: block;
+    /* Mostrar botón de hamburguesa */
+  }
+
+  .close-menu {
+    display: block;
+    /* Mostrar botón de cierre */
+  }
+}

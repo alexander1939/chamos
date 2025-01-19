@@ -13,17 +13,6 @@ body {
     transition: all 0.3s ease;
 }
 
-
-/* Header (navbar) */
-header {
-    grid-area: navbar;
-    background-color: #007BFF;
-    color: white;
-    padding: 10px;
-    text-align: center;
-}
-
-/* Main content area */
 main {
     grid-area: main;
     background-color: #F8F9FA;
@@ -32,18 +21,6 @@ main {
     transition: margin-left 0.3s ease;
     min-height: calc(100vh - 120px);
     box-sizing: border-box;
-}
-
-/* Footer */
-footer {
-    grid-area: footer;
-    background-color: #007BFF;
-    color: white;
-    text-align: center;
-    padding: 20px;
-    height: 100%;
-    position: relative;
-    margin-top: auto;
 }
 
 @media (max-width: 768px) {

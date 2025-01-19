@@ -21,6 +21,24 @@
     <div id="wrapper" class="wrapper">
         <!-- Encabezado reutilizable -->
         <header id="header" class="header">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('auth.index') }}">Home</a>
+                    </li>
+                    {% for crumb in breadcrumbs %}
+                    {% if crumb.url %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                    </li>
+                    {% else %}
+                    <li class="breadcrumb-item active" aria-current="page">{{ crumb.name }}</li>
+                    {% endif %}
+                    {% endfor %}
+                </ol>
+            </nav>
+
+
 
             <div class="menu-container">
                 <div class="sidebar" id="sidebar">

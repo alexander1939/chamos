@@ -1,0 +1,75 @@
+/* Estilos generales */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: grid;
+    grid-template-areas:
+        "sidebar navbar"
+        "sidebar main"
+        "sidebar footer";
+    grid-template-columns: 250px 1fr;
+    grid-template-rows: auto 1fr auto;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+
+/* Header (navbar) */
+header {
+    grid-area: navbar;
+    background-color: #007BFF;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+/* Main content area */
+main {
+    grid-area: main;
+    background-color: #F8F9FA;
+    padding: 20px;
+    margin-left: 0px;
+    transition: margin-left 0.3s ease;
+    min-height: calc(100vh - 120px);
+    box-sizing: border-box;
+}
+
+/* Footer */
+footer {
+    grid-area: footer;
+    background-color: #007BFF;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    height: 100%;
+    position: relative;
+    margin-top: auto;
+}
+
+@media (max-width: 768px) {
+    body {
+        grid-template-columns: 0 1fr;
+        grid-template-rows: auto 1fr auto;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .content {
+        margin-left: 0;
+    }
+
+    .content .toggle-menu {
+        display: block;
+    }
+
+    .close-menu {
+        display: block;
+    }
+}

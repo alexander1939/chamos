@@ -14,7 +14,6 @@ def create_app():
 
     app.register_blueprint(auth)
 
-    # Inyecta los breadcrumbs en el contexto de las plantillas
     @app.context_processor
     def inject_breadcrumbs():
         return {"breadcrumbs": generate_breadcrumbs()}

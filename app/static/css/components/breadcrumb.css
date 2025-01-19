@@ -1,0 +1,13 @@
+.navbar-custom {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+}
+
+.navbar-custom .breadcrumb-item a {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.navbar-custom .breadcrumb-item.active {
+    color: #6c757d;
+}

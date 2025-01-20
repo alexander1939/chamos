@@ -1,18 +1,17 @@
-<!-- templates/components/proyectos_section.jinja -->
 {% macro proyectos_section(title, subtitle, materias) %}
-<div class="container">
-    <h1 class="title_option">{{ title }}</h1>
+<div class="custom-container">
+    <h1 class="custom-title-option">{{ title }}</h1>
 </div>
-<div class="sections_per">
-    <section class="section-materias">
-        <div class="container">
-            <h2>{{ subtitle }}</h2> <!-- Muestra el subtítulo pasado al macro -->
-            <ul class="materia-list">
+<div class="custom-sections-per">
+    <section class="custom-section-materias">
+        <div class="custom-container">
+            <h2 class="custom-subtitle-option"> {{ subtitle }}</h2> <!-- Muestra el subtítulo pasado al macro -->
+            <ul class="custom-materia-list">
                 {% for materia in materias %}
-                <li class="materia-item">
+                <li class="custom-materia-item">
                     <h3>{{ materia.name }}</h3>
                     <p>{{ materia.description }}</p>
-                    <a href="{{ materia.url }}" class="btn">Ver más</a>
+                    <a href="{{ materia.url }}" class="custom-btn">Ver más</a>
                 </li>
                 {% endfor %}
             </ul>

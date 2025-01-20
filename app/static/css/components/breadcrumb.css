@@ -1,13 +1,27 @@
-.navbar-custom {
-    background-color: #f8f9fa;
-    border-radius: 10px;
+.breadcrumbsx {
+    display: flex;
+    flex-wrap: nowrap;
+    padding: 0;
+    margin-bottom: 0;
+    list-style: none;
+    font-size: 1rem;
 }
 
-.navbar-custom .breadcrumb-item a {
+.breadcrumbsx-item {
+    display: inline-block;
+}
+
+.breadcrumbsx-item a {
     color: #007bff;
     font-weight: 600;
+    text-decoration: none;
 }
 
-.navbar-custom .breadcrumb-item.active {
+.breadcrumbsx-item.active {
+    color: #6c757d;
+}
+
+.breadcrumbsx-item+.breadcrumbsx-item::before {
+    content: ">";
     color: #6c757d;
 }

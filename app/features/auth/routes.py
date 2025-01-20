@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, url_for
 
 auth = Blueprint('auth', __name__)
 
@@ -80,4 +80,68 @@ def error_500():
 
 
 
+
+
+@auth.route('/jesus/')  # Asegúrate de incluir la barra inicial '/'
+def jesus():
+    return render_template('temporary/jesus/index.jinja')
+
+
+
+@auth.route('/jesus/juegos/')  # Asegúrate de incluir la barra inicial '/'
+def juegos_jesus():
+    return render_template('temporary/jesus/juegos/index.jinja')
+
+@auth.route('/jesus/juegos/fornite/')  
+def juegos_jesus_fornite():
+    return render_template('temporary/jesus/juegos/fornite.jinja')  
+
+@auth.route('/jesus/juegos/apex/')  
+def juegos_jesus_apex():
+    return render_template('temporary/jesus/juegos/apex.jinja')  
+
+@auth.route('/jesus/juegos/cod/')  
+def juegos_jesus_cod():
+    return render_template('temporary/jesus/juegos/cod.jinja')
+
+
+
+@auth.route('/jesus/materias/')  # Asegúrate de incluir la barra inicial '/'
+def materias_jesus():
+    return render_template('temporary/jesus/materias/index.jinja')
+
+@auth.route('/jesus/materias/base/')  
+def materias_jesus_base():
+    return render_template('temporary/jesus/materias/base.jinja')
+
+@auth.route('/jesus/materias/ingles/')  
+def materias_jesus_ingles():
+    return render_template('temporary/jesus/materias/ingles.jinja')
+
+@auth.route('/jesus/materias/programacion/')  
+def materias_jesus_programacion():
+    return render_template('temporary/jesus/materias/programacion.jinja')
+
+
+
+@auth.route('/jesus/proyectos/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_jesus(): 
+    return render_template('temporary/jesus/proyectos/index.jinja')
+
+@auth.route('/jesus/proyectos/mg/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_jesus_mg(): 
+    return render_template('temporary/jesus/proyectos/mg.jinja')
+
+@auth.route('/jesus/proyectos/biblioteca/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_jesus_biblioteca(): 
+    return render_template('temporary/jesus/proyectos/biblioteca.jinja')
+
+@auth.route('/jesus/proyectos/butique/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_jesus_butique(): 
+    return render_template('temporary/jesus/proyectos/butique.jinja')
+
+
+@auth.route('/error-504') 
+def error_jesus():
+    return render_template('errors/504.jinja')
 

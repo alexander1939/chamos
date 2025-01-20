@@ -1,0 +1,18 @@
+{% extends "base.jinja" %}
+{% from 'components/seccion_option.jinja' import sections_per %}
+
+
+{% block title %}Página Principal{% endblock %}
+
+{% block content %}
+
+{% set sections = [
+{'name': 'Materias', 'url': url_for('auth.materias_jesus')},
+{'name': 'Juegos', 'url': url_for('auth.juegos_jesus')},
+{'name': 'Proyectos', 'url': url_for('auth.proyectos_jesus')}
+] %}
+
+
+{{ sections_per(sections) }}
+
+{% endblock %}

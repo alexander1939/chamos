@@ -1,0 +1,13 @@
+{% extends "base.jinja" %}
+{% block title %}Error 504: Tiempo de espera agotado{% endblock %}
+
+{% block content %}
+
+<div class="error-page" style="text-align: center; margin-top: 20vh;">
+    <h1>Error 504</h1>
+    <p>El servidor no pudo completar tu solicitud a tiempo. Esto puede deberse a un problema de comunicación con el servidor o a que la solicitud demoró más de lo esperado.</p>
+    <p>Por favor, intenta nuevamente más tarde o contacta al administrador si el problema persiste.</p>
+    <a href="/" class="btn btn-primary" style="display: inline-block; margin-top: 20px;">Volver al inicio</a>
+</div>
+
+{% endblock %}

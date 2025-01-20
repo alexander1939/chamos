@@ -6,215 +6,256 @@
     <title>{% block title %}Happy Box{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1 , maximum-scale=1, user-scalable=0">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/seccion_option.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/seccion_option-lista.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/breadcrumb.css') }}">
     <script src="{{ url_for('static', filename='js/components/sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/breadcrumb.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/styles.css') }}">
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
 
 
     {% block head %}{% endblock %}
 </head>
 
 <body>
-    <div id="wrapper" class="wrapper">
-        <!-- Encabezado reutilizable -->
-        <header id="header" class="header">
+    <header id="header" class="header">
+        <nav class="navbar navbar-light bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand mx-auto" href="#">
+                    <img src="https://mdbcdn.b-cdn.net/img/logo/mdb-transaprent-noshadows.webp" height="15"
+                        alt="MDB Logo" loading="lazy" />
+                </a>
 
-            <div class="menu-container">
-                <div class="sidebar" id="sidebar">
-                    <div class="sidebar-header">
-                        <h2>Menú</h2>
-                        <button class="close-menu" id="close-menu"><i class="fas fa-times"></i></button>
+                <div class=" d-lg-flex align-items-center">
+                    <div class="dropdown">
+                        <a data-bs-toggle="dropdown" class="dropdown-toggle d-flex align-items-center hidden-arrow"
+                            href="#" id="navbarDropdownMenuAvatar" role="button" aria-expanded="false">
+                            <img src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp" class="rounded-circle"
+                                height="25" alt="User Avatar" loading="lazy" />
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
+                            <li><a class="dropdown-item" href="#">My profile</a></li>
+                            <li><a class="dropdown-item" href="#">Settings</a></li>
+                            <li><a class="dropdown-item" href="#">Logout</a></li>
+                        </ul>
                     </div>
-                    <ul class="menu">
-                        <li><a href="#"><i class="fas fa-home"></i> Inicio</a></li>
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Gael <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a href="#" class="dropdown-btn">
-                                        <i class="fas fa-list"></i> Materias <i
-                                            class="fas fa-chevron-down dropdown-icon"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#"><i class="fas fa-folder"></i> Matematicas</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Ingles</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Ciencias</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#" class="dropdown-btn">
-                                        <i class="fas fa-list"></i> Juegos <i
-                                            class="fas fa-chevron-down dropdown-icon"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#"><i class="fas fa-folder"></i> Shooters</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Indie</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> RPG</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#" class="dropdown-btn">
-                                        <i class="fas fa-list"></i> Proyectos <i
-                                            class="fas fa-chevron-down dropdown-icon"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#"><i class="fas fa-folder"></i> Industriales</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Sociales</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Investigación</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Jesus <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a href="#" class="dropdown-btn">
-                                        <i class="fas fa-list"></i> Materias <i
-                                            class="fas fa-chevron-down dropdown-icon"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#"><i class="fas fa-folder"></i> Matematicas</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Ingles</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Ciencias</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#" class="dropdown-btn">
-                                        <i class="fas fa-list"></i> Juegos <i
-                                            class="fas fa-chevron-down dropdown-icon"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#"><i class="fas fa-folder"></i> Shooters</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Indie</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> RPG</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#" class="dropdown-btn">
-                                        <i class="fas fa-list"></i> Proyectos <i
-                                            class="fas fa-chevron-down dropdown-icon"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#"><i class="fas fa-folder"></i> Industriales</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Sociales</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Investigación</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Gustavo <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a href="#" class="dropdown-btn">
-                                        <i class="fas fa-list"></i> Materias <i
-                                            class="fas fa-chevron-down dropdown-icon"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#"><i class="fas fa-folder"></i> Matematicas</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Ingles</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Ciencias</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#" class="dropdown-btn">
-                                        <i class="fas fa-list"></i> Juegos <i
-                                            class="fas fa-chevron-down dropdown-icon"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#"><i class="fas fa-folder"></i> Shooters</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Indie</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> RPG</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#" class="dropdown-btn">
-                                        <i class="fas fa-list"></i> Proyectos <i
-                                            class="fas fa-chevron-down dropdown-icon"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#"><i class="fas fa-folder"></i> Industriales</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Sociales</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Investigación</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Roberto <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a href="#" class="dropdown-btn">
-                                        <i class="fas fa-list"></i> Materias <i
-                                            class="fas fa-chevron-down dropdown-icon"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#"><i class="fas fa-folder"></i> Matematicas</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Ingles</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Ciencias</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#" class="dropdown-btn">
-                                        <i class="fas fa-list"></i> Juegos <i
-                                            class="fas fa-chevron-down dropdown-icon"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#"><i class="fas fa-folder"></i> Shooters</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Indie</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> RPG</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#" class="dropdown-btn">
-                                        <i class="fas fa-list"></i> Proyectos <i
-                                            class="fas fa-chevron-down dropdown-icon"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#"><i class="fas fa-folder"></i> Industriales</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Sociales</a></li>
-                                        <li><a href="#"><i class="fas fa-folder"></i> Investigación</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        <li><a href="#"><i class="fas fa-info-circle"></i> Acerca de</a></li>
-                        <li><a href="#"><i class="fas fa-envelope"></i> Contacto</a></li>
-                    </ul>
-                </div>
-                <div class="content">
-                    <button class="toggle-menu" id="toggle-menu"><i class="fas fa-bars"></i></button>
                 </div>
             </div>
-        </header>
+        </nav>
 
-        <!-- Cuerpo del contenido específico -->
-        <main id="main" class="main">
-            {% block content %}
-            {% endblock %}
-        </main>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumbsx">
+                <li class="breadcrumbsx-item">
+                    <a href="{{ url_for('auth.index') }}">Home</a>
+                </li>
+                {% for crumb in breadcrumbs %}
+                {% if crumb.url %}
+                <li class="breadcrumbsx-item">
+                    <a href="{{ crumb.url }}" class="breadcrumbsx-link">
+                        <span class="breadcrumbsx-text">{{ crumb.name }}</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="breadcrumbsx-item active" aria-current="page">
+                    <span class="breadcrumbsx-text">{{ crumb.name }}</span>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ol>
+        </nav>
+
+
+
+
+
+    </header>
+
+    <div class="menu-container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Menú</h2>
+                <button class="close-menu" id="close-menu"><i class="fas fa-times"></i></button>
+            </div>
+            <ul class="menu">
+                <li><a href="#"><i class="fas fa-home"></i> Inicio</a></li>
+                <li>
+                    <a href="#" class="dropdown-btn">
+                        <i class="fas fa-list"></i> Gael <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </a>
+                    <ul class="dropdown-options">
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-list"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                <li><a href="#"><i class="fas fa-folder"></i> Matematicas</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Ingles</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Ciencias</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-list"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                <li><a href="#"><i class="fas fa-folder"></i> Shooters</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Indie</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> RPG</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-list"></i> Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                <li><a href="#"><i class="fas fa-folder"></i> Industriales</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Sociales</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Investigación</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="dropdown-btn">
+                        <i class="fas fa-list"></i> Jesus <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </a>
+                    <ul class="dropdown-options">
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-list"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                <li><a href="#"><i class="fas fa-folder"></i> Matematicas</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Ingles</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Ciencias</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-list"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                <li><a href="#"><i class="fas fa-folder"></i> Shooters</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Indie</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> RPG</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-list"></i> Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                <li><a href="#"><i class="fas fa-folder"></i> Industriales</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Sociales</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Investigación</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="dropdown-btn">
+                        <i class="fas fa-list"></i> Gustavo <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </a>
+                    <ul class="dropdown-options">
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-list"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                <li><a href="#"><i class="fas fa-folder"></i> Matematicas</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Ingles</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Ciencias</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-list"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                <li><a href="#"><i class="fas fa-folder"></i> Shooters</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Indie</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> RPG</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-list"></i> Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                <li><a href="#"><i class="fas fa-folder"></i> Industriales</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Sociales</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Investigación</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="dropdown-btn">
+                        <i class="fas fa-list"></i> Roberto <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </a>
+                    <ul class="dropdown-options">
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-list"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                <li><a href="#"><i class="fas fa-folder"></i> Matematicas</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Ingles</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Ciencias</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-list"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                <li><a href="#"><i class="fas fa-folder"></i> Shooters</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Indie</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> RPG</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-list"></i> Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                <li><a href="#"><i class="fas fa-folder"></i> Industriales</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Sociales</a></li>
+                                <li><a href="#"><i class="fas fa-folder"></i> Investigación</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li><a href="#"><i class="fas fa-info-circle"></i> Acerca de</a></li>
+                <li><a href="#"><i class="fas fa-envelope"></i> Contacto</a></li>
+                <br>
+            </ul>
+        </div>
+        <div class="contents">
+            <button class="toggle-menu" id="toggle-menu"><i class="fas fa-bars"></i></button>
+        </div>
+    </div>
+
+    <!-- Cuerpo del contenido específico -->
+    <main id="main" class="main">
+        {% block content %}
+        {% endblock %}
+    </main>
 
     </div>
 
     <footer id="footer" class="footer">
-        <!-- footer.html -->
-        <footer id="footer" class="footer">
-            soy el footer
-        </footer>
-
+        soy el footer
     </footer>
+
 </body>
 
 </html>

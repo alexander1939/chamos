@@ -1,12 +1,12 @@
 /* Contenedor de Materias */
-.section-materias h2 {
+.custom-section-materias h2 {
     text-align: center;
     margin-bottom: 20px;
     font-size: 1.8rem;
     color: #007bff;
 }
 
-.materia-list {
+.custom-materia-list {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
@@ -16,7 +16,16 @@
     margin: 0;
 }
 
-.materia-item {
+.custom-title-option {
+    text-align: center;
+    padding: 40px;
+}
+
+.custom-subtitle-option {
+    padding: 30px;
+}
+
+.custom-materia-item {
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -26,22 +35,22 @@
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.materia-item:hover {
+.custom-materia-item:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
 }
 
-.materia-item h3 {
+.custom-materia-item h3 {
     margin: 0 0 10px;
     color: #333;
 }
 
-.materia-item p {
+.custom-materia-item p {
     margin: 0 0 20px;
     color: #666;
 }
 
-.btn {
+.custom-btn {
     display: inline-block;
     text-decoration: none;
     color: #fff;
@@ -51,6 +60,6 @@
     transition: background-color 0.3s;
 }
 
-.btn:hover {
+.custom-btn:hover {
     background-color: #0056b3;
 }

@@ -10,10 +10,11 @@
 
 {% set juegos = [
 {'name': 'Fornite', 'description': 'Fortnite es un videojuego de acción y supervivencia desarrollado por Epic Games.',
-'url': '#'},
-{'name': 'call', 'description': 'Call of Duty es una serie de videojuegos de disparos en primera persona,', 'url': '#'},
+'url': url_for('auth.juegos_tavo_fornite')},
+{'name': 'call', 'description': 'Call of Duty es una serie de videojuegos de disparos en primera persona,', 'url':
+url_for('auth.juegos_tavo_call')},
 {'name': 'free', 'description': 'Free Fire es un popular juego de disparos en tercera persona de tipo *battle royale*
-desarrollado', 'url': '#'}
+desarrollado', 'url': url_for('auth.juegos_tavo_free')},
 ] %}
 
 {{ proyectos_section('Bienvenido a la Página de Juegos', 'Lista de Juegos', juegos) }}

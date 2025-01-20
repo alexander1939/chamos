@@ -10,9 +10,11 @@
 
 {% set materias = [
 {'name': 'Matemáticas', 'description': 'Explora el mundo de los números y las fórmulas.',
-'url': '#'},
-{'name': 'DESARROLLO WEB PROFESIONAL','description': 'Descubre las destructura de las paginas web.', 'url': '#'},
-{'name': 'EMPRENDIMIENTO DIGITAL', 'description': 'Conoce el pasado para entender el presente.', 'url': '#'}
+'url': url_for('auth.materias_tavo_mate')},
+{'name': 'DESARROLLO WEB PROFESIONAL','description': 'Descubre las destructura de las paginas web.', 'url':
+url_for('auth.materias_tavo_desa')},
+{'name': 'EMPRENDIMIENTO DIGITAL', 'description': 'Conoce el pasado para entender el presente.', 'url':
+url_for('auth.materias_tavo_empre')},
 ] %}
 
 {{ proyectos_section('Bienvenido a la Página de Materias', 'Lista de Materias', materias) }}

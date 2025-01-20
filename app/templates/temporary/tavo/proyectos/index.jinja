@@ -9,9 +9,12 @@
 
 
 {% set proyectos = [
-{'name': 'Cuestionario', 'description': 'Un proyecto donde las cuestios ayudan a mejorar','url': '#'},
-{'name': 'Mensajes', 'description': 'Descubre como funcionan los mensajes', 'url':'#'},
-{'name': 'Tareas', 'description': 'Conoce el pasado para entender el presente.', 'url': '#'}
+{'name': 'Cuestionario', 'description': 'Un proyecto donde las cuestios ayudan a mejorar','url':
+url_for('auth.proyectos_tavo_cues')},
+{'name': 'Mensajes', 'description': 'Descubre como funcionan los mensajes', 'url':
+url_for('auth.proyectos_tavo_mensa')},
+{'name': 'Tareas', 'description': 'Conoce el pasado para entender el presente.', 'url':
+url_for('auth.proyectos_tavo_tareas')},
 ] %}
 
 {{ proyectos_section('Bienvenido a la Página de Proyectos', 'Lista de Materias', proyectos) }}

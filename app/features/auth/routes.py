@@ -141,7 +141,69 @@ def proyectos_jesus_butique():
     return render_template('temporary/jesus/proyectos/butique.jinja')
 
 
+@auth.route('/gael/')  # Asegúrate de incluir la barra inicial '/'
+def gael():
+    return render_template('temporary/gael/index.jinja')
+
+
+
+@auth.route('/gael/juegos/')  # Asegúrate de incluir la barra inicial '/'
+def juegos_gael():
+    return render_template('temporary/gael/juegos/index.jinja')
+
+@auth.route('/gael/juegos/fornite/')  
+def juegos_gael_fornite():
+    return render_template('temporary/gael/juegos/fornite.jinja')  
+
+@auth.route('/gael/juegos/apex/')  
+def juegos_gael_apex():
+    return render_template('temporary/gael/juegos/apex.jinja')  
+
+@auth.route('/gael/juegos/cod/')  
+def juegos_gael_cod():
+    return render_template('temporary/gael/juegos/cod.jinja')
+
+
+
+@auth.route('/gael/materias/')  # Asegúrate de incluir la barra inicial '/'
+def materias_gael():
+    return render_template('temporary/gael/materias/index.jinja')
+
+@auth.route('/gael/materias/base/')  
+def materias_gael_base():
+    return render_template('temporary/gael/materias/base.jinja')
+
+@auth.route('/gael/materias/ingles/')  
+def materias_gael_ingles():
+    return render_template('temporary/gael/materias/ingles.jinja')
+
+@auth.route('/gael/materias/programacion/')  
+def materias_gael_programacion():
+    return render_template('temporary/gael/materias/programacion.jinja')
+
+
+
+@auth.route('/gael/proyectos/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_gael(): 
+    return render_template('temporary/gael/proyectos/index.jinja')
+
+@auth.route('/gael/proyectos/mg/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_gael_mg(): 
+    return render_template('temporary/gael/proyectos/mg.jinja')
+
+@auth.route('/gael/proyectos/biblioteca/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_gael_biblioteca(): 
+    return render_template('temporary/gael/proyectos/biblioteca.jinja')
+
+@auth.route('/gael/proyectos/butique/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_gael_butique(): 
+    return render_template('temporary/gael/proyectos/butique.jinja')
+
 @auth.route('/error-504') 
 def error_jesus():
     return render_template('errors/504.jinja')
+
+@auth.route('/error-500') 
+def error_gael():
+    return render_template('errors/500.jinja')
 

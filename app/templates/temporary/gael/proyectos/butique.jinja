@@ -1,0 +1,87 @@
+{% extends "base.jinja" %}
+{% block title %}Página del Proyecto{% endblock %}
+
+{% block content %}
+
+<section class="section-info">
+    <div class="container">
+        <h2>Información del Proyecto</h2>
+        <p><strong>Nombre del Proyecto:</strong> Sistema de Gestión de Boutique</p>
+        <p><strong>Objetivo:</strong> Desarrollar un sistema que permita gestionar los productos, inventarios, 
+            ventas y clientes de una boutique, optimizando el proceso de compras y la administración de productos 
+            de manera eficiente.</p>
+        <p><strong>Tecnologías Usadas:</strong> Aplicación web en React, backend con Node.js y base de datos en 
+            MongoDB para el almacenamiento de productos, clientes y transacciones.</p>
+    </div>
+</section>
+
+<section class="section-description">
+    <div class="container">
+        <h2>Descripción del Proyecto</h2>
+        <p>Este proyecto consiste en el desarrollo de un sistema de gestión para una boutique, el cual permitirá 
+            a los administradores gestionar los productos en stock, realizar ventas, y tener control sobre los 
+            clientes y sus compras. El sistema contará con una interfaz intuitiva tanto para el personal de la 
+            boutique como para los clientes, facilitando la experiencia de compra y la administración de los productos.</p>
+        <p>El sistema almacenará toda la información de los productos, clientes y transacciones, permitiendo 
+            realizar análisis de ventas y gestionar inventarios en tiempo real. Además, permitirá realizar ventas 
+            online y gestionar los pagos de manera segura.</p>
+    </div>
+</section>
+
+<section class="section-features">
+    <div class="container">
+        <h2>Características Principales</h2>
+        <ul class="feature-list">
+            <li class="feature-item">
+                <h3>Gestión de Productos</h3>
+                <p>Los administradores pueden agregar, actualizar o eliminar productos en el inventario, 
+                    incluyendo detalles como precio, cantidad en stock, y descripción.</p>
+            </li>
+            <li class="feature-item">
+                <h3>Ventas en Línea y Presenciales</h3>
+                <p>El sistema permite realizar ventas tanto en línea como de manera presencial, gestionando el 
+                    proceso de pago de forma eficiente y segura.</p>
+            </li>
+            <li class="feature-item">
+                <h3>Gestión de Clientes</h3>
+                <p>Los administradores pueden registrar clientes, seguir su historial de compras y ofrecerles 
+                    promociones personalizadas.</p>
+            </li>
+            <li class="feature-item">
+                <h3>Control de Inventario</h3>
+                <p>El sistema realiza un seguimiento en tiempo real del inventario de productos, alertando cuando 
+                    el stock esté bajo y facilitando la reposición de productos.</p>
+            </li>
+        </ul>
+    </div>
+</section>
+
+<section class="section-benefits">
+    <div class="container">
+        <h2>Beneficios del Sistema</h2>
+        <ul class="benefit-list">
+            <li class="benefit-item">
+                <h3>Optimización de Inventarios</h3>
+                <p>El sistema asegura un control detallado del inventario, lo que reduce el riesgo de tener productos 
+                    agotados o sobrestock.</p>
+            </li>
+            <li class="benefit-item">
+                <h3>Mejora de la Experiencia del Cliente</h3>
+                <p>La interfaz amigable facilita a los clientes realizar compras de manera rápida y cómoda, mejorando 
+                    la experiencia de compra tanto en línea como en la boutique física.</p>
+            </li>
+            <li class="benefit-item">
+                <h3>Gestión Eficiente de Ventas</h3>
+                <p>El sistema permite registrar ventas de manera rápida y obtener reportes detallados de las mismas, 
+                    optimizando la gestión de las transacciones y las estadísticas de ventas.</p>
+            </li>
+            <li class="benefit-item">
+                <h3>Promociones Personalizadas</h3>
+                <p>El sistema permite ofrecer promociones especiales a clientes frecuentes, aumentando la fidelización 
+                    y la satisfacción del cliente.</p>
+            </li>
+        </ul>
+    </div>
+</section>
+
+{% endblock %}

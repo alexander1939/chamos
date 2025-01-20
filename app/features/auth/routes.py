@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, url_for
 
 auth = Blueprint('auth', __name__)
 
@@ -23,4 +23,25 @@ def materias():
 @auth.route('/tavo/proyectos')  # Asegúrate de incluir la barra inicial '/'
 def proyectos():
     return render_template('temporary/tavo/proyectos/index.jinja')
+
+
+@auth.route('/jesus')  # Asegúrate de incluir la barra inicial '/'
+def jesus():
+    return render_template('temporary/jesus/index.jinja')
+
+@auth.route('/jesus/juegos')  # Asegúrate de incluir la barra inicial '/'
+def juegos_jesus():
+    return render_template('temporary/jesus/juegos/index.jinja')
+
+@auth.route('/jesus/materias')  # Asegúrate de incluir la barra inicial '/'
+def materias_jesus():
+    return render_template('temporary/jesus/materias/index.jinja')
+
+@auth.route('/jesus/proyectos')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_jesus(): 
+    return render_template('temporary/jesus/proyectos/index.jinja')
+
+@auth.route('/jesus/error') 
+def error_jesus():
+    return render_template('errors/504.jinja')
 

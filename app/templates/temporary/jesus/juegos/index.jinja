@@ -1,0 +1,20 @@
+{% extends "base.jinja" %}
+{% from 'components/section_option-list.jinja' import proyectos_section %}
+
+
+
+{% block title %}Página de juegos{% endblock %}
+
+{% block content %}
+
+
+{% set juegos = [
+{'name': 'Fornite', 'description': 'Fortnite es un videojuego de acción y supervivencia desarrollado por Epic Games.',
+'url': '#'},
+{'name': 'call', 'description': 'Call of Duty es una serie de videojuegos de disparos en primera persona,', 'url': '#'},
+{'name': 'free', 'description': 'Free Fire es un popular juego de disparos en tercera persona de tipo *battle royale*
+desarrollado', 'url': '#'}
+] %}
+
+{{ proyectos_section('Bienvenido a la Página de Juegos', 'Lista de Juegos', juegos) }}
+{% endblock %}

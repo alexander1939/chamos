@@ -9,10 +9,10 @@
 
 
 {% set materias = [
-{'name': 'Matemáticas', 'description': 'Explora el mundo de los números y las fórmulas.',
-'url': '#'},
-{'name': 'DESARROLLO WEB PROFESIONAL','description': 'Descubre las destructura de las paginas web.', 'url': '#'},
-{'name': 'EMPRENDIMIENTO DIGITAL', 'description': 'Conoce el pasado para entender el presente.', 'url': '#'}
+{'name': 'Base de datos', 'description': 'Ingresa al mundo del guardado de datos de manera relacional o no relacional',
+'url': url_for('auth.materias_gael_base')},
+{'name': 'Ingles','description': 'Pli open, wao el ingles abre puertas', 'url': url_for('auth.materias_gael_ingles')},
+{'name': 'Programación', 'description': 'Conoce lo que es el futuro del mundo en trabajo', 'url': url_for('auth.materias_gael_programacion')}
 ] %}
 
 {{ proyectos_section('Bienvenido a la Página de Materias', 'Lista de Materias', materias) }}

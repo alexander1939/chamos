@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for
+from flask import Blueprint, abort, render_template, request, url_for
 
 auth = Blueprint('auth', __name__)
 
@@ -68,17 +68,6 @@ def proyectos_tavo_tareas():
     return render_template('temporary/tavo/proyectos/tareas.jinja')
 
 
-@auth.route('/error-404')
-def error_404():
-    return render_template('errors/404.jinja')
-
-@auth.route('/error-500')
-def error_500():
-    return render_template('errors/500.jinja')
-
-
-
-
 
 
 
@@ -141,6 +130,7 @@ def proyectos_jesus_butique():
     return render_template('temporary/jesus/proyectos/butique.jinja')
 
 
+
 @auth.route('/gael/')  # Asegúrate de incluir la barra inicial '/'
 def gael():
     return render_template('temporary/gael/index.jinja')
@@ -155,9 +145,9 @@ def juegos_gael():
 def juegos_gael_fornite():
     return render_template('temporary/gael/juegos/fornite.jinja')  
 
-@auth.route('/gael/juegos/apex/')  
-def juegos_gael_apex():
-    return render_template('temporary/gael/juegos/apex.jinja')  
+@auth.route('/gael/juegos/metro/')  
+def juegos_gael_metro():
+    return render_template('temporary/gael/juegos/metro.jinja')  
 
 @auth.route('/gael/juegos/cod/')  
 def juegos_gael_cod():
@@ -187,9 +177,9 @@ def materias_gael_programacion():
 def proyectos_gael(): 
     return render_template('temporary/gael/proyectos/index.jinja')
 
-@auth.route('/gael/proyectos/mg/')  # Asegúrate de incluir la barra inicial '/'
-def proyectos_gael_mg(): 
-    return render_template('temporary/gael/proyectos/mg.jinja')
+@auth.route('/gael/proyectos/connectricity/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_gael_connect(): 
+    return render_template('temporary/gael/proyectos/connectricity.jinja')
 
 @auth.route('/gael/proyectos/biblioteca/')  # Asegúrate de incluir la barra inicial '/'
 def proyectos_gael_biblioteca(): 
@@ -203,7 +193,10 @@ def proyectos_gael_butique():
 def error_jesus():
     return render_template('errors/504.jinja')
 
-@auth.route('/error-500') 
-def error_gael():
-    return render_template('errors/500.jinja')
-
+    # Ruta que requiere autenticación
+@auth.route('/protected')
+def protected():
+    auth = request.authorization
+    if not auth or auth.username != 'admin' or auth.password != 'password':
+        abort(401)  # Genera el error 401 si no se proporciona autenticación válida
+    return "Acceso permitido a la página protegida."

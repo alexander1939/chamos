@@ -9,9 +9,9 @@
 
 
 {% set proyectos = [
-{'name': 'Cuestionario', 'description': 'Un proyecto donde las cuestios ayudan a mejorar','url': '#'},
-{'name': 'Mensajes', 'description': 'Descubre como funcionan los mensajes', 'url':'#'},
-{'name': 'Tareas', 'description': 'Conoce el pasado para entender el presente.', 'url': '#'}
+{'name': 'Connectrity', 'description': 'Juego web de monsters NFT.','url': url_for('auth.proyectos_gael_connect')},
+{'name': 'Biblioteca', 'description': 'Proyecto para la biblioteca municipal.', 'url': url_for('auth.proyectos_gael_biblioteca')},
+{'name': 'Boutique', 'description': 'Proyecto para una boutique de ropa', 'url': url_for('auth.proyectos_gael_butique')}
 ] %}
 
 {{ proyectos_section('Bienvenido a la Página de Proyectos', 'Lista de Materias', proyectos) }}

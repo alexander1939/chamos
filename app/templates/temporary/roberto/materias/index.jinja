@@ -1,0 +1,21 @@
+{% extends "base.jinja" %}
+{% from 'components/section_option-list.jinja' import proyectos_section %}
+
+
+
+{% block title %}Página materias{% endblock %}
+
+{% block content %}
+
+
+{% set materias = [
+{'name': 'Ingles', 'description': 'Explora el mundo de los números y las fórmulas.',
+'url': url_for('auth.materias_roberto_ingles')},
+{'name': 'Desarrollo Web','description': 'Descubre las destructura de las paginas web.', 'url':
+url_for('auth.materias_roberto_des')},
+{'name': 'Base de Datos', 'description': 'Conoce el pasado para entender el presente.', 'url':
+url_for('auth.materias_roberto_base')},
+] %}
+
+{{ proyectos_section('Bienvenido a la Página de Materias', 'Lista de Materias', materias) }}
+{% endblock %}

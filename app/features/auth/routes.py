@@ -67,11 +67,6 @@ def proyectos_tavo_mensa():
 def proyectos_tavo_tareas():
     return render_template('temporary/tavo/proyectos/tareas.jinja')
 
-
-@auth.route('/error-404')
-def error_404():
-    return render_template('errors/404.jinja')
-
 @auth.route('/error-500')
 def error_500():
     return render_template('errors/500.jinja')

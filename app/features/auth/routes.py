@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for
+from flask import Blueprint, abort, render_template, request, url_for
 
 auth = Blueprint('auth', __name__)
 
@@ -66,6 +66,11 @@ def proyectos_tavo_mensa():
 @auth.route('/tavo/proyectos/tareas/') 
 def proyectos_tavo_tareas():
     return render_template('temporary/tavo/proyectos/tareas.jinja')
+
+
+@auth.route('/error-404')
+def error_404():
+    return render_template('errors/404.jinja')
 
 @auth.route('/error-500')
 def error_500():
@@ -136,6 +141,7 @@ def proyectos_jesus_butique():
     return render_template('temporary/jesus/proyectos/butique.jinja')
 
 
+
 @auth.route('/gael/')  # Asegúrate de incluir la barra inicial '/'
 def gael():
     return render_template('temporary/gael/index.jinja')
@@ -150,9 +156,9 @@ def juegos_gael():
 def juegos_gael_fornite():
     return render_template('temporary/gael/juegos/fornite.jinja')  
 
-@auth.route('/gael/juegos/apex/')  
-def juegos_gael_apex():
-    return render_template('temporary/gael/juegos/apex.jinja')  
+@auth.route('/gael/juegos/metro/')  
+def juegos_gael_metro():
+    return render_template('temporary/gael/juegos/metro.jinja')  
 
 @auth.route('/gael/juegos/cod/')  
 def juegos_gael_cod():
@@ -182,9 +188,9 @@ def materias_gael_programacion():
 def proyectos_gael(): 
     return render_template('temporary/gael/proyectos/index.jinja')
 
-@auth.route('/gael/proyectos/mg/')  # Asegúrate de incluir la barra inicial '/'
-def proyectos_gael_mg(): 
-    return render_template('temporary/gael/proyectos/mg.jinja')
+@auth.route('/gael/proyectos/connectricity/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_gael_connect(): 
+    return render_template('temporary/gael/proyectos/connectricity.jinja')
 
 @auth.route('/gael/proyectos/biblioteca/')  # Asegúrate de incluir la barra inicial '/'
 def proyectos_gael_biblioteca(): 
@@ -201,66 +207,4 @@ def error_jesus():
 @auth.route('/error-500') 
 def error_gael():
     return render_template('errors/500.jinja')
-
-
-
-# Roberto
-
-@auth.route('/roberto/')  # Asegúrate de incluir la barra inicial '/'
-def roberto():
-    return render_template('temporary/roberto/index.jinja')
-
-
-
-@auth.route('/roberto/juegos/')  # Asegúrate de incluir la barra inicial '/'
-def juegos_roberto():
-    return render_template('temporary/roberto/juegos/index.jinja')
-
-@auth.route('/roberto/juegos/fortnite/')  
-def juegos_roberto_fortnite():
-    return render_template('temporary/roberto/juegos/fortnite.jinja')  
-
-@auth.route('/roberto/juegos/frefire/')  
-def juegos_roberto_free():
-    return render_template('temporary/roberto/juegos/freefire.jinja')  
-
-@auth.route('/roberto/juegos/clash/')  
-def juegos_roberto_clash():
-    return render_template('temporary/roberto/juegos/clashroyale.jinja')
-
-
-
-@auth.route('/roberto/materias/')  # Asegúrate de incluir la barra inicial '/'
-def materias_roberto():
-    return render_template('temporary/roberto/materias/index.jinja')
-
-@auth.route('/roberto/materias/base/')  
-def materias_roberto_base():
-    return render_template('temporary/roberto/materias/basedatos.jinja')
-
-@auth.route('/roberto/materias/ingles/')  
-def materias_roberto_ingles():
-    return render_template('temporary/roberto/materias/ingles.jinja')
-
-@auth.route('/roberto/materias/desarrollo/')  
-def materias_roberto_des():
-    return render_template('temporary/roberto/materias/desarrolloweb.jinja')
-
-
-
-@auth.route('/roberto/proyectos/')  # Asegúrate de incluir la barra inicial '/'
-def proyectos_roberto(): 
-    return render_template('temporary/roberto/proyectos/index.jinja')
-
-@auth.route('/roberto/proyectos/agencia/')  # Asegúrate de incluir la barra inicial '/'
-def proyectos_roberto_age(): 
-    return render_template('temporary/roberto/proyectos/agenciamoto.jinja')
-
-@auth.route('/roberto/proyectos/evaluacion/')  # Asegúrate de incluir la barra inicial '/'
-def proyectos_roberto_eva(): 
-    return render_template('temporary/roberto/proyectos/udm.jinja')
-
-@auth.route('/roberto/proyectos/puntoventa/')  # Asegúrate de incluir la barra inicial '/'
-def proyectos_roberto_punto(): 
-    return render_template('temporary/roberto/proyectos/asscom.jinja')
 

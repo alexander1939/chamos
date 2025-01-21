@@ -63,22 +63,7 @@ main {
         padding: 20px;
     }
 
-    .breadcrumbsx-item {
-        max-width: 100px;
-        white-space: nowrap;
-    }
 
-    .breadcrumbsx-item a {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        max-width: 120px;
-    }
-
-
-    .breadcrumbsx-item+.breadcrumbsx-item::before {
-        content: ">";
-    }
 }
 
 
@@ -99,5 +84,22 @@ main {
     .custom-btn {
         padding: 8px 16px;
         font-size: 0.9rem;
+    }
+
+    .breadcrumbsx-item {
+        max-width: 100px;
+        white-space: nowrap;
+    }
+
+    .breadcrumbsx-item a {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        max-width: 120px;
+    }
+
+
+    .breadcrumbsx-item+.breadcrumbsx-item::before {
+        content: ">";
     }
 }

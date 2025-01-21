@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     function adjustBreadcrumbs() {
         const breadcrumbs = document.querySelectorAll('.breadcrumbsx-item .breadcrumbsx-text');
-        const isMobile = window.innerWidth <= 768;
+        const isMobile = window.innerWidth <= 480;
 
         breadcrumbs.forEach((crumb, index) => {
             if (isMobile) {

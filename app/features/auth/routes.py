@@ -208,6 +208,12 @@ def error_jesus():
 def error_gael():
     return render_template('errors/500.jinja')
 
+@auth.route('/protected')
+def protected():
+    auth = request.authorization
+    if not auth or auth.username != 'admin' or auth.password != 'password':
+        abort(401)  # Genera el error 401 si no se proporciona autenticación válida
+    return "Acceso permitido a la página protegida."
 
 
 

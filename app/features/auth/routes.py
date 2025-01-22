@@ -206,7 +206,7 @@ def error_jesus():
 
 @auth.route('/login') 
 def login():
-    return render_template('login.jinja')
+    return render_template('auth/login.jinja')
 
 # Ruta que requiere autenticación
 @auth.route('/protected')

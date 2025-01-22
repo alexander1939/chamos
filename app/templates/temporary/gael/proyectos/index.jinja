@@ -1,0 +1,18 @@
+{% extends "base.jinja" %}
+{% from 'components/section_option-list.jinja' import proyectos_section %}
+
+
+
+{% block title %}Página proyectos{% endblock %}
+
+{% block content %}
+
+
+{% set proyectos = [
+{'name': 'Connectrity', 'description': 'Juego web de monsters NFT.','url': url_for('auth.proyectos_gael_connect')},
+{'name': 'Biblioteca', 'description': 'Proyecto para la biblioteca municipal.', 'url': url_for('auth.proyectos_gael_biblioteca')},
+{'name': 'Boutique', 'description': 'Proyecto para una boutique de ropa', 'url': url_for('auth.proyectos_gael_butique')}
+] %}
+
+{{ proyectos_section('Bienvenido a la Página de Proyectos', 'Lista de Materias', proyectos) }}
+{% endblock %}

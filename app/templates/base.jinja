@@ -85,7 +85,7 @@
                 <button class="close-menu" id="close-menu"><i class="fas fa-times"></i></button>
             </div>
             <ul class="menu">
-                <li><a href="#"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="{{ url_for('auth.index') }}"><i class="fas fa-home"></i> Inicio</a></li>
                 <li>
                     <a href="#" class="dropdown-btn">
                         <i class="fas fa-list"></i> Gael <i class="fas fa-chevron-down dropdown-icon"></i>
@@ -96,9 +96,9 @@
                                 <i class="fas fa-list"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
                             </a>
                             <ul class="dropdown-options">
-                                <li><a href="#"><i class="fas fa-folder"></i> Matematicas</a></li>
-                                <li><a href="#"><i class="fas fa-folder"></i> Ingles</a></li>
-                                <li><a href="#"><i class="fas fa-folder"></i> Ciencias</a></li>
+                                <li><a href="{{ url_for('auth.materias_gael_base') }}"><i class="fas fa-folder"></i> Base de Datos</a></li>
+                                <li><a href="{{ url_for('auth.materias_gael_ingles') }}"><i class="fas fa-folder"></i> Ingles</a></li>
+                                <li><a href="{{ url_for('auth.materias_gael_programacion') }}"><i class="fas fa-folder"></i> Programacion</a></li>
                             </ul>
                         </li>
                         <li>
@@ -106,9 +106,9 @@
                                 <i class="fas fa-list"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
                             </a>
                             <ul class="dropdown-options">
-                                <li><a href="#"><i class="fas fa-folder"></i> Shooters</a></li>
-                                <li><a href="#"><i class="fas fa-folder"></i> Indie</a></li>
-                                <li><a href="#"><i class="fas fa-folder"></i> RPG</a></li>
+                                <li><a href="{{ url_for('auth.juegos_gael_metro') }}"><i class="fas fa-folder"></i> Metro</a></li>
+                                <li><a href="{{ url_for('auth.juegos_gael_cod') }}"><i class="fas fa-folder"></i> COD</a></li>
+                                <li><a href="{{ url_for('auth.juegos_gael_fornite') }}"><i class="fas fa-folder"></i> Fornite</a></li>
                             </ul>
                         </li>
                         <li>
@@ -116,9 +116,9 @@
                                 <i class="fas fa-list"></i> Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
                             </a>
                             <ul class="dropdown-options">
-                                <li><a href="#"><i class="fas fa-folder"></i> Industriales</a></li>
-                                <li><a href="#"><i class="fas fa-folder"></i> Sociales</a></li>
-                                <li><a href="#"><i class="fas fa-folder"></i> Investigación</a></li>
+                                <li><a href="{{ url_for('auth.proyectos_gael_connect') }}"><i class="fas fa-folder"></i> Connectricity</a></li>
+                                <li><a href="{{ url_for('auth.proyectos_gael_biblioteca') }}"><i class="fas fa-folder"></i> Biblioteca</a></li>
+                                <li><a href="{{ url_for('auth.proyectos_gael_butique') }}"><i class="fas fa-folder"></i> Boutique</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -207,9 +207,9 @@
                                 <i class="fas fa-list"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
                             </a>
                             <ul class="dropdown-options">
-                                <li><a href="#"><i class="fas fa-folder"></i> Matematicas</a></li>
-                                <li><a href="#"><i class="fas fa-folder"></i> Ingles</a></li>
-                                <li><a href="#"><i class="fas fa-folder"></i> Ciencias</a></li>
+                                <li><a href="{{ url_for('auth.materias_roberto_ingles') }}"><i class="fas fa-folder"></i> Ingles</a></li>
+                                <li><a href="{{ url_for('auth.materias_roberto_des') }}"><i class="fas fa-folder"></i> Desarrollo web</a></li>
+                                <li><a href="{{ url_for('auth.materias_roberto_base') }}"><i class="fas fa-folder"></i> Base de datos</a></li>
                             </ul>
                         </li>
                         <li>
@@ -217,9 +217,9 @@
                                 <i class="fas fa-list"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
                             </a>
                             <ul class="dropdown-options">
-                                <li><a href="#"><i class="fas fa-folder"></i> Shooters</a></li>
-                                <li><a href="#"><i class="fas fa-folder"></i> Indie</a></li>
-                                <li><a href="#"><i class="fas fa-folder"></i> RPG</a></li>
+                                <li><a href="{{ url_for('auth.juegos_roberto_fortnite') }}"><i class="fas fa-folder"></i> Fortnite</a></li>
+                                <li><a href="{{ url_for('auth.juegos_roberto_free') }}"><i class="fas fa-folder"></i> Free Fire</a></li>
+                                <li><a href="{{ url_for('auth.juegos_roberto_clash') }}"><i class="fas fa-folder"></i> Clash Royale</a></li>
                             </ul>
                         </li>
                         <li>
@@ -227,15 +227,16 @@
                                 <i class="fas fa-list"></i> Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
                             </a>
                             <ul class="dropdown-options">
-                                <li><a href="#"><i class="fas fa-folder"></i> Industriales</a></li>
-                                <li><a href="#"><i class="fas fa-folder"></i> Sociales</a></li>
-                                <li><a href="#"><i class="fas fa-folder"></i> Investigación</a></li>
+                                <li><a href="{{ url_for('auth.proyectos_roberto_eva') }}"><i class="fas fa-folder"></i> Evaluacion UDM</a></li>
+                                <li><a href="{{ url_for('auth.proyectos_roberto_punto') }}"><i class="fas fa-folder"></i> Punto de Venta</a></li>
+                                <li><a href="{{ url_for('auth.proyectos_roberto_age') }}"><i class="fas fa-folder"></i> Agencia de Motocicletas</a></li>
                             </ul>
                         </li>
                     </ul>
                 </li>
                 <li><a href="#"><i class="fas fa-info-circle"></i> Acerca de</a></li>
                 <li><a href="#"><i class="fas fa-envelope"></i> Contacto</a></li>
+                <li><a href="{{ url_for('auth.protected') }}"><i class="fas fa-envelope"></i> Cuentas de usuario</a></li>
                 <br>
             </ul>
         </div>
@@ -252,8 +253,14 @@
 
     </div>
 
-    <footer id="footer" class="footer">
-        soy el footer
+    <footer>
+        <div class="footer-container">
+            <p>&copy; {{ year }} Todos los derechos reservados.</p>
+            <p>
+                <a href="#">Política de Privacidad</a> | 
+                <a href="#">Términos del Servicio</a>
+            </p>
+        </div>
     </footer>
 
 </body>

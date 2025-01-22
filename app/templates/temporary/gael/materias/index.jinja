@@ -1,0 +1,34 @@
+{% extends "base.jinja" %}
+{% from 'components/section_option-list.jinja' import proyectos_section %}
+
+
+
+{% block title %}Página materias{% endblock %}
+
+{% block content %}
+
+
+{% set materias = [
+{'name': 'Base de datos', 'description': 'Ingresa al mundo del guardado de datos de manera relacional o no relacional',
+'url': url_for('auth.materias_gael_base')},
+{'name': 'Ingles','description': 'Pli open, wao el ingles abre puertas', 'url': url_for('auth.materias_gael_ingles')},
+{'name': 'Programación', 'description': 'Conoce lo que es el futuro del mundo en trabajo', 'url': url_for('auth.materias_gael_programacion')}
+] %}
+
+{{ proyectos_section('Bienvenido a la Página de Materias', 'Lista de Materias', materias) }}
+{% endblock %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        {% for crumb in breadcrumbs %}
+            {% if crumb.url %}
+                <li class="breadcrumb-item">
+                    <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                </li>
+            {% else %}
+                <li class="breadcrumb-item active" aria-current="page">{{ crumb.name }}</li>
+            {% endif %}
+        {% endfor %}
+    </ol>
+</nav>
+{% endblock %}

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error 400</title>
+    <!-- Vincula tu archivo CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/error.css') }}">
+</head>
+<body>
+    <div class="error-container">
+        <h1>Error 400: Solicitud incorrecta</h1>
+        <p>El campo enviado no es válido. Por favor, introduce un número válido.</p>
+        <a href="/">Volver al inicio</a>
+    </div>
+</body>
+</html>

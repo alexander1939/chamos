@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for
+from flask import Blueprint, render_template, url_for, abort, request
 
 auth = Blueprint('auth', __name__)
 
@@ -264,3 +264,21 @@ def proyectos_roberto_eva():
 def proyectos_roberto_punto(): 
     return render_template('temporary/roberto/proyectos/asscom.jinja')
 
+
+
+#error 400
+
+@auth.route('/error400')
+def error_400():
+    abort(400)
+
+@auth.route('/procesar', methods=['POST'])
+def procesar():
+    campo = request.form.get('campo')
+    if not campo.isdigit():  # Verifica si el valor no es un número
+        abort(400)  # Error 400 si el campo no es un entero
+    return "Datos procesados correctamente"
+
+@auth.app_errorhandler(400)
+def handle_400_error(error):
+    return render_template('/errors/400.jinja'), 400

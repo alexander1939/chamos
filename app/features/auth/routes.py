@@ -204,10 +204,11 @@ def proyectos_gael_butique():
 def error_jesus():
     return render_template('errors/504.jinja')
 
-@auth.route('/error-500') 
-def error_gael():
-    return render_template('errors/500.jinja')
+@auth.route('/login') 
+def login():
+    return render_template('auth/login.jinja')
 
+# Ruta que requiere autenticación
 @auth.route('/protected')
 def protected():
     auth = request.authorization

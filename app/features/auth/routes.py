@@ -68,6 +68,17 @@ def proyectos_tavo_tareas():
     return render_template('temporary/tavo/proyectos/tareas.jinja')
 
 
+@auth.route('/error-404')
+def error_404():
+    return render_template('errors/404.jinja')
+
+@auth.route('/error-500')
+def error_500():
+    return render_template('errors/500.jinja')
+
+
+
+
 
 
 
@@ -204,3 +215,66 @@ def protected():
     if not auth or auth.username != 'admin' or auth.password != 'password':
         abort(401)  # Genera el error 401 si no se proporciona autenticación válida
     return "Acceso permitido a la página protegida."
+
+
+
+
+
+@auth.route('/roberto/')  # Asegúrate de incluir la barra inicial '/'
+def roberto():
+    return render_template('temporary/roberto/index.jinja')
+
+
+
+@auth.route('/roberto/juegos/')  # Asegúrate de incluir la barra inicial '/'
+def juegos_roberto():
+    return render_template('temporary/roberto/juegos/index.jinja')
+
+@auth.route('/roberto/juegos/fortnite/')  
+def juegos_roberto_fortnite():
+    return render_template('temporary/roberto/juegos/fortnite.jinja')  
+
+@auth.route('/roberto/juegos/frefire/')  
+def juegos_roberto_free():
+    return render_template('temporary/roberto/juegos/freefire.jinja')  
+
+@auth.route('/roberto/juegos/clash/')  
+def juegos_roberto_clash():
+    return render_template('temporary/roberto/juegos/clashroyale.jinja')
+
+
+
+@auth.route('/roberto/materias/')  # Asegúrate de incluir la barra inicial '/'
+def materias_roberto():
+    return render_template('temporary/roberto/materias/index.jinja')
+
+@auth.route('/roberto/materias/base/')  
+def materias_roberto_base():
+    return render_template('temporary/roberto/materias/basedatos.jinja')
+
+@auth.route('/roberto/materias/ingles/')  
+def materias_roberto_ingles():
+    return render_template('temporary/roberto/materias/ingles.jinja')
+
+@auth.route('/roberto/materias/desarrollo/')  
+def materias_roberto_des():
+    return render_template('temporary/roberto/materias/desarrolloweb.jinja')
+
+
+
+@auth.route('/roberto/proyectos/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_roberto(): 
+    return render_template('temporary/roberto/proyectos/index.jinja')
+
+@auth.route('/roberto/proyectos/agencia/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_roberto_age(): 
+    return render_template('temporary/roberto/proyectos/agenciamoto.jinja')
+
+@auth.route('/roberto/proyectos/evaluacion/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_roberto_eva(): 
+    return render_template('temporary/roberto/proyectos/udm.jinja')
+
+@auth.route('/roberto/proyectos/puntoventa/')  # Asegúrate de incluir la barra inicial '/'
+def proyectos_roberto_punto(): 
+    return render_template('temporary/roberto/proyectos/asscom.jinja')
+

@@ -1,11 +1,9 @@
 .container {
-    max-width: 600px;
     margin: 0 auto;
     padding: 20px;
     background-color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    margin-left: 50px; 
 }
 
 /* Estilos para el mensaje encriptado */
@@ -15,7 +13,7 @@ p.encrypted {
     padding: 15px;
     border-radius: 4px;
     border: 1px solid #ced4da;
-    white-space: pre-wrap; 
-    word-wrap: break-word; 
-    overflow-wrap: break-word; 
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }

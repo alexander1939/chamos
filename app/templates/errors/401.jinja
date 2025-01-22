@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error 401 - No autorizado</title>
+    <title>Error 401 - Sin autorización</title>
     <style>
         body {
             margin: 0;
@@ -63,20 +63,25 @@
         }
 
         .illustration {
-            margin: 20px auto;
+            margin: 15px auto;
+        }
+
+        .img-fluid {
+            max-width: 100%;
+            height: auto;
         }
     </style>
 </head>
 
 <body>
     <div class="error-container">
-        <h1>500</h1>
-        <div class="illustration">
-            <img src="{{ url_for('static', filename='images/Server_Error-500.webp') }}" alt="Error del Servidor">
+        <h1>401</h1>
+        <div class="illustration img-fluid">
+            <img src="{{ url_for('static', filename='images/no_autorizo.jpg') }}" alt="No autorizado">
         </div>
-        <h2>¡Ups! Algo salió mal en el servidor</h2>
-        <p>Ocurrió un error inesperado. Estamos trabajando para solucionarlo. Por favor, intenta de nuevo más tarde.</p>
-        {# <a href="/">Regresar al inicio</a> #}
+        <h2>!AH CARAY! No tienes permisos para entrar aca.</h2>
+        <p>Sin los permisos necesarios no podras acceder al contenido.</p>
+        <a href="/">Regresar al inicio</a>
     </div>
 </body>
 

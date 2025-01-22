@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for
+from flask import Blueprint, abort, render_template, url_for
 
 auth = Blueprint('auth', __name__)
 
@@ -131,12 +131,10 @@ def proyectos_jesus_mg():
 def proyectos_jesus_biblioteca(): 
     return render_template('temporary/jesus/proyectos/biblioteca.jinja')
 
-@auth.route('/jesus/proyectos/butique/')  # Asegúrate de incluir la barra inicial '/'
+@auth.route('/jesus/proyectos/boutique/')  # Asegúrate de incluir la barra inicial '/'
 def proyectos_jesus_butique(): 
     return render_template('temporary/jesus/proyectos/butique.jinja')
 
-
-@auth.route('/error-504') 
-def error_jesus():
-    return render_template('errors/504.jinja')
-
+@auth.route('/old-page')
+def old_page():
+    abort(410)

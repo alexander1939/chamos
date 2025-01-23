@@ -9,9 +9,9 @@
 
 
 {% set proyectos = [
-{'name': 'Cuestionario', 'description': 'Un proyecto donde las cuestios ayudan a mejorar','url': '#'},
-{'name': 'Mensajes', 'description': 'Descubre como funcionan los mensajes', 'url':'#'},
-{'name': 'Tareas', 'description': 'Conoce el pasado para entender el presente.', 'url': '#'}
+{'name': 'MG-400', 'description': 'Robots con capacidad de procesamiento de información.', 'url': url_for('auth.proyectos_jesus_mg')},
+{'name': 'Biblioteca', 'description': 'Explora tus conocimientos sobre la informacion del mundo.', 'url': url_for('auth.proyectos_jesus_biblioteca')},
+{'name': 'Boutique', 'description': 'Revisa la ropa de una boutique ', 'url': url_for('auth.proyectos_jesus_butique')},
 ] %}
 
 {{ proyectos_section('Bienvenido a la Página de Proyectos', 'Lista de Materias', proyectos) }}

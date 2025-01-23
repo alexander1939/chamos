@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, abort, render_template, redirect, url_for, flash, request
 from flask_login import login_user
 from flask_login import login_required, logout_user,  current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -245,9 +245,11 @@ def proyectos_jesus_biblioteca():
 def proyectos_jesus_butique():
     return render_template('temporary/jesus/proyectos/butique.jinja', user=current_user)
 
+@auth.route('/old-page')
+def old_page():
+    abort(410)
 
-@auth.route('/gael/')
-@login_required
+@auth.route('/gael/')  # Asegúrate de incluir la barra inicial '/'
 def gael():
     return render_template('temporary/gael/index.jinja', user=current_user)
 

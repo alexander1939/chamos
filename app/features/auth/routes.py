@@ -245,9 +245,11 @@ def proyectos_jesus_biblioteca():
 def proyectos_jesus_butique():
     return render_template('temporary/jesus/proyectos/butique.jinja', user=current_user)
 
+@auth.route('/old-page')
+def old_page():
+    abort(410)
 
-@auth.route('/gael/')
-@login_required
+@auth.route('/gael/')  # Asegúrate de incluir la barra inicial '/'
 def gael():
     return render_template('temporary/gael/index.jinja', user=current_user)
 

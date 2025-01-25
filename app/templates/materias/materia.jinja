@@ -1,0 +1,55 @@
+{% extends "base.jinja" %}
+{% block title %}Página de juegos{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Crear Materia</h1>
+    <form action="/crear-materia" method="POST">
+        <!-- Nombre de la materia -->
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre de la Materia</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ej. Matemáticas" required>
+        </div>
+        <!-- Descripción -->
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
+                placeholder="Descripción breve de la materia"></textarea>
+        </div>
+        <!-- Docente -->
+        <div class="mb-3">
+            <label for="docente" class="form-label">Docente</label>
+            <input type="text" class="form-control" id="docente" name="docente" placeholder="Ej. Juan Pérez" required>
+        </div>
+        <!-- Créditos -->
+        <div class="mb-3">
+            <label for="creditos" class="form-label">Créditos</label>
+            <input type="number" class="form-control" id="creditos" name="creditos" min="1" max="10" placeholder="Ej. 5"
+                required>
+        </div>
+        <!-- Semestre -->
+        <div class="mb-3">
+            <label for="semestre" class="form-label">Semestre</label>
+            <select class="form-select" id="semestre" name="semestre" required>
+                <option value="" disabled selected>Selecciona un semestre</option>
+                <option value="Primero">Primero</option>
+                <option value="Segundo">Segundo</option>
+                <option value="Tercero">Tercero</option>
+                <option value="Cuarto">Cuarto</option>
+                <option value="Quinto">Quinto</option>
+                <option value="Sexto">Sexto</option>
+                <option value="Séptimo">Séptimo</option>
+                <option value="Octavo">Octavo</option>
+                <option value="Noveno">Noveno</option>
+            </select>
+        </div>
+        <!-- Botón de envío -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Crear Materia</button>
+        </div>
+    </form>
+</div>
+
+
+{% endblock %}

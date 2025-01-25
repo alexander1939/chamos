@@ -8,6 +8,7 @@ from .features.auth import auth
 from .features.auth.model import User  # Importa el modelo User
 from .features.components import generate_breadcrumbs
 from app.features.components import create_admin_user
+from .features.materia import materia
 
 def create_app():
     app = Flask(__name__)
@@ -29,6 +30,7 @@ def create_app():
     migrate = Migrate(app, db)
 
     app.register_blueprint(auth)
+    app.register_blueprint(materia)
 
     @app.context_processor
     def inject_breadcrumbs():

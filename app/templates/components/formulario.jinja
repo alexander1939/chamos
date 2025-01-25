@@ -1,0 +1,21 @@
+{% block content %}
+<section class="section-add-item">
+    <div class="container">
+        <h1>{{ form_title }}</h1>
+<form method="POST" action="{{ action_url }}">
+    <!-- Campos del formulario -->
+    <div class="mb-3">
+        <label for="item_name" class="form-label">{{ input_title }}</label>
+        <input type="text" id="item_name" name="item_name" class="form-control" value="{{ item_name }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="item_description" class="form-label">{{ desc_title }}</label>
+        <textarea id="item_description" name="item_description" class="form-control"
+            required>{{ item_description }}</textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{ button_text }}</button>
+</form>
+</section>
+{% endblock %}

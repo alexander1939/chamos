@@ -1,5 +1,7 @@
 from flask import Flask, render_template
 from flask_migrate import Migrate
+from app.features.juegos import juegos
+from app.features.proyectos import proyectos
 from app.features.components.error_handlers import init_error_handlers
 from .config import Config
 from flask_login import LoginManager
@@ -32,6 +34,8 @@ def create_app():
     #aqui se agregan las rutas:
     app.register_blueprint(auth)
     app.register_blueprint(materia)
+    app.register_blueprint(juegos)
+    app.register_blueprint(proyectos)
 
     @app.context_processor
     def inject_breadcrumbs():

@@ -1,0 +1,13 @@
+{% extends "base.jinja" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="section-proyectos py-5">
+    <div class="container">
+    <h2 class="display-4 text-primary">{{ name }}</h2>    
+    <p class="lead text-muted">{{ description }}</p>
+    <a href="{{ url_for('proyectos.listar_proyectos') }}" class="btn btn-secondary btn-lg mt-4">Volver a la lista de proyectos</a>
+    </div>    
+</section>
+{% endblock %}

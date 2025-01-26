@@ -1,0 +1,55 @@
+{% extends "base.jinja" %}	
+
+{% block title %}Página de Proyectos{% endblock %}
+
+{% block content %}
+<section class="section-proyectos py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-4 text-primary">Proyectos Registrados</h2>
+            <p class="lead text-muted">Aquí puedes ver todos los proyectos que has registrado.</p>
+        </div>
+
+        {% if proyectos %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for proyecto in proyectos %}
+            <div class="col">
+                <div class="card shadow-sm border-light rounded">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ proyecto.nombre }}</h5>
+                        <p class="card-text">{{ proyecto.descripcion[:100] }}...</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('proyectos.proyecto_detail', proyecto_id=proyecto.id) }}"
+                                class="btn btn-primary btn-sm">Ver Detalles</a>
+                            <div class="d-flex">
+                                <a href="{{ url_for('proyectos.form_edit_proyecto', proyecto_id=proyecto.id) }}"
+                                    class="btn btn-warning btn-sm me-2">
+                                    <img src="{{ url_for('static', filename='images/edit.png') }}" alt="Editar"
+                                        width="20" height="20">
+                                </a>
+                                <form action="{{ url_for('proyectos.delete_proyecto', proyecto_id=proyecto.id) }}"
+                                    method="POST" style="display:inline-block;">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <img src="{{ url_for('static', filename='images/delete.png') }}" alt="Eliminar"
+                                            width="20" height="20">
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info" role="alert">
+            No tienes proyectos registrados.
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('proyectos.form_add_proyecto') }}" class="btn btn-success btn-lg">Agregar Nuevo Proyecto</a>
+        </div>
+    </div>
+</section>        
+{% endblock %}      

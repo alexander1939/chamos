@@ -3,18 +3,20 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<section class="section-edit-game">
+<section class="section-edit-materia">
     <div class="container">
         <h2>{{ form_title }}</h2>
 
         <form action="{{ action_url }}" method="POST">
             <div class="mb-3">
                 <label for="item_name" class="form-label">{{ input_title }}</label>
-                <input type="text" class="form-control" id="item_name" name="item_name" value="{{ game.name }}" required>
+                <input type="text" class="form-control" id="item_name" name="item_name" value="{{ item_name }}"
+                    required>
             </div>
             <div class="mb-3">
                 <label for="item_description" class="form-label">{{ desc_title }}</label>
-                <textarea class="form-control" id="item_description" name="item_description" required>{{ game.description }}</textarea>
+                <textarea class="form-control" id="item_description" name="item_description"
+                    required>{{ item_description }}</textarea>
             </div>
             <button type="submit" class="btn btn-success">{{ button_text }}</button>
         </form>

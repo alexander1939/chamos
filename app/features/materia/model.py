@@ -10,11 +10,8 @@ class Materia(BaseModel, UserMixin):
     id = Column(Integer, primary_key=True)
     nombre = Column(String(100), nullable=False)
     descripcion = Column(String(255), nullable=True) 
-    docente = Column(String(120), nullable=False)  
-    creditos = Column(Integer, nullable=False)  
-    semestre = Column(String(20), nullable=False)  
     id_usuario = Column(Integer, ForeignKey('users.id'), nullable=False)
 
 
     def __repr__(self):
-        return f'<Materia {self.nombre} - Docente: {self.docente} - Usuario ID: {self.id_usuario}>'
+        return f'<Materia {self.nombre}  - Usuario ID: {self.id_usuario}>'

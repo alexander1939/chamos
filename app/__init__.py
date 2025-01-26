@@ -5,7 +5,7 @@ from .config import Config
 from flask_login import LoginManager
 from .db import db
 from .features.auth import auth
-from .features.auth.model import User  # Importa el modelo User
+from .features.auth.model import User  
 from .features.components import generate_breadcrumbs
 from app.features.components import create_admin_user
 from .features.materia import materia
@@ -16,7 +16,7 @@ def create_app():
 
 
     login_manager = LoginManager()
-    login_manager.login_view = 'auth.login'  # Ruta para el login
+    login_manager.login_view = 'auth.login' 
     login_manager.init_app(app)
 
     @login_manager.user_loader
@@ -29,6 +29,7 @@ def create_app():
     db.init_app(app)
     migrate = Migrate(app, db)
 
+    #aqui se agregan las rutas:
     app.register_blueprint(auth)
     app.register_blueprint(materia)
 

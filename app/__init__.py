@@ -35,7 +35,11 @@ def create_app():
     @app.context_processor
     def inject_breadcrumbs():
         return {"breadcrumbs": generate_breadcrumbs()}
-
+    
+    @app.errorhandler(410)
+    def gone(error):
+        return render_template('errors/410.jinja'), 410
+    
     with app.app_context():
         db.create_all()
         create_admin_user()

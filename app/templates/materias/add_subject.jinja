@@ -1,0 +1,10 @@
+{% extends "base.jinja" %}
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="section-add-item">
+    <div class="container">
+        {% include "components/formulario.jinja" with context %}
+    </div>
+</section>
+{% endblock %}

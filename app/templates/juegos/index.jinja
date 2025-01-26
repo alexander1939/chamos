@@ -1,0 +1,57 @@
+{% extends "base.jinja" %}
+
+{% block title %}Página de Juegos{% endblock %}
+
+{% block content %}
+<section class="section-games py-5">
+    <div class="container">
+        <!-- Contenedor para el título -->
+        <div class="text-center mb-5">
+            <h2 class="display-4 text-primary">Juegos Registrados</h2>
+            <p class="lead text-muted">Aquí puedes ver todos los juegos que has registrado.</p>
+        </div>
+
+        <!-- Contenedor para la lista de juegos -->
+        {% if games %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for game in games %}
+                    <div class="col">
+                        <div class="card shadow-sm border-light rounded">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ game.name }}</h5>
+                                <p class="card-text">{{ game.description[:100] }}...</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{{ url_for('auth.game_detail', game_id=loop.index) }}" class="btn btn-primary btn-sm">Ver Detalles</a>
+                                    <div class="d-flex">
+                                        <!-- Botón de Editar con imagen -->
+                                        <a href="{{ url_for('auth.edit_game', game_id=loop.index) }}" class="btn btn-warning btn-sm me-2">
+                                            <img src="{{ url_for('static', filename='images/edit.png') }}" alt="Editar" width="20" height="20">
+                                        </a>
+
+                                        <!-- Botón de Eliminar con imagen -->
+                                        <form action="{{ url_for('auth.delete_game', game_id=loop.index) }}" method="POST" style="display:inline-block;">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <img src="{{ url_for('static', filename='images/delete.png') }}" alt="Eliminar" width="20" height="20">
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                No tienes juegos registrados.
+            </div>
+        {% endif %}
+
+        <!-- Contenedor para el botón de agregar nuevo juego -->
+        <div class="text-center mt-4">
+            <a href="/juegos/agregarJuego" class="btn btn-success btn-lg">Agregar Nuevo Juego</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

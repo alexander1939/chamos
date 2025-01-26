@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, abort, render_template, redirect, url_for, flash, request
 from flask_login import login_user
 from flask_login import login_required, logout_user,  current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -245,16 +245,18 @@ def proyectos_jesus_biblioteca():
 def proyectos_jesus_butique():
     return render_template('temporary/jesus/proyectos/butique.jinja', user=current_user)
 
+@auth.route('/old-page')
+def old_page():
+    abort(410)
 
-@auth.route('/gael/')
-@login_required
+@auth.route('/gael/')  # Asegúrate de incluir la barra inicial '/'
 def gael():
     return render_template('temporary/gael/index.jinja', user=current_user)
 
 @auth.route('/gael/juegos/')
 @login_required
 def juegos_gael():
-    return render_template('temporary/gael/juegos/index.jinja', user=current_user)
+    return render_template('temporary/juegos/index.jinja', user=current_user)
 
 @auth.route('/gael/juegos/fornite/')
 @login_required
@@ -392,3 +394,125 @@ def proyectos_roberto_eva():
 @login_required
 def proyectos_roberto_punto():
     return render_template('temporary/roberto/proyectos/asscom.jinja', user=current_user)
+
+
+# RUTA PARA FORMULARIOS DINAMICOS
+# Variables globales para almacenar los datos temporalmente
+user_games = {}
+user_projects = {}
+user_subjects = {}
+
+@auth.route('/juegos/agregarJuego', methods=['GET', 'POST'])
+@login_required
+def add_game():
+    if request.method == 'POST':
+        name = request.form['item_name']
+        description = request.form['item_description']
+        # Asociar el juego con el usuario autenticado
+        user_games.setdefault(current_user.id, []).append({
+            'name': name,
+            'description': description
+        })
+        flash("Juego agregado exitosamente.", "success")
+        return redirect(url_for('auth.games'))  # Redirigir a la lista de juegos
+
+    # Enviar datos al formulario
+    return render_template(
+        'juegos/add_game.jinja',
+        page_title="Agregar Juego",  # Título de la página
+        form_title="Formulario para agregar un nuevo juego",  # Título del formulario
+        input_title="Nombre del juego", # Título del campo
+        desc_title="Descripción del juego", # Título de la descripcion
+        action_url=url_for('auth.add_game'),  # URL de acción
+        button_text="Agregar Juego",  # Texto del botón
+        user=current_user,  # Información del usuario autenticado
+        item_name="",  # Inicializa los campos del formulario
+        item_description=""  # Inicializa los campos del formulario
+    )
+
+@auth.route('/juegos/detalles/<int:game_id>')
+@login_required
+def game_detail(game_id):
+    # Obtener el juego de la lista temporal usando el game_id
+    games = user_games.get(current_user.id, [])
+    
+    # Verificar si el game_id es válido (es decir, si está dentro del rango de la lista)
+    if game_id <= 0 or game_id > len(games):
+        flash("Juego no encontrado.", "danger")
+        return redirect(url_for('auth.games'))  # Redirigir a la lista de juegos si no se encuentra
+    
+    # Acceder al juego correcto (el índice es game_id - 1 porque la lista comienza en 0)
+    game = games[game_id - 1]  # Restamos 1 para convertir el game_id (1-indexed) a un índice (0-indexed)
+    
+    if not game:
+        flash("Juego no encontrado.", "danger")
+        return redirect(url_for('auth.games'))  # Redirigir a la lista de juegos si no se encuentra
+    
+    return render_template(
+        'juegos/game_detail.jinja', user=current_user, 
+        name=game['name'], 
+        description=game['description']
+    )
+
+
+
+@auth.route('/juegos', methods=['GET'])
+@login_required
+def games():
+    games = user_games.get(current_user.id, [])  # Obtener los juegos del usuario
+    return render_template('juegos/index.jinja', user=current_user, games=games)
+
+#EDITAR JUEGO
+@auth.route('/edit_game/<int:game_id>', methods=['GET', 'POST'])
+@login_required
+def edit_game(game_id):
+    # Obtener el juego de la lista temporal
+    games = user_games.get(current_user.id, [])
+    
+    if game_id <= 0 or game_id > len(games):
+        flash("Juego no encontrado.", "danger")
+        return redirect(url_for('auth.games'))  # Redirigir a la lista de juegos si no se encuentra
+    
+    # Acceder al juego que se desea editar
+    game = games[game_id - 1]
+    
+    # Si el formulario es enviado
+    if request.method == 'POST':
+        # Obtener los datos del formulario
+        name = request.form['item_name']
+        description = request.form['item_description']
+        
+        # Actualizar los datos del juego
+        game['name'] = name
+        game['description'] = description
+        
+        flash("Juego actualizado exitosamente.", "success")
+        return redirect(url_for('auth.games', game_id=game_id))  # Redirigir a la página de detalles del juego
+    
+    return render_template(
+        'juegos/edit_game.jinja', user=current_user, 
+        game=game,  # Enviar el juego a la plantilla
+        page_title="Editar Juego",  # Título de la página
+        form_title="Formulario para editar el juego",  # Título del formulario
+        input_title="Nombre del juego",  # Título del campo de nombre
+        desc_title="Descripción del juego",  # Título del campo de descripción
+        action_url=url_for('auth.edit_game', game_id=game_id),  # URL de acción para el formulario
+        button_text="Actualizar Juego"  # Texto del botón
+    )
+
+#ELIMINAR JUEGO
+@auth.route('/delete_game/<int:game_id>', methods=['POST'])
+@login_required
+def delete_game(game_id):
+    # Obtener la lista de juegos del usuario
+    games = user_games.get(current_user.id, [])
+    
+    if game_id <= 0 or game_id > len(games):
+        flash("Juego no encontrado.", "danger")
+        return redirect(url_for('auth.games'))  # Redirigir a la lista de juegos si no se encuentra
+    
+    # Eliminar el juego de la lista
+    games.pop(game_id - 1)
+    
+    flash("Juego eliminado exitosamente.", "success")
+    return redirect(url_for('auth.games'))  # Redirigir a la lista de juegos

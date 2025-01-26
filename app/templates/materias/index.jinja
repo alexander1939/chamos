@@ -1,0 +1,36 @@
+{% extends "base.jinja" %}
+{% from 'components/section_option-list.jinja' import proyectos_section %}
+
+
+
+{% block title %}Página de Materias{% endblock %}
+
+{% block content %}
+{{ proyectos_section('Bienvenido a la Página de Materias', 'Lista de Materias',  materia) }}
+
+<section class="section-materia">
+    <div class="container">
+        <h2>Materias Registrados</h2>
+        {% if materia %}
+            <div class="materia-list">
+                {% for  materia in  materias %}
+                    <div class=" materia-card">
+                        <h3>{{ materia.name }}</h3>
+                        <p>{{ materia.description }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No tienes materias registrados.</p>
+        {% endif %}
+        <div class="add-materia">
+            <a href="/add_materia" class="btn">Agregar Nueva materia</a>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}
+
+
+

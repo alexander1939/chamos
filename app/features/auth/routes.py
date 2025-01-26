@@ -418,7 +418,7 @@ def add_game():
 
     # Enviar datos al formulario
     return render_template(
-        'temporary/juegos/add_game.jinja',
+        'juegos/add_game.jinja',
         page_title="Agregar Juego",  # Título de la página
         form_title="Formulario para agregar un nuevo juego",  # Título del formulario
         input_title="Nombre del juego", # Título del campo
@@ -449,7 +449,7 @@ def game_detail(game_id):
         return redirect(url_for('auth.games'))  # Redirigir a la lista de juegos si no se encuentra
     
     return render_template(
-        'temporary/juegos/game_detail.jinja', user=current_user, 
+        'juegos/game_detail.jinja', user=current_user, 
         name=game['name'], 
         description=game['description']
     )
@@ -460,7 +460,7 @@ def game_detail(game_id):
 @login_required
 def games():
     games = user_games.get(current_user.id, [])  # Obtener los juegos del usuario
-    return render_template('temporary/juegos/index.jinja', user=current_user, games=games)
+    return render_template('juegos/index.jinja', user=current_user, games=games)
 
 #EDITAR JUEGO
 @auth.route('/edit_game/<int:game_id>', methods=['GET', 'POST'])
@@ -490,7 +490,7 @@ def edit_game(game_id):
         return redirect(url_for('auth.games', game_id=game_id))  # Redirigir a la página de detalles del juego
     
     return render_template(
-        'temporary/juegos/edit_game.jinja', user=current_user, 
+        'juegos/edit_game.jinja', user=current_user, 
         game=game,  # Enviar el juego a la plantilla
         page_title="Editar Juego",  # Título de la página
         form_title="Formulario para editar el juego",  # Título del formulario

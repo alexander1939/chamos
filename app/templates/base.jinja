@@ -95,201 +95,51 @@
                 <li><a href="{{ url_for('materia.listar_materias') }}"><i class="fas fa-folder"></i>Materias</a></li>
                 <li><a href="{{ url_for('juegos.listar_juegos') }}"><i class="fas fa-folder"></i>Juegos</a></li>
                 <li><a href="{{ url_for('proyectos.listar_proyectos') }}"><i class="fas fa-folder"></i>Proyectos</a></li>
+                {% if current_user.role == 'Admin' %}
+                {% for user in users %}
                 <li>
                     <a href="#" class="dropdown-btn">
-                        <i class="fas fa-list"></i> Gael <i class="fas fa-chevron-down dropdown-icon"></i>
+                        <i class="fas fa-user"></i> {{ user.name }} <i class="fas fa-chevron-down dropdown-icon"></i>
                     </a>
                     <ul class="dropdown-options">
+                        {% for materia in user_materias[user.id] %}
                         <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
+                            <a href="{{ url_for('materia.materia_detail', materia_id=materia.id) }}">
+                                <i class="fas fa-folder"></i> {{ materia.nombre }}
                             </a>
-                            <ul class="dropdown-options">
-                                <li><a href="{{ url_for('auth.materias_gael_base') }}"><i class="fas fa-folder"></i>
-                                        Base de Datos</a></li>
-                                <li><a href="{{ url_for('auth.materias_gael_ingles') }}"><i class="fas fa-folder"></i>
-                                        Ingles</a></li>
-                                <li><a href="{{ url_for('auth.materias_gael_programacion') }}"><i
-                                            class="fas fa-folder"></i> Programacion</a></li>
-                            </ul>
                         </li>
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-options">
-                                <li><a href="{{ url_for('auth.juegos_gael_metro') }}"><i class="fas fa-folder"></i>
-                                        Metro</a></li>
-                                <li><a href="{{ url_for('auth.juegos_gael_cod') }}"><i class="fas fa-folder"></i>
-                                        COD</a></li>
-                                <li><a href="{{ url_for('auth.juegos_gael_fornite') }}"><i class="fas fa-folder"></i>
-                                        Fornite</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-options">
-                                <li><a href="{{ url_for('auth.proyectos_gael_connect') }}"><i class="fas fa-folder"></i>
-                                        Connectricity</a></li>
-                                <li><a href="{{ url_for('auth.proyectos_gael_biblioteca') }}"><i
-                                            class="fas fa-folder"></i> Biblioteca</a></li>
-                                <li><a href="{{ url_for('auth.proyectos_gael_butique') }}"><i class="fas fa-folder"></i>
-                                        Boutique</a></li>
-                            </ul>
-                        </li>
+                        {% endfor %}
                     </ul>
                 </li>
+                {% endfor %}
+                {% else %}
                 <li>
                     <a href="#" class="dropdown-btn">
-                        <i class="fas fa-list"></i> Jesus <i class="fas fa-chevron-down dropdown-icon"></i>
+                        <i class="fas fa-list"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
                     </a>
                     <ul class="dropdown-options">
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-options">
-                                <li><a href="{{ url_for('auth.materias_jesus_base') }}"><i class="fas fa-folder"></i>
-                                        Base de Datos</a></li>
-                                <li><a href="{{ url_for('auth.materias_jesus_ingles') }}"><i class="fas fa-folder"></i>
-                                        Ingles</a></li>
-                                <li><a href="{{ url_for('auth.materias_jesus_programacion') }}"><i
-                                            class="fas fa-folder"></i> Programacion</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-options">
-                                <li><a href="{{ url_for('auth.juegos_jesus_apex') }}"><i class="fas fa-folder"></i>
-                                        Apex</a></li>
-                                <li><a href="{{ url_for('auth.juegos_jesus_cod') }}"><i class="fas fa-folder"></i>
-                                        COD</a></li>
-                                <li><a href="{{ url_for('auth.juegos_jesus_fornite') }}"><i class="fas fa-folder"></i>
-                                        Fornite</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-options">
-                                <li><a href="{{ url_for('auth.proyectos_jesus_mg') }}"><i class="fas fa-folder"></i>
-                                        MG-400</a></li>
-                                <li><a href="{{ url_for('auth.proyectos_jesus_biblioteca') }}"><i
-                                            class="fas fa-folder"></i> Bilioteca</a></li>
-                                <li><a href="{{ url_for('auth.proyectos_jesus_butique') }}"><i
-                                            class="fas fa-folder"></i> Buotique</a></li>
-                            </ul>
-                        </li>
+                        {% if user_materias and current_user.id in user_materias %}
+                        {% for materia in user_materias[current_user.id] %}
+                        <li><a href="{{ url_for('materia.materia_detail', materia_id=materia.id) }}"><i
+                                    class="fas fa-folder"></i> {{ materia.nombre }}</a></li>
+                        {% endfor %}
+                        {% else %}
+                        <li>No hay materias disponibles.</li>
+                        {% endif %}
                     </ul>
                 </li>
-                <li>
-                    <a href="#" class="dropdown-btn">
-                        <i class="fas fa-list"></i> Gustavo <i class="fas fa-chevron-down dropdown-icon"></i>
-                    </a>
-                    <ul class="dropdown-options">
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-options">
-                                <li><a href="{{ url_for('auth.materias_tavo_desa') }}"><i class="fas fa-folder"></i>
-                                        Desarrollo web</a></li>
-                                <li><a href="{{ url_for('auth.materias_tavo_empre') }}"><i class="fas fa-folder"></i>
-                                        Emprendimiento</a></li>
-                                <li><a href="{{ url_for('auth.materias_tavo_mate') }}"><i class="fas fa-folder"></i>
-                                        Matematicas</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-options">
-                                <li><a href="{{ url_for('auth.juegos_tavo_call') }}"><i class="fas fa-folder"></i> Call
-                                        of duty</a></li>
-                                <li><a href="{{ url_for('auth.juegos_tavo_fornite') }}"><i class="fas fa-folder"></i>
-                                        Fornite</a></li>
-                                <li><a href="{{ url_for('auth.juegos_tavo_free') }}"><i class="fas fa-folder"></i> Free
-                                        fire</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-options">
-                                <li><a href="{{ url_for('auth.proyectos_tavo_cues') }}"><i class="fas fa-folder"></i>
-                                        Cuestionario</a></li>
-                                <li><a href="{{ url_for('auth.proyectos_tavo_mensa') }}"><i class="fas fa-folder"></i>
-                                        Mensajes</a></li>
-                                <li><a href="{{ url_for('auth.proyectos_tavo_tareas') }}"><i class="fas fa-folder"></i>
-                                        Tareas</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#" class="dropdown-btn">
-                        <i class="fas fa-list"></i> Roberto <i class="fas fa-chevron-down dropdown-icon"></i>
-                    </a>
-                    <ul class="dropdown-options">
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-options">
-                                <li><a href="{{ url_for('auth.materias_roberto_ingles') }}"><i
-                                            class="fas fa-folder"></i> Ingles</a></li>
-                                <li><a href="{{ url_for('auth.materias_roberto_des') }}"><i class="fas fa-folder"></i>
-                                        Desarrollo web</a></li>
-                                <li><a href="{{ url_for('auth.materias_roberto_base') }}"><i class="fas fa-folder"></i>
-                                        Base de datos</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-options">
-                                <li><a href="{{ url_for('auth.juegos_roberto_fortnite') }}"><i
-                                            class="fas fa-folder"></i> Fortnite</a></li>
-                                <li><a href="{{ url_for('auth.juegos_roberto_free') }}"><i class="fas fa-folder"></i>
-                                        Free Fire</a></li>
-                                <li><a href="{{ url_for('auth.juegos_roberto_clash') }}"><i class="fas fa-folder"></i>
-                                        Clash Royale</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-btn">
-                                <i class="fas fa-list"></i> Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-options">
-                                <li><a href="{{ url_for('auth.proyectos_roberto_eva') }}"><i class="fas fa-folder"></i>
-                                        Evaluacion UDM</a></li>
-                                <li><a href="{{ url_for('auth.proyectos_roberto_punto') }}"><i
-                                            class="fas fa-folder"></i> Punto de Venta</a></li>
-                                <li><a href="{{ url_for('auth.proyectos_roberto_age') }}"><i class="fas fa-folder"></i>
-                                        Agencia de Motocicletas</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
+                {% endif %}
+
                 <li><a href="#"><i class="fas fa-info-circle"></i> Acerca de</a></li>
                 <li><a href="#"><i class="fas fa-envelope"></i> Contacto</a></li>
-                <li><a href="{{ url_for('auth.protected') }}"><i class="fas fa-envelope"></i> Cuentas de usuario</a>
-                </li>
-                <br>
             </ul>
         </div>
         <div class="contents">
             <button class="toggle-menu" id="toggle-menu"><i class="fas fa-bars"></i></button>
         </div>
     </div>
+
+
 
     <!-- Cuerpo del contenido específico -->
     <main id="main" class="main">

@@ -37,6 +37,7 @@ def materia_detail(materia_id):
     else:
         users = [current_user] 
         user_materias = {current_user.id: Materia.query.filter_by(id_usuario=current_user.id).all()}
+    
 
     return render_template(
         'materias/detail_materia.jinja',

@@ -3,24 +3,44 @@ from flask_login import login_required, current_user
 from app.features.materia.model import Materia
 from app.db import db
 from app.features.auth.model import User
+from app.features.juegos.model import Juegos
+from app.features.proyectos.model import Proyectos
+
 
 
 materia = Blueprint('materia', __name__)
+
+
+
 
 @materia.get('/materias')
 @login_required
 def listar_materias():        
     if current_user.role == 'Admin':    
         materias = Materia.query.all()
+        proyectos = Proyectos.query.all()
+        juegos = Juegos.query.all()
         flash("Los administradores no pueden listar las materias.", "warning")
         return redirect(url_for('auth.index'))
     else:
         materias = Materia.query.filter_by(id_usuario=current_user.id).all()
+        proyectos = Proyectos.query.filter_by(id_usuario=current_user.id).all()
+        juegos = Juegos.query.filter_by(id_usuario=current_user.id).all()
     
     user_materias = {current_user.id: materias}
+    user_proyectos = {current_user.id: proyectos}
+    user_juegos = {current_user.id: juegos}
     
-    return render_template('materias/index.jinja', user=current_user, materias=materias, user_materias=user_materias)
-
+    return render_template(
+        'materias/index.jinja', 
+        user=current_user, 
+        proyectos=proyectos,
+        materias=materias, 
+        juegos=juegos,
+        user_materias=user_materias, 
+        user_proyectos=user_proyectos, 
+        user_juegos=user_juegos
+    )
 
 @materia.get('/materias/detalles/<int:materia_id>')
 @login_required
@@ -31,13 +51,19 @@ def materia_detail(materia_id):
         flash("No tienes permiso para ver esta materia.", "danger")
         return redirect(url_for('materia.listar_materias'))
 
+    proyectos = Proyectos.query.filter_by(id_usuario=current_user.id).all()
+    juegos = Juegos.query.filter_by(id_usuario=current_user.id).all()
+    
     if current_user.role == 'Admin':
         users = User.query.filter(User.role != 'Admin').all()
         user_materias = {user.id: Materia.query.filter_by(id_usuario=user.id).all() for user in users}
+        user_proyectos = {user.id: Proyectos.query.filter_by(id_usuario=user.id).all() for user in users}
+        user_juegos = {user.id: Juegos.query.filter_by(id_usuario=user.id).all() for user in users}
     else:
-        users = [current_user] 
+        users = [current_user]
         user_materias = {current_user.id: Materia.query.filter_by(id_usuario=current_user.id).all()}
-    
+        user_proyectos = {current_user.id: Proyectos.query.filter_by(id_usuario=current_user.id).all()}
+        user_juegos = {current_user.id: Juegos.query.filter_by(id_usuario=current_user.id).all()}
 
     return render_template(
         'materias/detail_materia.jinja',
@@ -45,9 +71,12 @@ def materia_detail(materia_id):
         name=materia.nombre,
         description=materia.descripcion,
         users=users, 
-        user_materias=user_materias 
+        user_materias=user_materias,
+        user_proyectos=user_proyectos, 
+        user_juegos=user_juegos,
+        proyectos=proyectos,
+        juegos=juegos,
     )
-
 
 
 @materia.get('/materias/agregar')
@@ -57,10 +86,11 @@ def form_add_materia():
         flash("Los administradores no pueden agregar materias.", "warning")
         return redirect(url_for('materia.listar_materias'))
     
-    user_materias = {
-        current_user.id: Materia.query.filter_by(id_usuario=current_user.id).all()
-    }
+    proyectos = Proyectos.query.filter_by(id_usuario=current_user.id).all()
+    juegos = Juegos.query.filter_by(id_usuario=current_user.id).all()
 
+    user_materias = {current_user.id: Materia.query.filter_by(id_usuario=current_user.id).all()}
+    
     return render_template(
         'materias/add_materia.jinja',
         page_title="Agregar Materia",
@@ -72,7 +102,11 @@ def form_add_materia():
         item_name="",
         item_description="",
         user=current_user,
-        user_materias=user_materias  
+        user_materias=user_materias,
+        proyectos=proyectos,
+        juegos=juegos,
+        user_proyectos={current_user.id: proyectos},
+        user_juegos={current_user.id: juegos}
     )
 
 
@@ -85,7 +119,7 @@ def save_materia():
 
     nombre = request.form['item_name']
     descripcion = request.form.get('item_description', '')  
-    
+
     nueva_materia = Materia(
         nombre=nombre,
         descripcion=descripcion,
@@ -107,16 +141,19 @@ def save_materia():
 @materia.get('/materias/editar/<int:materia_id>')
 @login_required
 def form_edit_materia(materia_id):
-
     if current_user.role == 'Admin': 
         flash("Los administradores no pueden editar materias.", "warning")
         return redirect(url_for('auth.index'))
+
     materia = Materia.query.get_or_404(materia_id)
-    
+
     if materia.id_usuario != current_user.id:
         flash("No tienes permiso para editar esta materia.", "danger")
         return redirect(url_for('materia.listar_materias'))
-    
+
+    proyectos = Proyectos.query.filter_by(id_usuario=current_user.id).all()
+    juegos = Juegos.query.filter_by(id_usuario=current_user.id).all()
+
     return render_template(
         'materias/edit_materia.jinja',
         page_title="Editar Materia",
@@ -127,14 +164,17 @@ def form_edit_materia(materia_id):
         button_text="Actualizar Materia",
         item_name=materia.nombre,
         item_description=materia.descripcion,
-        user=current_user
+        user=current_user,
+        proyectos=proyectos,
+        juegos=juegos,
+        user_proyectos={current_user.id: proyectos},
+        user_juegos={current_user.id: juegos}
     )
 
 
 @materia.post('/materias/editar/<int:materia_id>')
 @login_required
 def save_edited_materia(materia_id):
-
     if current_user.role == 'Admin':  
         flash("Los administradores no pueden editar materias.", "warning")
         return redirect(url_for('auth.index'))
@@ -162,13 +202,12 @@ def save_edited_materia(materia_id):
 @materia.post('/materias/eliminar/<int:materia_id>')
 @login_required
 def delete_materia(materia_id):
-
     if current_user.role == 'Admin':  
         flash("Los administradores no pueden eliminar materias.", "warning")
         return redirect(url_for('auth.index'))
 
     materia = Materia.query.get_or_404(materia_id)
-    
+
     if materia.id_usuario != current_user.id:
         flash("No tienes permiso para eliminar esta materia.", "danger")
         return redirect(url_for('materia.listar_materias'))
@@ -183,5 +222,3 @@ def delete_materia(materia_id):
         print(f"Error: {e}")
     
     return redirect(url_for('materia.listar_materias'))
-
-

@@ -2,6 +2,10 @@ from flask import request
 from flask_login import current_user
 from app.features.materia.model import Materia
 from app.features.auth.model import User
+from app.features.juegos.model import Juegos
+from app.features.proyectos.model import Proyectos
+
+
 
 BREADCRUMB_NAMES = {
     "/error-404": "Página no encontrada"
@@ -13,6 +17,8 @@ def generate_breadcrumbs():
     """
     MODELS_MAP = {
         "materias": Materia,
+        "juegos":Juegos,
+        "proyectos": Proyectos
     }
 
     path_segments = [seg for seg in request.path.strip("/").split("/") if seg]

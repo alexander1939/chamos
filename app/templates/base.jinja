@@ -93,9 +93,7 @@
             </div>
             <ul class="menu">
                 <li><a href="{{ url_for('auth.index') }}"><i class="fas fa-home"></i> Inicio</a></li>
-                <li><a href="{{ url_for('materia.listar_materias') }}"><i class="fas fa-folder"></i>Materias</a></li>
-                <li><a href="{{ url_for('juegos.listar_juegos') }}"><i class="fas fa-folder"></i>Juegos</a></li>
-                <li><a href="{{ url_for('proyectos.listar_proyectos') }}"><i class="fas fa-folder"></i>Proyectos</a></li>
+
                 {% if current_user.role == 'Admin' %}
                 {% for user in users %}
                 <li>
@@ -103,34 +101,109 @@
                         <i class="fas fa-user"></i> {{ user.name }} <i class="fas fa-chevron-down dropdown-icon"></i>
                     </a>
                     <ul class="dropdown-options">
-                        {% for materia in user_materias[user.id] %}
+                        <!-- Materias -->
                         <li>
-                            <a href="{{ url_for('materia.materia_detail', materia_id=materia.id) }}">
-                                <i class="fas fa-folder"></i> {{ materia.nombre }}
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-folder"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
                             </a>
+                            <ul class="dropdown-options">
+                                {% for materia in user_materias[user.id] %}
+                                <li>
+                                    <a href="{{ url_for('materia.materia_detail', materia_id=materia.id) }}">
+                                        {{ materia.nombre }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
                         </li>
-                        {% endfor %}
+                        <!-- Proyectos -->
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-folder"></i> Proyectos <i
+                                    class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                {% for proyecto in user_proyectos[user.id] %}
+                                <li>
+                                    <a href="{{ url_for('proyectos.proyecto_detail', proyecto_id=proyecto.id) }}">
+                                        {{ proyecto.nombre }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        <!-- Juegos -->
+                        <li>
+                            <a href="#" class="dropdown-btn">
+                                <i class="fas fa-folder"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
+                            </a>
+                            <ul class="dropdown-options">
+                                {% for juego in user_juegos[user.id] %}
+                                <li>
+                                    <a href="{{ url_for('juegos.juego_detail', juego_id=juego.id) }}">
+                                        {{ juego.nombre }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
                     </ul>
                 </li>
                 {% endfor %}
                 {% else %}
+                <!-- Aquí está lo que el usuario regular verá -->
                 <li>
                     <a href="#" class="dropdown-btn">
-                        <i class="fas fa-list"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
+                        <i class="fas fa-list"></i> Mis Materias <i class="fas fa-chevron-down dropdown-icon"></i>
                     </a>
                     <ul class="dropdown-options">
                         {% if user_materias and current_user.id in user_materias %}
                         {% for materia in user_materias[current_user.id] %}
-                        <li><a href="{{ url_for('materia.materia_detail', materia_id=materia.id) }}"><i
-                                    class="fas fa-folder"></i> {{ materia.nombre }}</a></li>
+                        <li><a href="{{ url_for('materia.materia_detail', materia_id=materia.id) }}">
+                                <i class="fas fa-folder"></i> {{ materia.nombre }}</a></li>
                         {% endfor %}
                         {% else %}
                         <li>No hay materias disponibles.</li>
                         {% endif %}
                     </ul>
                 </li>
+                <li>
+                    <a href="#" class="dropdown-btn">
+                        <i class="fas fa-list"></i> Mis Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </a>
+                    <ul class="dropdown-options">
+                        {% if user_proyectos and current_user.id in user_proyectos %}
+                        {% for proyecto in user_proyectos[current_user.id] %}
+                        <li>
+                            <a href="{{ url_for('proyectos.proyecto_detail', proyecto_id=proyecto.id) }}">
+                                <i class="fas fa-folder"></i> {{ proyecto.nombre }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                        {% else %}
+                        <li>No hay proyectos disponibles.</li>
+                        {% endif %}
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="dropdown-btn">
+                        <i class="fas fa-list"></i> Mis Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </a>
+                    <ul class="dropdown-options">
+                        {% if user_juegos and current_user.id in user_juegos %}
+                        {% for juego in user_juegos[current_user.id] %}
+                        <li>
+                            <a href="{{ url_for('juegos.juego_detail', juego_id=juego.id) }}">
+                                <i class="fas fa-folder"></i> {{ juego.nombre }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                        {% else %}
+                        <li>No hay juegos disponibles.</li>
+                        {% endif %}
+                    </ul>
+                </li>
                 {% endif %}
-
                 <li><a href="#"><i class="fas fa-info-circle"></i> Acerca de</a></li>
                 <li><a href="#"><i class="fas fa-envelope"></i> Contacto</a></li>
             </ul>
@@ -142,7 +215,7 @@
 
 
 
-    <!-- Cuerpo del contenido específico -->
+
     <main id="main" class="main">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

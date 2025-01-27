@@ -9,6 +9,9 @@ from flask_login import login_user
 from werkzeug.security import check_password_hash
 from flask_login import login_required, logout_user,  current_user
 from app.features.materia.model import Materia
+from app.features.proyectos.model import Proyectos
+from app.features.juegos.model import Juegos
+
 
 
 auth = Blueprint('auth', __name__)
@@ -18,15 +21,28 @@ auth = Blueprint('auth', __name__)
 def index():
     users = []
     user_materias = {}
+    user_proyectos = {}
+    user_juegos = {}
 
     if current_user.role == 'Admin':
-        users = User.query.filter_by(role='Usuario').all()  # Usuarios con rol "Usuario"
+        users = User.query.filter_by(role='Usuario').all() 
+        
         for user in users:
-            user_materias[user.id] = Materia.query.filter_by(id_usuario=user.id).all()  # Materias por usuario
-    else:
-        user_materias[current_user.id] = Materia.query.filter_by(id_usuario=current_user.id).all()  # Materias del usuario logueado
+            user_materias[user.id] = Materia.query.filter_by(id_usuario=user.id).all()  
+            user_proyectos[user.id] = Proyectos.query.filter_by(id_usuario=user.id).all()  
+            user_juegos[user.id] = Juegos.query.filter_by(id_usuario=user.id).all()  
     
-    return render_template('index.jinja', user=current_user, users=users, user_materias=user_materias)
+    else:
+        user_materias[current_user.id] = Materia.query.filter_by(id_usuario=current_user.id).all()  
+        user_proyectos[current_user.id] = Proyectos.query.filter_by(id_usuario=current_user.id).all() 
+        user_juegos[current_user.id] = Juegos.query.filter_by(id_usuario=current_user.id).all()  
+    
+    return render_template('index.jinja', 
+                           user=current_user, 
+                           users=users, 
+                           user_materias=user_materias, 
+                           user_proyectos=user_proyectos, 
+                           user_juegos=user_juegos)
 
 
 

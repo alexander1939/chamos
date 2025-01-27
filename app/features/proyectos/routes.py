@@ -2,15 +2,48 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app.features.proyectos.model import Proyectos
 from app.db import db
+from app.features.materia.model import Materia
+from app.features.juegos.model import Juegos
+from app.features.auth.model import User
+
+
 
 proyectos = Blueprint('proyectos', __name__)
 
 
+# Rutas para Proyectos
 @proyectos.get('/proyectos')
 @login_required
 def listar_proyectos():
-    proyectos = Proyectos.query.filter_by(id_usuario=current_user.id).all()
-    return render_template('proyectos/index.jinja', user=current_user, proyectos=proyectos)
+    materias = []
+    proyectos = []
+    juegos = []
+
+    # Verificar si el usuario es Admin
+    if current_user.role == 'Admin':
+        materias = Materia.query.all()
+        proyectos = Proyectos.query.all()
+        juegos = Juegos.query.all()
+        flash("Los administradores no pueden listar proyectos, juegos o materias.", "warning")
+        return redirect(url_for('auth.index'))
+    else:
+        materias = Materia.query.filter_by(id_usuario=current_user.id).all()
+        proyectos = Proyectos.query.filter_by(id_usuario=current_user.id).all()
+        juegos = Juegos.query.filter_by(id_usuario=current_user.id).all()
+
+    user_materias = {current_user.id: materias}
+    user_proyectos = {current_user.id: proyectos}
+    user_juegos = {current_user.id: juegos}
+
+    return render_template('proyectos/index.jinja', 
+                           user=current_user, 
+                           proyectos=proyectos,
+                           materias=materias, 
+                           juegos=juegos,
+                           user_materias=user_materias, 
+                           user_proyectos=user_proyectos, 
+                           user_juegos=user_juegos)
+
 
 
 
@@ -19,22 +52,45 @@ def listar_proyectos():
 def proyecto_detail(proyecto_id):
     proyecto = Proyectos.query.get_or_404(proyecto_id)
 
-    if proyecto.id_usuario != current_user.id:
-        flash("No tienes permiso para ver esta materia.", "danger")
+    if current_user.role != 'Admin' and proyecto.id_usuario != current_user.id:
+        flash("No tienes permiso para ver este proyecto.", "danger")
         return redirect(url_for('proyectos.listar_proyectos'))
+
+    proyectos = Proyectos.query.filter_by(id_usuario=current_user.id).all()
+    juegos = Juegos.query.filter_by(id_usuario=current_user.id).all()
+
+    if current_user.role == 'Admin':
+        users = User.query.filter(User.role != 'Admin').all()
+        user_materias = {user.id: Materia.query.filter_by(id_usuario=user.id).all() for user in users}
+        user_proyectos = {user.id: Proyectos.query.filter_by(id_usuario=user.id).all() for user in users}
+        user_juegos = {user.id: Juegos.query.filter_by(id_usuario=user.id).all() for user in users}
+    else:
+        users = [current_user]
+        user_materias = {current_user.id: Materia.query.filter_by(id_usuario=current_user.id).all()}
+        user_proyectos = {current_user.id: Proyectos.query.filter_by(id_usuario=current_user.id).all()}
+        user_juegos = {current_user.id: Juegos.query.filter_by(id_usuario=current_user.id).all()}
 
     return render_template(
         'proyectos/detail_proyecto.jinja',
         user=current_user,
         name=proyecto.nombre,
         description=proyecto.descripcion,
+        users=users,
+        user_materias=user_materias,
+        user_proyectos=user_proyectos,
+        user_juegos=user_juegos,
+        proyectos=proyectos,
+        juegos=juegos
     )
-
 
 
 @proyectos.get('/proyectos/agregar')
 @login_required
 def form_add_proyecto():
+    if current_user.role == 'Admin':
+        flash("Los administradores no pueden agregar proyectos.", "warning")
+        return redirect(url_for('proyectos.listar_proyectos'))
+
     return render_template(
         'proyectos/add_proyecto.jinja',
         page_title="Agregar Proyecto",
@@ -52,6 +108,10 @@ def form_add_proyecto():
 @proyectos.post('/proyectos/agregar')
 @login_required
 def save_proyecto():
+    if current_user.role == 'Admin':
+        flash("Los administradores no pueden agregar proyectos.", "warning")
+        return redirect(url_for('auth.index'))
+
     nombre = request.form['item_name']
     descripcion = request.form.get('item_description', '')  
     
@@ -76,12 +136,16 @@ def save_proyecto():
 @proyectos.get('/proyectos/editar/<int:proyecto_id>')
 @login_required
 def form_edit_proyecto(proyecto_id):
+    if current_user.role == 'Admin':
+        flash("Los administradores no pueden editar proyectos.", "warning")
+        return redirect(url_for('auth.index'))
+
     proyecto = Proyectos.query.get_or_404(proyecto_id)
-    
+
     if proyecto.id_usuario != current_user.id:
         flash("No tienes permiso para editar este proyecto.", "danger")
         return redirect(url_for('proyectos.listar_proyectos'))
-    
+
     return render_template(
         'proyectos/edit_proyecto.jinja',
         page_title="Editar Proyecto",
@@ -95,15 +159,20 @@ def form_edit_proyecto(proyecto_id):
         user=current_user
     )
 
+
 @proyectos.post('/proyectos/editar/<int:proyecto_id>')
 @login_required
 def save_edited_proyecto(proyecto_id):
+    if current_user.role == 'Admin':
+        flash("Los administradores no pueden editar proyectos.", "warning")
+        return redirect(url_for('auth.index'))
+
     proyecto = Proyectos.query.get_or_404(proyecto_id)
 
     if proyecto.id_usuario != current_user.id:
         flash("No tienes permiso para editar este proyecto.", "danger")
         return redirect(url_for('proyectos.listar_proyectos'))
-    
+
     proyecto.nombre = request.form['item_name']
     proyecto.descripcion = request.form.get('item_description', '')  
 
@@ -121,12 +190,16 @@ def save_edited_proyecto(proyecto_id):
 @proyectos.post('/proyectos/eliminar/<int:proyecto_id>')
 @login_required
 def delete_proyecto(proyecto_id):
+    if current_user.role == 'Admin':
+        flash("Los administradores no pueden eliminar proyectos.", "warning")
+        return redirect(url_for('auth.index'))
+
     proyecto = Proyectos.query.get_or_404(proyecto_id)
-    
+
     if proyecto.id_usuario != current_user.id:
         flash("No tienes permiso para eliminar este proyecto.", "danger")
         return redirect(url_for('proyectos.listar_proyectos'))
-    
+
     try:
         db.session.delete(proyecto)
         db.session.commit()
@@ -134,5 +207,7 @@ def delete_proyecto(proyecto_id):
     except Exception as e:
         db.session.rollback()
         flash("Ocurrió un error al eliminar el proyecto. Inténtalo de nuevo.", "danger")
-        print(f"Error: {e}")                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
-    return redirect(url_for('proyectos.listar_proyectos'))          
+        print(f"Error: {e}")
+    
+    return redirect(url_for('proyectos.listar_proyectos'))
+

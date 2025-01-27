@@ -11,5 +11,8 @@ class Juegos(BaseModel, UserMixin):
     descripcion = Column(String(255), nullable=True) 
     id_usuario = Column(Integer, ForeignKey('users.id'), nullable=False)
 
+    usuario = relationship("User", backref="juegos")
+
+
     def __repr__(self):
         return f'<Juegos {self.nombre}  - Usuario ID: {self.id_usuario}>'   

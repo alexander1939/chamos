@@ -20,8 +20,6 @@ def listar_materias():
         materias = Materia.query.all()
         proyectos = Proyectos.query.all()
         juegos = Juegos.query.all()
-        flash("Los administradores no pueden listar las materias.", "warning")
-        return redirect(url_for('auth.index'))
     else:
         materias = Materia.query.filter_by(id_usuario=current_user.id).all()
         proyectos = Proyectos.query.filter_by(id_usuario=current_user.id).all()

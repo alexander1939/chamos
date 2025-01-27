@@ -11,5 +11,9 @@ class Proyectos(BaseModel, UserMixin):
     descripcion = Column(String(255), nullable=True) 
     id_usuario = Column(Integer, ForeignKey('users.id'), nullable=False)
 
+
+    usuario = relationship("User", backref="proyectos")
+
+
     def __repr__(self):
         return f'<Proyectos {self.nombre}  - Usuario ID: {self.id_usuario}>'

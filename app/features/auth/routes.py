@@ -8,8 +8,44 @@ from app.db import db
 from flask_login import login_user
 from werkzeug.security import check_password_hash
 from flask_login import login_required, logout_user,  current_user
+from app.features.materia.model import Materia
+from app.features.proyectos.model import Proyectos
+from app.features.juegos.model import Juegos
+
+
 
 auth = Blueprint('auth', __name__)
+
+@auth.route('/')
+@login_required
+def index():
+    users = []
+    user_materias = {}
+    user_proyectos = {}
+    user_juegos = {}
+
+    if current_user.role == 'Admin':
+        users = User.query.filter_by(role='Usuario').all() 
+        
+        for user in users:
+            user_materias[user.id] = Materia.query.filter_by(id_usuario=user.id).all()  
+            user_proyectos[user.id] = Proyectos.query.filter_by(id_usuario=user.id).all()  
+            user_juegos[user.id] = Juegos.query.filter_by(id_usuario=user.id).all()  
+    
+    else:
+        user_materias[current_user.id] = Materia.query.filter_by(id_usuario=current_user.id).all()  
+        user_proyectos[current_user.id] = Proyectos.query.filter_by(id_usuario=current_user.id).all() 
+        user_juegos[current_user.id] = Juegos.query.filter_by(id_usuario=current_user.id).all()  
+    
+    return render_template('index.jinja', 
+                           user=current_user, 
+                           users=users, 
+                           user_materias=user_materias, 
+                           user_proyectos=user_proyectos, 
+                           user_juegos=user_juegos)
+
+
+
 
 @auth.get('/register/')
 def register():
@@ -92,17 +128,26 @@ def logout():
 
 
 
-@auth.route('/')
-@login_required
-def index():
-    return render_template('index.jinja', user=current_user)
-
 
 
 @auth.route('/profile/')
 @login_required
 def profile():
-    return render_template('auth/profile.jinja', user=current_user)
+
+    if current_user.role != 'Admin' and materia.id_usuario != current_user.id:
+        flash("No tienes permiso para ver esta materia.", "danger")
+        return redirect(url_for('materia.listar_materias'))
+
+    if current_user.role == 'Admin':
+        users = User.query.filter(User.role != 'Admin').all()
+        user_materias = {user.id: Materia.query.filter_by(id_usuario=user.id).all() for user in users}
+    else:
+        users = [current_user] 
+        user_materias = {current_user.id: Materia.query.filter_by(id_usuario=current_user.id).all()}
+
+    return render_template('auth/profile.jinja', user=current_user, user_materias=user_materias, users=users, 
+ 
+)
 
 
 
@@ -256,7 +301,7 @@ def gael():
 @auth.route('/gael/juegos/')
 @login_required
 def juegos_gael():
-    return render_template('temporary/gael/juegos/index.jinja', user=current_user)
+    return render_template('temporary/juegos/index.jinja', user=current_user)
 
 @auth.route('/gael/juegos/fornite/')
 @login_required
@@ -394,6 +439,7 @@ def proyectos_roberto_eva():
 @login_required
 def proyectos_roberto_punto():
     return render_template('temporary/roberto/proyectos/asscom.jinja', user=current_user)
+
 
 
 #error 400

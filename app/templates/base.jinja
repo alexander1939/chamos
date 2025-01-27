@@ -93,6 +93,9 @@
             </div>
             <ul class="menu">
                 <li><a href="{{ url_for('auth.index') }}"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="{{ url_for('materia.listar_materias') }}"><i class="fas fa-folder"></i>Materias</a></li>
+                <li><a href="{{ url_for('juegos.listar_juegos') }}"><i class="fas fa-folder"></i>Juegos</a></li>
+                <li><a href="{{ url_for('proyectos.listar_proyectos') }}"><i class="fas fa-folder"></i>Proyectos</a></li>
                 {% if current_user.role == 'Admin' %}
                 {% for user in users %}
                 <li>

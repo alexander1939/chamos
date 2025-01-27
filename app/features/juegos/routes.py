@@ -11,24 +11,34 @@ from app.db import db
 
 juegos = Blueprint('juegos', __name__)
 
-@juegos.get('/juegos')
+@juegos.route('/juegos')
 @login_required
 def listar_juegos():
-    if current_user.role == 'Admin':
+    user_juegos = {}
+    user_materias = {}
+    user_proyectos = {}
+    users = []
+    
+    if current_user.role == 'Admin':    
         juegos = Juegos.query.all()
         materias = Materia.query.all()
         proyectos = Proyectos.query.all()
-        flash("Los administradores no pueden listar los juegos.", "warning")
-        return redirect(url_for('auth.index'))
+
+        users = User.query.filter_by(role='Usuario').all()  
+        for user in users:
+            user_juegos[user.id] = Juegos.query.filter_by(id_usuario=user.id).all()
+            user_materias[user.id] = Materia.query.filter_by(id_usuario=user.id).all()
+            user_proyectos[user.id] = Proyectos.query.filter_by(id_usuario=user.id).all()
+
     else:
         juegos = Juegos.query.filter_by(id_usuario=current_user.id).all()
         materias = Materia.query.filter_by(id_usuario=current_user.id).all()
         proyectos = Proyectos.query.filter_by(id_usuario=current_user.id).all()
 
-    user_juegos = {current_user.id: juegos}
-    user_materias = {current_user.id: materias}
-    user_proyectos = {current_user.id: proyectos}
-
+        user_juegos[current_user.id] = juegos
+        user_materias[current_user.id] = materias
+        user_proyectos[current_user.id] = proyectos
+    
     return render_template(
         'juegos/index.jinja', 
         user=current_user, 
@@ -37,8 +47,10 @@ def listar_juegos():
         proyectos=proyectos,
         user_juegos=user_juegos, 
         user_materias=user_materias, 
-        user_proyectos=user_proyectos
+        user_proyectos=user_proyectos, 
+        users=users  
     )
+
 
 
 @juegos.get('/juegos/detalles/<int:juego_id>')

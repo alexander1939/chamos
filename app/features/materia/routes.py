@@ -13,32 +13,46 @@ materia = Blueprint('materia', __name__)
 
 
 
-@materia.get('/materias')
+@materia.route('/materias')
 @login_required
-def listar_materias():        
+def listar_materias():  
+    user_materias = {}
+    user_proyectos = {}
+    user_juegos = {}
+    users = []
+    
     if current_user.role == 'Admin':    
         materias = Materia.query.all()
         proyectos = Proyectos.query.all()
         juegos = Juegos.query.all()
+
+        users = User.query.filter_by(role='Usuario').all() 
+        for user in users:
+            user_materias[user.id] = Materia.query.filter_by(id_usuario=user.id).all()
+            user_proyectos[user.id] = Proyectos.query.filter_by(id_usuario=user.id).all()
+            user_juegos[user.id] = Juegos.query.filter_by(id_usuario=user.id).all()
+
     else:
         materias = Materia.query.filter_by(id_usuario=current_user.id).all()
         proyectos = Proyectos.query.filter_by(id_usuario=current_user.id).all()
         juegos = Juegos.query.filter_by(id_usuario=current_user.id).all()
-    
-    user_materias = {current_user.id: materias}
-    user_proyectos = {current_user.id: proyectos}
-    user_juegos = {current_user.id: juegos}
+
+        user_materias[current_user.id] = materias
+        user_proyectos[current_user.id] = proyectos
+        user_juegos[current_user.id] = juegos
     
     return render_template(
         'materias/index.jinja', 
         user=current_user, 
-        proyectos=proyectos,
         materias=materias, 
-        juegos=juegos,
+        proyectos=proyectos, 
+        juegos=juegos, 
         user_materias=user_materias, 
         user_proyectos=user_proyectos, 
-        user_juegos=user_juegos
+        user_juegos=user_juegos, 
+        users=users 
     )
+
 
 @materia.get('/materias/detalles/<int:materia_id>')
 @login_required

@@ -11,40 +11,45 @@ from app.features.auth.model import User
 proyectos = Blueprint('proyectos', __name__)
 
 
-# Rutas para Proyectos
-@proyectos.get('/proyectos')
+@proyectos.route('/proyectos')
 @login_required
 def listar_proyectos():
-    materias = []
-    proyectos = []
-    juegos = []
-
-    # Verificar si el usuario es Admin
-    if current_user.role == 'Admin':
-        materias = Materia.query.all()
+    user_materias = {}
+    user_proyectos = {}
+    user_juegos = {}
+    users = []
+    
+    if current_user.role == 'Admin':    
         proyectos = Proyectos.query.all()
+        materias = Materia.query.all()
         juegos = Juegos.query.all()
-        flash("Los administradores no pueden listar proyectos, juegos o materias.", "warning")
-        return redirect(url_for('auth.index'))
+
+        users = User.query.filter_by(role='Usuario').all()  
+        for user in users:
+            user_materias[user.id] = Materia.query.filter_by(id_usuario=user.id).all()
+            user_proyectos[user.id] = Proyectos.query.filter_by(id_usuario=user.id).all()
+            user_juegos[user.id] = Juegos.query.filter_by(id_usuario=user.id).all()
+
     else:
-        materias = Materia.query.filter_by(id_usuario=current_user.id).all()
         proyectos = Proyectos.query.filter_by(id_usuario=current_user.id).all()
+        materias = Materia.query.filter_by(id_usuario=current_user.id).all()
         juegos = Juegos.query.filter_by(id_usuario=current_user.id).all()
 
-    user_materias = {current_user.id: materias}
-    user_proyectos = {current_user.id: proyectos}
-    user_juegos = {current_user.id: juegos}
-
-    return render_template('proyectos/index.jinja', 
-                           user=current_user, 
-                           proyectos=proyectos,
-                           materias=materias, 
-                           juegos=juegos,
-                           user_materias=user_materias, 
-                           user_proyectos=user_proyectos, 
-                           user_juegos=user_juegos)
-
-
+        user_materias[current_user.id] = materias
+        user_proyectos[current_user.id] = proyectos
+        user_juegos[current_user.id] = juegos
+    
+    return render_template(
+        'proyectos/index.jinja', 
+        user=current_user, 
+        proyectos=proyectos,
+        materias=materias,
+        juegos=juegos,
+        user_materias=user_materias, 
+        user_proyectos=user_proyectos, 
+        user_juegos=user_juegos, 
+        users=users 
+    )
 
 
 @proyectos.get('/proyectos/detalles/<int:proyecto_id>')

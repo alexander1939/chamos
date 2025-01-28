@@ -162,3 +162,7 @@ def protected():
         abort(401) 
     return "Acceso permitido a la página protegida."
 
+
+@auth.route('/privacidad')
+def privacidad():
+    return render_template('aviso_privacidad.jinja',)

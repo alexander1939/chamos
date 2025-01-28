@@ -39,7 +39,8 @@ def generate_breadcrumbs():
                     if current_user.is_authenticated and current_user.role == "Admin":
                         user = User.query.get(item.id_usuario)  
                         if user:
-                            breadcrumbs.append({
+                            # Insertamos el breadcrumb del usuario en la posición 1 (después de "Home")
+                            breadcrumbs.insert(0, {
                                 "name": user.name,  
                                 "url": None  
                             })

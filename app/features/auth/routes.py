@@ -2,6 +2,7 @@ from flask import Blueprint, abort, render_template, redirect, url_for, flash, r
 from flask_login import login_user
 from flask_login import login_required, logout_user,  current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from app.features import materia
 from app.features.auth.model import User
 from app.features.auth.form import RegisterForm, LoginForm
 from app.db import db
@@ -161,21 +162,3 @@ def protected():
         abort(401) 
     return "Acceso permitido a la página protegida."
 
-
-
-#error 400
-
-@auth.route('/error400')
-def error_400():
-    abort(400)
-
-@auth.route('/procesar', methods=['POST'])
-def procesar():
-    campo = request.form.get('campo')
-    if not campo.isdigit():  # Verifica si el valor no es un número
-        abort(400)  # Error 400 si el campo no es un entero
-    return "Datos procesados correctamente"
-
-@auth.app_errorhandler(400)
-def handle_400_error(error):
-    return render_template('/errors/400.jinja'), 400

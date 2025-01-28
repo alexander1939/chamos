@@ -70,7 +70,7 @@
                 <!-- Checkbox de aviso de privacidad -->
                 <label for="terms">
                     <input type="checkbox" id="terms" name="terms" required onchange="toggleButton()">
-                    Acepto el <a href="/aviso-de-privacidad">aviso de privacidad</a>.
+                    Acepto el <a href="{{ url_for('auth.privacidad') }}">Aviso de Privacidad</a>
                 </label>
 
                 <!-- Botón de Crear cuenta -->

@@ -67,14 +67,36 @@
                     {% endfor %}
                 </div>
 
-                <button type="submit" class="form-button">Crear cuenta</button>
+                <!-- Checkbox de aviso de privacidad -->
+                <label for="terms">
+                    <input type="checkbox" id="terms" name="terms" required onchange="toggleButton()">
+                    Acepto el <a href="{{ url_for('auth.privacidad') }}">Aviso de Privacidad</a>
+                </label>
+
+                <!-- Botón de Crear cuenta -->
+                <button type="submit" class="form-button" id="submitButton" disabled>Crear cuenta</button>
+
                 <br>
-                <p style="margin-top:20px">¿tienes cuenta? <a href="{{ url_for('auth.login') }}">Iniciar sesion</a></p>
+                <p style="margin-top:20px">¿Tienes cuenta? <a href="{{ url_for('auth.login') }}">Iniciar sesión</a></p>
             </form>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Función para activar o desactivar el botón y cambiar su estilo
+        function toggleButton() {
+            const checkbox = document.getElementById('terms');
+            const button = document.getElementById('submitButton');
+
+            if (checkbox.checked) {
+                button.disabled = false; // Habilita el botón
+            } else {
+                button.disabled = true; // Deshabilita el botón
+            }
+        }
+    </script>
 
 </body>
 

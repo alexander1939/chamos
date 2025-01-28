@@ -5,6 +5,7 @@ from app.features.auth.model import User
 from app.features.juegos.model import Juegos
 from app.features.proyectos.model import Proyectos
 from app.features.materia.model import Materia
+from sqlalchemy import or_
 
 
 from app.db import db
@@ -14,6 +15,9 @@ juegos = Blueprint('juegos', __name__)
 @juegos.route('/juegos')
 @login_required
 def listar_juegos():
+    if current_user.role == 'Small':
+        flash("No puedes agregar materias.", "warning")
+        return redirect(url_for('auth.index'))
     user_juegos = {}
     user_materias = {}
     user_proyectos = {}
@@ -24,7 +28,14 @@ def listar_juegos():
         materias = Materia.query.all()
         proyectos = Proyectos.query.all()
 
-        users = User.query.filter_by(role='Usuario').all()  
+        if current_user.role == 'Admin':
+            users = User.query.filter(
+            or_(
+                User.role == 'Usuario',
+                User.role == 'Mini',
+                User.role == 'Small'
+            )
+        ).all()
         for user in users:
             user_juegos[user.id] = Juegos.query.filter_by(id_usuario=user.id).all()
             user_materias[user.id] = Materia.query.filter_by(id_usuario=user.id).all()
@@ -56,6 +67,9 @@ def listar_juegos():
 @juegos.get('/juegos/detalles/<int:juego_id>')
 @login_required
 def juego_detail(juego_id):
+    if current_user.role == 'Small':
+        flash("No puedes agregar materias.", "warning")
+        return redirect(url_for('auth.index'))
     juego = Juegos.query.get_or_404(juego_id)
 
     if current_user.role != 'Admin' and juego.id_usuario != current_user.id:
@@ -94,6 +108,9 @@ def juego_detail(juego_id):
 @juegos.get('/juegos/agregar')
 @login_required
 def form_add_juego():
+    if current_user.role == 'Small':
+        flash("No puedes agregar materias.", "warning")
+        return redirect(url_for('auth.index'))
     if current_user.role == 'Admin':
         flash("Los administradores no pueden agregar juegos.", "warning")
         return redirect(url_for('juegos.listar_juegos'))
@@ -125,6 +142,9 @@ def form_add_juego():
 @juegos.post('/juegos/agregar')
 @login_required
 def save_juego():
+    if current_user.role == 'Small':
+        flash("No puedes agregar materias.", "warning")
+        return redirect(url_for('auth.index'))
     if current_user.role == 'Admin': 
         flash("Los administradores no pueden agregar juegos.", "warning")
         return redirect(url_for('auth.index'))
@@ -153,6 +173,9 @@ def save_juego():
 @juegos.get('/juegos/editar/<int:juego_id>')
 @login_required
 def form_edit_juego(juego_id):
+    if current_user.role == 'Small':
+        flash("No puedes agregar materias.", "warning")
+        return redirect(url_for('auth.index'))
     juego = Juegos.query.get_or_404(juego_id)
 
     if juego.id_usuario != current_user.id:
@@ -183,6 +206,9 @@ def form_edit_juego(juego_id):
 @juegos.post('/juegos/editar/<int:juego_id>')
 @login_required
 def save_edited_juego(juego_id):
+    if current_user.role == 'Small':
+        flash("No puedes agregar materias.", "warning")
+        return redirect(url_for('auth.index'))
     juego = Juegos.query.get_or_404(juego_id)
 
     if juego.id_usuario != current_user.id:
@@ -206,6 +232,9 @@ def save_edited_juego(juego_id):
 @juegos.post('/juegos/eliminar/<int:juego_id>')
 @login_required
 def delete_juego(juego_id):
+    if current_user.role == 'Small':
+        flash("No puedes agregar materias.", "warning")
+        return redirect(url_for('auth.index'))
     juego = Juegos.query.get_or_404(juego_id)
 
     if juego.id_usuario != current_user.id:

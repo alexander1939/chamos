@@ -5,6 +5,8 @@ from app.db import db
 from app.features.auth.model import User
 from app.features.juegos.model import Juegos
 from app.features.proyectos.model import Proyectos
+from sqlalchemy import or_
+
 
 
 
@@ -16,6 +18,9 @@ materia = Blueprint('materia', __name__)
 @materia.route('/materias')
 @login_required
 def listar_materias():  
+    if current_user.role == 'Mini':
+        flash("No puedes agregar materias.", "warning")
+        return redirect(url_for('auth.index'))
     user_materias = {}
     user_proyectos = {}
     user_juegos = {}
@@ -26,7 +31,14 @@ def listar_materias():
         proyectos = Proyectos.query.all()
         juegos = Juegos.query.all()
 
-        users = User.query.filter_by(role='Usuario').all() 
+        if current_user.role == 'Admin':
+            users = User.query.filter(
+            or_(
+                User.role == 'Usuario',
+                User.role == 'Mini',
+                User.role == 'Small'
+            )
+        ).all()
         for user in users:
             user_materias[user.id] = Materia.query.filter_by(id_usuario=user.id).all()
             user_proyectos[user.id] = Proyectos.query.filter_by(id_usuario=user.id).all()
@@ -94,9 +106,9 @@ def materia_detail(materia_id):
 @materia.get('/materias/agregar')
 @login_required
 def form_add_materia():
-    if current_user.role == 'Admin':
+    if current_user.role == 'Admin' or current_user.role == 'Mini':
         flash("Los administradores no pueden agregar materias.", "warning")
-        return redirect(url_for('materia.listar_materias'))
+        return redirect(url_for('auth.index'))
     
     proyectos = Proyectos.query.filter_by(id_usuario=current_user.id).all()
     juegos = Juegos.query.filter_by(id_usuario=current_user.id).all()
@@ -125,7 +137,7 @@ def form_add_materia():
 @materia.post('/materias/agregar')
 @login_required
 def save_materia():
-    if current_user.role == 'Admin': 
+    if current_user.role == 'Admin' or current_user.role == 'Mini':
         flash("Los administradores no pueden agregar materias.", "warning")
         return redirect(url_for('auth.index'))
 
@@ -153,7 +165,7 @@ def save_materia():
 @materia.get('/materias/editar/<int:materia_id>')
 @login_required
 def form_edit_materia(materia_id):
-    if current_user.role == 'Admin': 
+    if current_user.role == 'Admin' or current_user.role == 'Mini': 
         flash("Los administradores no pueden editar materias.", "warning")
         return redirect(url_for('auth.index'))
 
@@ -187,7 +199,7 @@ def form_edit_materia(materia_id):
 @materia.post('/materias/editar/<int:materia_id>')
 @login_required
 def save_edited_materia(materia_id):
-    if current_user.role == 'Admin':  
+    if current_user.role == 'Admin' or current_user.role == 'Mini':  
         flash("Los administradores no pueden editar materias.", "warning")
         return redirect(url_for('auth.index'))
 
@@ -214,7 +226,7 @@ def save_edited_materia(materia_id):
 @materia.post('/materias/eliminar/<int:materia_id>')
 @login_required
 def delete_materia(materia_id):
-    if current_user.role == 'Admin':  
+    if current_user.role == 'Admin' or current_user.role == 'Mini':  
         flash("Los administradores no pueden eliminar materias.", "warning")
         return redirect(url_for('auth.index'))
 

@@ -5,6 +5,8 @@ from app.db import db
 from app.features.materia.model import Materia
 from app.features.juegos.model import Juegos
 from app.features.auth.model import User
+from sqlalchemy import or_
+
 
 
 
@@ -14,6 +16,10 @@ proyectos = Blueprint('proyectos', __name__)
 @proyectos.route('/proyectos')
 @login_required
 def listar_proyectos():
+    if current_user.role == 'Small':
+        flash("No puedes agregar materias.", "warning")
+        return redirect(url_for('auth.index'))
+
     user_materias = {}
     user_proyectos = {}
     user_juegos = {}
@@ -24,7 +30,14 @@ def listar_proyectos():
         materias = Materia.query.all()
         juegos = Juegos.query.all()
 
-        users = User.query.filter_by(role='Usuario').all()  
+        if current_user.role == 'Admin':
+            users = User.query.filter(
+            or_(
+                User.role == 'Usuario',
+                User.role == 'Mini',
+                User.role == 'Small'
+            )
+        ).all()
         for user in users:
             user_materias[user.id] = Materia.query.filter_by(id_usuario=user.id).all()
             user_proyectos[user.id] = Proyectos.query.filter_by(id_usuario=user.id).all()
@@ -55,6 +68,10 @@ def listar_proyectos():
 @proyectos.get('/proyectos/detalles/<int:proyecto_id>')
 @login_required
 def proyecto_detail(proyecto_id):
+    if current_user.role == 'Small':
+        flash("No puedes agregar materias.", "warning")
+        return redirect(url_for('auth.index'))
+
     proyecto = Proyectos.query.get_or_404(proyecto_id)
 
     if current_user.role != 'Admin' and proyecto.id_usuario != current_user.id:
@@ -92,6 +109,9 @@ def proyecto_detail(proyecto_id):
 @proyectos.get('/proyectos/agregar')
 @login_required
 def form_add_proyecto():
+    if current_user.role == 'Small':
+        flash("No puedes agregar materias.", "warning")
+        return redirect(url_for('auth.index'))
     if current_user.role == 'Admin':
         flash("Los administradores no pueden agregar proyectos.", "warning")
         return redirect(url_for('proyectos.listar_proyectos'))
@@ -113,6 +133,9 @@ def form_add_proyecto():
 @proyectos.post('/proyectos/agregar')
 @login_required
 def save_proyecto():
+    if current_user.role == 'Small':
+        flash("No puedes agregar materias.", "warning")
+        return redirect(url_for('auth.index'))
     if current_user.role == 'Admin':
         flash("Los administradores no pueden agregar proyectos.", "warning")
         return redirect(url_for('auth.index'))
@@ -141,7 +164,7 @@ def save_proyecto():
 @proyectos.get('/proyectos/editar/<int:proyecto_id>')
 @login_required
 def form_edit_proyecto(proyecto_id):
-    if current_user.role == 'Admin':
+    if current_user.role == 'Admin' or current_user.role== 'Small':
         flash("Los administradores no pueden editar proyectos.", "warning")
         return redirect(url_for('auth.index'))
 
@@ -168,7 +191,7 @@ def form_edit_proyecto(proyecto_id):
 @proyectos.post('/proyectos/editar/<int:proyecto_id>')
 @login_required
 def save_edited_proyecto(proyecto_id):
-    if current_user.role == 'Admin':
+    if current_user.role == 'Admin' or current_user.role == 'Small':
         flash("Los administradores no pueden editar proyectos.", "warning")
         return redirect(url_for('auth.index'))
 
@@ -195,7 +218,7 @@ def save_edited_proyecto(proyecto_id):
 @proyectos.post('/proyectos/eliminar/<int:proyecto_id>')
 @login_required
 def delete_proyecto(proyecto_id):
-    if current_user.role == 'Admin':
+    if current_user.role == 'Admin' or current_user.role == 'Small':
         flash("Los administradores no pueden eliminar proyectos.", "warning")
         return redirect(url_for('auth.index'))
 

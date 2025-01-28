@@ -67,7 +67,7 @@ def generate_breadcrumbs():
             if current_user.is_authenticated and current_user.role == "Admin":
                 breadcrumbs.append({
                     "name": name,
-                    "url": None  
+                    "url": url  
                 })
             else:
                 breadcrumbs.append({

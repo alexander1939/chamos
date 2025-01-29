@@ -71,19 +71,26 @@ body {
 .form-input:focus+i {
     color: #6a11cb;
 }
+
 /* Estilo cuando el botón está deshabilitado */
 .form-button:disabled {
-    background-color: #cccccc; /* Color gris */
+    background-color: #cccccc;
+    /* Color gris */
     border-color: #cccccc;
-    cursor: not-allowed; /* Cambia el cursor */
-    opacity: 0.7; /* Oscurece el botón */
+    cursor: not-allowed;
+    /* Cambia el cursor */
+    opacity: 0.7;
+    /* Oscurece el botón */
 }
 
 .form-button:disabled:hover {
-    background-color: #cccccc; /* Color gris */
+    background-color: #cccccc;
+    /* Color gris */
     border-color: #cccccc;
-    cursor: not-allowed; /* Cambia el cursor */
-    opacity: 0.7; /* Oscurece el botón */
+    cursor: not-allowed;
+    /* Cambia el cursor */
+    opacity: 0.7;
+    /* Oscurece el botón */
 }
 
 .form-button {

@@ -64,7 +64,7 @@ def register():
         return redirect(url_for('auth.login'))
     
     context = {
-        "register_form": RegisterForm(meta={'csrf': False})
+        "register_form": RegisterForm()
     }
     return render_template('auth/register.jinja', **context)
 
@@ -75,12 +75,6 @@ def register_post():
     if not form.validate_on_submit():
         flash("Por favor, completa todos los campos requeridos.", "danger")
         return render_template('auth/register.jinja', register_form=form)
-    
-    if 'terms' not in request.form:
-        flash("Debes aceptar el Aviso de Privacidad para continuar.", "danger")
-        return render_template('auth/register.jinja', register_form=form)
-
-
 
     existing_user = User.query.filter_by(email=form.email.data).first()
     if existing_user:

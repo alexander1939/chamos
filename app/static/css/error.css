@@ -1,0 +1,36 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8d7da;
+    color: #721c24;
+    text-align: center;
+    padding: 50px;
+    margin: 0;
+}
+
+.error-container {
+    border: 2px solid #f5c6cb;
+    border-radius: 8px;
+    display: inline-block;
+    padding: 20px;
+    background-color: #f8d7da;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    font-size: 50px;
+}
+
+p {
+    font-size: 20px;
+    margin: 20px 0;
+}
+
+a {
+    text-decoration: none;
+    color: #721c24;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}

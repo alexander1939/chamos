@@ -3,21 +3,5 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<section class="section-edit-juego">
-        <div class="container">
-                <h2>{{ form_title }}</h2>
-                <form action="{{ action_url }}" method="POST">
-                        <div class="mb-3">
-                                <label for="item_name">{{ input_title }}</label>
-                                <input type="text" class="form-control" id="item_name" name="item_name"
-                                        value="{{ item_name }}">
-                        </div>
-                        <div class="mb-3">
-                                <label for="item_description">{{ desc_title }}</label>
-                                <textarea class="form-control" id="item_description"
-                                        name="item_description">{{ item_description }}</textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">{{ button_text }}</button>
-        </div>
-</section>
+    {% include "components/edit.jinja" %}
 {% endblock %}

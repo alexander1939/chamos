@@ -7,7 +7,6 @@ from .config import Config
 from flask_login import LoginManager
 from .db import db
 from .features.auth import auth
-from .features.auth.model import User  
 from .features.components import generate_breadcrumbs
 from app.features.components import create_admin_user
 from app.features.components import create_mini_user
@@ -50,8 +49,5 @@ def create_app():
     
     with app.app_context():
         db.create_all()
-        create_admin_user()
-        create_mini_user()
-        create_small_user()
 
     return app

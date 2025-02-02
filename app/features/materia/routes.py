@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app.features.materia.model import Materia
 from app.db import db
-from app.features.auth.model import User
 from app.features.juegos.model import Juegos
 from app.features.proyectos.model import Proyectos
 from sqlalchemy import or_

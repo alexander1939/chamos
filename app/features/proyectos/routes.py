@@ -4,7 +4,6 @@ from app.features.proyectos.model import Proyectos
 from app.db import db
 from app.features.materia.model import Materia
 from app.features.juegos.model import Juegos
-from app.features.auth.model import User
 from sqlalchemy import or_
 
 

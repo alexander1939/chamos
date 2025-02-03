@@ -1,0 +1,75 @@
+import re
+from flask import request, jsonify
+from functools import wraps
+from app.db.users_model import User
+from werkzeug.security import check_password_hash
+import uuid
+import time
+
+
+def check_existing_user(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if request.method == "POST":
+            data = request.get_json() if request.is_json else request.form
+
+            required_fields = ["email", "password", "name", "surnames", "phone"]
+            if not all(field in data and data[field].strip() for field in required_fields):
+                return jsonify({"error": "Faltan campos obligatorios"}), 400
+
+            if not re.match(r"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$", data["name"]):
+                return jsonify({"error": "El nombre solo puede contener letras y espacios."}), 400
+
+            if not re.match(r"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$", data["surnames"]):
+                return jsonify({"error": "Los apellidos solo pueden contener letras y espacios."}), 400
+
+            if not re.match(r"^\d{10}$", data["phone"]):
+                return jsonify({"error": "El teléfono solo puede contener números de 10 dijitos ."}), 400
+
+            if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", data["email"]):
+                return jsonify({"error": "El correo electrónico no es válido."}), 400
+
+            if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$", data["password"]):
+                return jsonify({"error": "La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula y un número."}), 400
+
+            existing_user = User.query.filter(
+                (User.email == data["email"]) | 
+                ((User.name == data["name"]) & (User.surnames == data["surnames"]))
+            ).first()
+
+            if existing_user:
+                return jsonify({"error": "Ya existe un usuario con este correo, nombre y apellidos."}), 400
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+active_tokens = {}
+refresh_tokens = {}  
+
+TOKEN_EXPIRATION_TIME = 3600  # 1 hora
+
+def generate_secure_token():
+    """Genera un token único usando UUID"""
+    return str(uuid.uuid4())
+
+def is_token_valid(token):
+    """Valida si el token existe y no ha expirado"""
+    return token in active_tokens and active_tokens[token]["expires"] > time.time()
+
+def auth_required(f):
+    """Middleware para proteger rutas que requieren autenticación"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get("Authorization")
+
+        if token and token.startswith("Bearer "):
+            token = token.split(" ")[1] 
+
+        if not token or not is_token_valid(token):
+            return jsonify({"error": "Token inválido o expirado"}), 401
+        
+        return f(*args, **kwargs)
+    
+    return decorated_function

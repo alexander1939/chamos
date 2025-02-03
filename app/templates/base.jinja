@@ -25,6 +25,8 @@
 
 
 
+
+
     {% block head %}{% endblock %}
 </head>
 
@@ -43,13 +45,13 @@
                             href="#" id="navbarDropdownMenuAvatar" role="button" aria-expanded="false">
                             <img src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp" class="rounded-circle"
                                 height="35" alt="User Avatar" loading="lazy" />
-                            <span class="ms-2" style="text-decoration: none;">{{ user.name }}</span>
+                            <span class="ms-2" style="text-decoration: none;">tavo</span>
 
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
-                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">My profile</a></li>
+                            <li><a class="dropdown-item" href="#">My profile</a></li>
                             <li><a class="dropdown-item" href="#">Settings</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                            <li><a class="dropdown-item" href="#">Logout</a></li>
                         </ul>
                     </div>
                 </div>
@@ -91,117 +93,53 @@
                 <h2>Menú</h2>
                 <button class="close-menu" id="close-menu"><i class="fas fa-times"></i></button>
             </div>
-            <ul class="menu">
+            <ul class="menu" id="menu-list">
                 <li><a href="{{ url_for('auth.index') }}"><i class="fas fa-home"></i> Inicio</a></li>
 
-                {% if current_user.role == 'Admin' %}
-                {% for user in users %}
+                {% if "Proyectos" in menu['privilegios'] %}
                 <li>
                     <a href="#" class="dropdown-btn">
-                        <i class="fas fa-user"></i> {{ user.name }} <i class="fas fa-chevron-down dropdown-icon"></i>
+                        <i class="fas fa-folder"></i> Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
                     </a>
                     <ul class="dropdown-options">
-                        {% if user.role in ['Mini', 'Usuario'] %}
-                        <li>
-                            <a href="#" class="dropdown-btn"><i class="fas fa-folder"></i> Proyectos <i
-                                    class="fas fa-chevron-down dropdown-icon"></i></a>
-                            <ul class="dropdown-options">
-                                {% for proyecto in user_proyectos.get(user.id, []) %}
-                                <li><a href="{{ url_for('proyectos.proyecto_detail', proyecto_id=proyecto.id) }}">{{
-                                        proyecto.nombre }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-btn"><i class="fas fa-folder"></i> Juegos <i
-                                    class="fas fa-chevron-down dropdown-icon"></i></a>
-                            <ul class="dropdown-options">
-                                {% for juego in user_juegos.get(user.id, []) %}
-                                <li><a href="{{ url_for('juegos.juego_detail', juego_id=juego.id) }}">{{ juego.nombre
-                                        }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                        {% endif %}
-                        {% if user.role in ['Small', 'Usuario'] %}
-                        <li>
-                            <a href="#" class="dropdown-btn"><i class="fas fa-folder"></i> Materias <i
-                                    class="fas fa-chevron-down dropdown-icon"></i></a>
-                            <ul class="dropdown-options">
-                                {% for materia in user_materias.get(user.id, []) %}
-                                <li><a href="{{ url_for('materia.materia_detail', materia_id=materia.id) }}">{{
-                                        materia.nombre }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </li>
-                {% endfor %}
-                <li><a href="{{ url_for('materia.listar_materias') }}"><i class="fas fa-list"></i> Listar Materias</a>
-                </li>
-                <li><a href="{{ url_for('proyectos.listar_proyectos') }}"><i class="fas fa-list"></i> Listar
-                        Proyectos</a></li>
-                <li><a href="{{ url_for('juegos.listar_juegos') }}"><i class="fas fa-list"></i> Listar Juegos</a></li>
-
-                {% else %}
-                {% if current_user.role in ['Mini', 'Usuario'] %}
-                <li>
-                    <a href="#" class="dropdown-btn"><i class="fas fa-list"></i> Mis Proyectos <i
-                            class="fas fa-chevron-down dropdown-icon"></i></a>
-                    <ul class="dropdown-options">
-                        {% for proyecto in user_proyectos.get(current_user.id, []) %}
-                        <li><a href="{{ url_for('proyectos.proyecto_detail', proyecto_id=proyecto.id) }}">{{
-                                proyecto.nombre }}</a></li>
+                        {% for proyecto in menu['contenido']['Proyectos'] %}
+                        <li><a href="#">{{ proyecto['nombre'] }}</a></li>
                         {% endfor %}
-                        <li><a href="{{ url_for('proyectos.form_add_proyecto') }}"><i class="fas fa-plus"></i> Agregar
-                                Proyecto</a></li>
-                        <li><a href="{{ url_for('proyectos.listar_proyectos') }}"><i class="fas fa-list"></i> Listar
-                                Proyectos</a></li>
                     </ul>
                 </li>
-                <li>
-                    <a href="#" class="dropdown-btn"><i class="fas fa-list"></i> Mis Juegos <i
-                            class="fas fa-chevron-down dropdown-icon"></i></a>
-                    <ul class="dropdown-options">
-                        {% for juego in user_juegos.get(current_user.id, []) %}
-                        <li><a href="{{ url_for('juegos.juego_detail', juego_id=juego.id) }}">{{ juego.nombre }}</a>
-                        </li>
-                        {% endfor %}
-                        <li><a href="{{ url_for('juegos.form_add_juego') }}"><i class="fas fa-plus"></i> Agregar
-                                Juego</a></li>
-                        <li><a href="{{ url_for('juegos.listar_juegos') }}"><i class="fas fa-list"></i> Listar
-                                Juegos</a></li>
-                    </ul>
-                </li>
-                {% endif %}
-                {% if current_user.role in ['Small', 'Usuario'] %}
-                <li>
-                    <a href="#" class="dropdown-btn"><i class="fas fa-list"></i> Mis Materias <i
-                            class="fas fa-chevron-down dropdown-icon"></i></a>
-                    <ul class="dropdown-options">
-                        {% for materia in user_materias.get(current_user.id, []) %}
-                        <li><a href="{{ url_for('materia.materia_detail', materia_id=materia.id) }}">{{ materia.nombre
-                                }}</a></li>
-                        {% endfor %}
-                        <li><a href="{{ url_for('materia.form_add_materia') }}"><i class="fas fa-plus"></i> Agregar
-                                Materia</a></li>
-                        <li><a href="{{ url_for('materia.listar_materias') }}"><i class="fas fa-list"></i> Listar
-                                Materias</a></li>
-                    </ul>
-                </li>
-                {% endif %}
                 {% endif %}
 
-                <li><a href="#"><i class="fas fa-info-circle"></i> Acerca de</a></li>
-                <li><a href="#"><i class="fas fa-envelope"></i> Contacto</a></li>
+                {% if "Juegos" in menu['privilegios'] %}
+                <li>
+                    <a href="#" class="dropdown-btn">
+                        <i class="fas fa-folder"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </a>
+                    <ul class="dropdown-options">
+                        {% for juego in menu['contenido']['Juegos'] %}
+                        <li><a href="#">{{ juego['nombre'] }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endif %}
+
+                {% if "Materias" in menu['privilegios'] %}
+                <li>
+                    <a href="#" class="dropdown-btn">
+                        <i class="fas fa-folder"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </a>
+                    <ul class="dropdown-options">
+                        {% for materia in menu['contenido']['Materias'] %}
+                        <li><a href="#">{{ materia['nombre'] }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endif %}
             </ul>
         </div>
         <div class="contents">
             <button class="toggle-menu" id="toggle-menu"><i class="fas fa-bars"></i></button>
         </div>
     </div>
-
 
 
 

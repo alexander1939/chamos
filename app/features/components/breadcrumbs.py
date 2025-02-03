@@ -1,9 +1,6 @@
 from flask import request
 from flask_login import current_user
-from app.features.materia.model import Materia
-from app.features.auth.model import User
-from app.features.juegos.model import Juegos
-from app.features.proyectos.model import Proyectos
+
 
 
 
@@ -16,9 +13,9 @@ def generate_breadcrumbs():
     Genera breadcrumbs dinámicos para rutas que incluyen "detalle" o "editar".
     """
     MODELS_MAP = {
-        "materias": Materia,
-        "juegos":Juegos,
-        "proyectos": Proyectos
+        # "materias": Materia,
+        # "juegos":Juegos,
+        # "proyectos": Proyectos
     }
 
     path_segments = [seg for seg in request.path.strip("/").split("/") if seg]

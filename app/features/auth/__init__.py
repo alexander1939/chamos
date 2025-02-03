@@ -1,3 +1,1 @@
-from .routes import auth
-from .model import User
-
+from .routes import auth_bp

@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template,redirect,url_for,make_response
 from flask import jsonify, request, render_template
 
 from app.api.auth_api import register_user, login_user, logout_user, protected_route
@@ -24,13 +24,13 @@ def index():
     return render_template("index.jinja")
 
 
-
-@auth_bp.route('/register/', methods=['GET', 'POST']) 
+@auth_bp.get('/register/') 
 @guest_only 
 def register():
     return render_template("auth/register.jinja")
 
-@auth_bp.route('/login/', methods=['GET', 'POST'])
+
+@auth_bp.get('/login/')
 @guest_only
 def login():
     return render_template("auth/login.jinja")

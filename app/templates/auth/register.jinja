@@ -40,15 +40,15 @@
                 </div>
 
                 <div class="form-group">
-                    {{ register_form.phone(class_="form-input", placeholder="Teléfono") }}
-                    {% for error in register_form.phone.errors %}
+                    {{ register_form.surnames(class_="form-input", placeholder="Apellidos") }}
+                    {% for error in register_form.surnames.errors %}
                     <div class="error">{{ error }}</div>
                     {% endfor %}
                 </div>
 
                 <div class="form-group">
-                    {{ register_form.surnames(class_="form-input", placeholder="Apellidos") }}
-                    {% for error in register_form.surnames.errors %}
+                    {{ register_form.phone(class_="form-input", placeholder="Teléfono") }}
+                    {% for error in register_form.phone.errors %}
                     <div class="error">{{ error }}</div>
                     {% endfor %}
                 </div>

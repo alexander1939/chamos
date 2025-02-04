@@ -1,29 +1,50 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const menuList = document.getElementById("menu-list");
-    const token = localStorage.getItem("token");
 
-    if (token) {
-        fetch("/api/menu", {
+    try {
+        const response = await fetch("/api/menu", {
             method: "GET",
-            headers: {
-                Authorization: token,
-            },
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.error) {
-                    console.error("Error en API:", data.error);
-                    return;
-                }
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+        });
 
-                menuList.innerHTML = `<li><a href="/"><i class="fas fa-home"></i> Inicio</a></li>`;
+        if (!response.ok) {
+            if (response.status === 401) {
+                console.warn("Sesión expirada o token inválido. Redirigiendo a login...");
+                window.location.href = "/login";
+            } else {
+                console.error(`Error en la API (Código ${response.status}): ${response.statusText}`);
+            }
+            return;
+        }
 
-                data.privilegios.forEach((privilegio) => {
-                    const items = data.contenido[privilegio] || [];
-                    menuList.innerHTML += createDropdown(privilegio, items);
-                });
-            })
-            .catch((error) => console.error("Error al obtener el menú:", error));
+        const data = await response.json();
+
+        if (!data || typeof data !== "object") {
+            console.error("La API devolvió un formato inesperado:", data);
+            return;
+        }
+
+        if (data.error) {
+            console.error("Error en la API:", data.error);
+            return;
+        }
+
+        menuList.innerHTML = `<li><a href="/"><i class="fas fa-home"></i> Inicio</a></li>`;
+
+        if (!Array.isArray(data.privilegios) || data.privilegios.length === 0) {
+            console.warn("El usuario no tiene privilegios asignados.");
+            return;
+        }
+
+        data.privilegios.forEach((privilegio) => {
+            const items = data.contenido[privilegio] || [];
+            menuList.innerHTML += createDropdown(privilegio, items);
+        });
+
+    } catch (error) {
+        console.error("Error al conectar con la API del menú:", error);
+        alert("No se pudo cargar el menú. Verifica tu conexión e intenta nuevamente.");
     }
 });
 
@@ -41,9 +62,13 @@ function createDropdown(title, items) {
                       <i class="fas fa-list"></i> Listar</a></li>
     `;
 
-    items.forEach((item) => {
-        dropdown += `<li><a href="#"><i class="fas fa-file-alt"></i> ${item.nombre}</a></li>`;
-    });
+    if (Array.isArray(items) && items.length > 0) {
+        items.forEach((item) => {
+            dropdown += `<li><a href="#"><i class="fas fa-file-alt"></i> ${item.nombre}</a></li>`;
+        });
+    } else {
+        dropdown += `<li><span class="no-items">No hay elementos disponibles</span></li>`;
+    }
 
     dropdown += "</ul></li>";
     return dropdown;

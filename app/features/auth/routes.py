@@ -34,3 +34,8 @@ def register():
 @guest_only
 def login():
     return render_template("auth/login.jinja")
+
+@auth_bp.get('/priv')
+@auth_required
+def priv():
+    return render_template("auth/manage_priv.jinja")

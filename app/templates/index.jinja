@@ -3,5 +3,9 @@
 {% block title %}Página Principal{% endblock %}
 
 {% block content %}
-index html
+    <div id="cards-container" class="grid-container"></div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/apis/inicio_api.js') }}"></script>
 {% endblock %}

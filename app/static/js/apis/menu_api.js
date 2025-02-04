@@ -1,58 +1,50 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
     const menuList = document.getElementById("menu-list");
+    const token = localStorage.getItem("token");
 
-    const token = localStorage.getItem("token");  // Obtener el token del localStorage
-
-    fetch("/menu/", {
-        method: "GET",
-        headers: {
-            "Authorization": token  // Agregar el token al encabezado
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error("Error al obtener el menú:", data.error);
-                return;
-            }
-
-            const { privilegios, contenido } = data;
-
-            if (privilegios.includes("Proyectos")) {
-                const proyectosMenu = `
-                <li>
-                    <a href="#"><i class="fas fa-folder"></i> Proyectos</a>
-                    <ul>
-                        ${contenido.Proyectos.map(proyecto => `<li><a href="#">${proyecto.nombre}</a></li>`).join("")}
-                    </ul>
-                </li>
-            `;
-                menuList.innerHTML += proyectosMenu;
-            }
-
-            if (privilegios.includes("Juegos")) {
-                const juegosMenu = `
-                <li>
-                    <a href="#"><i class="fas fa-folder"></i> Juegos</a>
-                    <ul>
-                        ${contenido.Juegos.map(juego => `<li><a href="#">${juego.nombre}</a></li>`).join("")}
-                    </ul>
-                </li>
-            `;
-                menuList.innerHTML += juegosMenu;
-            }
-
-            if (privilegios.includes("Materias")) {
-                const materiasMenu = `
-                <li>
-                    <a href="#"><i class="fas fa-folder"></i> Materias</a>
-                    <ul>
-                        ${contenido.Materias.map(materia => `<li><a href="#">${materia.nombre}</a></li>`).join("")}
-                    </ul>
-                </li>
-            `;
-                menuList.innerHTML += materiasMenu;
-            }
+    if (token) {
+        fetch("/api/menu", {
+            method: "GET",
+            headers: {
+                Authorization: token,
+            },
         })
-        .catch(error => console.error("Error al cargar el menú:", error));
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.error) {
+                    console.error("Error en API:", data.error);
+                    return;
+                }
+
+                menuList.innerHTML = `<li><a href="/"><i class="fas fa-home"></i> Inicio</a></li>`;
+
+                data.privilegios.forEach((privilegio) => {
+                    const items = data.contenido[privilegio] || [];
+                    menuList.innerHTML += createDropdown(privilegio, items);
+                });
+            })
+            .catch((error) => console.error("Error al obtener el menú:", error));
+    }
 });
+
+function createDropdown(title, items) {
+    let dropdown = `
+          <li>
+              <a href="#" class="dropdown-btn">
+                  <i class="fas fa-folder"></i> ${title} 
+                  <i class="fas fa-chevron-down dropdown-icon"></i>
+              </a>
+              <ul class="dropdown-options" style="display: none;">
+                  <li><a href="/${title.toLowerCase()}/agregar">
+                      <i class="fas fa-plus-circle"></i> Agregar</a></li>
+                  <li><a href="/${title.toLowerCase()}/listar">
+                      <i class="fas fa-list"></i> Listar</a></li>
+    `;
+
+    items.forEach((item) => {
+        dropdown += `<li><a href="#"><i class="fas fa-file-alt"></i> ${item.nombre}</a></li>`;
+    });
+
+    dropdown += "</ul></li>";
+    return dropdown;
+}

@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const successTextSpan = document.getElementById('successText');
     const termsErrorDiv = document.getElementById('termsError');
 
-    // Habilitar o deshabilitar el botón según el checkbox de términos
     checkbox.addEventListener("change", function () {
         button.disabled = !checkbox.checked;
     });
@@ -31,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
             termsErrorDiv.style.display = 'none';
         }
 
-        fetch('/register/', {  // Asegúrate de que coincide con la URL de Flask
+        fetch('/api/register/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData),
@@ -52,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     button.disabled = true;
 
                     setTimeout(() => {
-                        window.location.href = "/login";  // Redirigir al login después de registrar
+                        window.location.href = "/login";
                     }, 2000);
                 }
             })

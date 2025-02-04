@@ -4,7 +4,9 @@ from app.features.components.error_handlers import init_error_handlers
 from .config import Config
 from flask_login import LoginManager
 from .db import db
-from .features.auth.routes import auth_bp  # CORREGIDO: Importar routes.py correctamente
+from .features.auth.routes import auth_bp
+from .api.menu_api import menu 
+from .api.auth_api import authApi
 from .features.components import generate_breadcrumbs, create_roles, create_privileges
 from .db.users_model import User
 
@@ -27,6 +29,8 @@ def create_app():
 
     # Registrar el Blueprint correctamente
     app.register_blueprint(auth_bp)
+    app.register_blueprint(menu)  
+    app.register_blueprint(authApi) 
 
     @app.context_processor
     def inject_breadcrumbs():

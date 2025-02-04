@@ -19,7 +19,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/styles.css') }}">
     <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth/profile.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth/profile.css') }}">}
+    <script src="{{ url_for('static', filename='js/apis/menu_api.js') }}"></script>
+
 
 
 
@@ -46,7 +48,6 @@
                             <img src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp" class="rounded-circle"
                                 height="35" alt="User Avatar" loading="lazy" />
                             <span class="ms-2" style="text-decoration: none;">tavo</span>
-
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
                             <li><a class="dropdown-item" href="#">My profile</a></li>
@@ -94,46 +95,7 @@
                 <button class="close-menu" id="close-menu"><i class="fas fa-times"></i></button>
             </div>
             <ul class="menu" id="menu-list">
-                <li><a href="{{ url_for('auth.index') }}"><i class="fas fa-home"></i> Inicio</a></li>
-
-                {% if "Proyectos" in menu['privilegios'] %}
-                <li>
-                    <a href="#" class="dropdown-btn">
-                        <i class="fas fa-folder"></i> Proyectos <i class="fas fa-chevron-down dropdown-icon"></i>
-                    </a>
-                    <ul class="dropdown-options">
-                        {% for proyecto in menu['contenido']['Proyectos'] %}
-                        <li><a href="#">{{ proyecto['nombre'] }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </li>
-                {% endif %}
-
-                {% if "Juegos" in menu['privilegios'] %}
-                <li>
-                    <a href="#" class="dropdown-btn">
-                        <i class="fas fa-folder"></i> Juegos <i class="fas fa-chevron-down dropdown-icon"></i>
-                    </a>
-                    <ul class="dropdown-options">
-                        {% for juego in menu['contenido']['Juegos'] %}
-                        <li><a href="#">{{ juego['nombre'] }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </li>
-                {% endif %}
-
-                {% if "Materias" in menu['privilegios'] %}
-                <li>
-                    <a href="#" class="dropdown-btn">
-                        <i class="fas fa-folder"></i> Materias <i class="fas fa-chevron-down dropdown-icon"></i>
-                    </a>
-                    <ul class="dropdown-options">
-                        {% for materia in menu['contenido']['Materias'] %}
-                        <li><a href="#">{{ materia['nombre'] }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </li>
-                {% endif %}
+                <!-- Aquí se llenará el menú dinámicamente con JS -->
             </ul>
         </div>
         <div class="contents">

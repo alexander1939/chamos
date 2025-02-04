@@ -1,5 +1,5 @@
 import re
-from flask import request, jsonify
+from flask import request, jsonify, redirect, url_for
 from functools import wraps
 from app.db.users_model import User
 from werkzeug.security import check_password_hash
@@ -62,14 +62,42 @@ def auth_required(f):
     """Middleware para proteger rutas que requieren autenticación"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        token = request.headers.get("Authorization")
+        token = request.cookies.get("token")
 
-        if token and token.startswith("Bearer "):
-            token = token.split(" ")[1] 
+        # Si el token es válido, permitir acceso
+        if token and is_token_valid(token):
+            return f(*args, **kwargs)
 
-        if not token or not is_token_valid(token):
-            return jsonify({"error": "Token inválido o expirado"}), 401
-        
+        # Si el token expiró, intentar renovarlo con el refresh token
+        refresh_token = request.cookies.get("refresh_token")
+        if refresh_token and refresh_token in refresh_tokens:
+            token_data = refresh_tokens[refresh_token]
+
+            if token_data["expires"] > time.time():  # Si el refresh token sigue válido
+                new_token = generate_secure_token()
+                active_tokens[new_token] = {
+                    "user_id": token_data["user_id"],
+                    "expires": time.time() + TOKEN_EXPIRATION_TIME
+                }
+
+                response = make_response(f(*args, **kwargs))
+                response.set_cookie("token", new_token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
+                return response
+
+        return redirect(url_for("auth.login"))  # Si todo falla, redirigir a login
+
+    return decorated_function
+
+
+def guest_only(f):
+    """Middleware para evitar que usuarios autenticados accedan a login y registro"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.cookies.get("token")  
+
+        if token and is_token_valid(token):
+            return redirect(url_for("auth.index"))  
+
         return f(*args, **kwargs)
-    
+
     return decorated_function

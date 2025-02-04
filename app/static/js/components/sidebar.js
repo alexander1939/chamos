@@ -16,15 +16,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Delegación de eventos para manejar los desplegables
   menuList.addEventListener("click", (event) => {
-    if (event.target.classList.contains("dropdown-btn")) {
-      event.target.classList.toggle("active");
-
-      // Buscar el siguiente elemento y alternar su visibilidad
-      const dropdownOptions = event.target.nextElementSibling;
+    let target = event.target;
+  
+    // Verificar si el clic fue en el ícono y obtener el botón padre
+    if (target.classList.contains("dropdown-icon")) {
+      target = target.closest(".dropdown-btn"); // Busca el <a> más cercano
+    }
+  
+    // Si el clic fue en el botón o su ícono, alternar el submenú
+    if (target && target.classList.contains("dropdown-btn")) {
+      target.classList.toggle("active");
+  
+      const dropdownOptions = target.nextElementSibling;
       if (dropdownOptions && dropdownOptions.classList.contains("dropdown-options")) {
         dropdownOptions.style.display =
           dropdownOptions.style.display === "block" ? "none" : "block";
       }
     }
   });
+  
 });
+

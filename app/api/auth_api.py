@@ -76,7 +76,6 @@ def login_user():
         "refresh_token": refresh_token
     }), 200)
 
-    # Guardar tokens en cookies
     response.set_cookie("token", token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
     response.set_cookie("refresh_token", refresh_token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24)
 
@@ -92,7 +91,7 @@ def refresh_access_token():
         return jsonify({"error": "Refresh token inválido"}), 401
 
     token_data = refresh_tokens[refresh_token]
-    if token_data["expires"] < time.time():  # Si el refresh token expiró
+    if token_data["expires"] < time.time(): 
         del refresh_tokens[refresh_token]
         return jsonify({"error": "Refresh token expirado, inicie sesión nuevamente"}), 401
 
@@ -113,15 +112,17 @@ def refresh_access_token():
 @authApi.route('/api/logout/', methods=['POST'])
 @auth_required
 def logout_user():
-    token = request.headers.get("Authorization")
-    if token and token.startswith("Bearer "):
-        token = token.split(" ")[1]
+    token = request.cookies.get("token")
 
     if token in active_tokens:
         del active_tokens[token]
-        return jsonify({"message": "Sesión cerrada correctamente"}), 200
 
-    return jsonify({"error": "Token inválido"}), 401
+    response = jsonify({"message": "Sesión cerrada correctamente"})
+    response.set_cookie("token", "", expires=0)  
+    response.set_cookie("refresh_token", "", expires=0)  
+
+    return response, 200
+
 
 @authApi.route('/api/protected/', methods=['GET'])
 @auth_required

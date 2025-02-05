@@ -1,6 +1,5 @@
 from flask import Blueprint, request, render_template,redirect,url_for,make_response
 from flask import jsonify, request, render_template
-
 from app.api.auth_api import register_user, login_user, logout_user, protected_route
 from app.middleware.auth_middleware import  auth_required
 from app.api.menu_api import get_user_menu

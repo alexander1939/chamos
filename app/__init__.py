@@ -7,6 +7,9 @@ from .db import db
 from .features.auth.routes import auth_bp
 from .api.menu_api import menu 
 from .api.auth_api import authApi
+from .api.materia_api import materia_api
+from .api.juego_api import juegos_api
+from .api.proyecto_api import proyectos_api
 from .api.users_api import usersApi
 from .features.components import generate_breadcrumbs, create_roles, create_privileges
 from .db.users_model import User
@@ -32,8 +35,12 @@ def create_app():
     # Registrar el Blueprint correctamente
     app.register_blueprint(auth_bp)
     app.register_blueprint(menu)  
-    app.register_blueprint(authApi) 
+    app.register_blueprint(authApi)
+    app.register_blueprint(materia_api)
+    app.register_blueprint(juegos_api)
+    app.register_blueprint(proyectos_api)
     app.register_blueprint(usersApi) 
+
 
     @app.context_processor
     def inject_breadcrumbs():
@@ -50,3 +57,5 @@ def create_app():
         create_admin_user()
 
     return app
+
+active_tokens = {}  # Diccionario global para almacenar los tokens activos

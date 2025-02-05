@@ -1,13 +1,15 @@
-from app.features.auth.model import User
 from app.db import db
+from app.db.users_model import User
+from app.db.UserPrivilege_model import UserPrivilege
+from app.db.Privilege_model import Privilege
 from werkzeug.security import generate_password_hash
 
 def create_admin_user():
-    admin_email = "admin@admin.com"
+    admin_email = "admin@example.com"
     admin_password = "Admin123"
     admin_name = "Admin"
-    admin_surnames = "Admin"
-    admin_phone = "1234567890"  
+    admin_surnames = "User"
+    admin_phone = "123456789"  
 
     existing_admin = User.query.filter_by(email=admin_email).first()
 
@@ -20,11 +22,19 @@ def create_admin_user():
             name=admin_name,
             surnames=admin_surnames,
             phone=admin_phone,
-            role="Admin"  
+            role_id=1
         )
 
         db.session.add(admin_user)
         db.session.commit()
-        print(f"Usuario administrador {admin_name} creado con éxito.")
+        db.session.refresh(admin_user)
+
+        privileges = Privilege.query.filter(Privilege.id.in_([1, 2, 3])).all()
+        for privilege in privileges:
+            user_privilege = UserPrivilege(user_id=admin_user.id, privilege_id=privilege.id)
+            db.session.add(user_privilege)
+
+        db.session.commit()
+        print(f"Usuario administrador {admin_name} creado con éxito con privilegios.")
     else:
         print(f"El usuario administrador con el correo {admin_email} ya existe.")

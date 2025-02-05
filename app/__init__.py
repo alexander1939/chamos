@@ -9,6 +9,7 @@ from .api.menu_api import menu
 from .api.auth_api import authApi
 from .features.components import generate_breadcrumbs, create_roles, create_privileges
 from .db.users_model import User
+from .features.components.create_admin import create_admin_user
 
 def create_app():
     app = Flask(__name__)
@@ -44,5 +45,6 @@ def create_app():
         db.create_all()
         create_roles()
         create_privileges()
+        create_admin_user()
 
     return app

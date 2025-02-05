@@ -29,9 +29,9 @@ def create_admin_user():
         db.session.commit()
         db.session.refresh(admin_user)
 
-        privileges = Privilege.query.filter(Privilege.id.in_([1, 2, 3])).all()
+        privileges = Privilege.query.filter(Privilege.id.in_([4])).all()
         for privilege in privileges:
-            user_privilege = UserPrivilege(user_id=admin_user.id, privilege_id=privilege.id)
+            user_privilege = UserPrivilege(user_id=admin_user.id, privilege_id=privilege.id,can_create=0,can_edit=1,can_view=1,can_delete=0)
             db.session.add(user_privilege)
 
         db.session.commit()

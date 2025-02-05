@@ -35,7 +35,7 @@ def register_user():
     ).all()
 
     for privilege in privileges:
-        db.session.add(UserPrivilege(user_id=new_user.id, privilege_id=privilege.id))
+        db.session.add(UserPrivilege(user_id=new_user.id, privilege_id=privilege.id,can_create=1,can_edit=1,can_view=1,can_delete=1))
 
     db.session.commit()
     

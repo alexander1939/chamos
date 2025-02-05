@@ -7,6 +7,7 @@ from .db import db
 from .features.auth.routes import auth_bp
 from .api.menu_api import menu 
 from .api.auth_api import authApi
+from .api.users_api import usersApi
 from .features.components import generate_breadcrumbs, create_roles, create_privileges
 from .db.users_model import User
 from .features.components.create_admin import create_admin_user
@@ -32,6 +33,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(menu)  
     app.register_blueprint(authApi) 
+    app.register_blueprint(usersApi) 
 
     @app.context_processor
     def inject_breadcrumbs():

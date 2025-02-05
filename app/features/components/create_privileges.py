@@ -7,6 +7,7 @@ def create_privileges():
         {"name": "Materias", "description": "Acceso a la gestión de materias"},
         {"name": "Juegos", "description": "Acceso a la gestión de juegos"},
         {"name": "Proyectos", "description": "Acceso a la gestión de proyectos"},
+        {"name": "Gestionar Privilegios", "description": "Modificar y consultar los Privilegios de los usuarios"},
     ]
 
     for privilege_data in privileges:

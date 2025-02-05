@@ -1,0 +1,42 @@
+{% extends "base.jinja" %}
+
+{% block title %}Consulta de Usuarios{% endblock %}
+
+{% block content %}
+<h1>Consulta de Usuarios</h1>
+
+<!-- Campo de búsqueda -->
+<div class="search-container">
+    <input type="text" id="search-input" placeholder="Buscar por nombre, correo o teléfono...">
+</div>
+
+<!-- Contenedor de cards -->
+<div class="user-cards">
+    {% for usuario in usuarios %}
+    <div class="card" data-name="{{ usuario.name }} {{ usuario.surnames }}" data-email="{{ usuario.email }}" data-phone="{{ usuario.phone }}">
+        <div class="card-header">
+            <h2>{{ usuario.name }} {{ usuario.surnames }}</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Correo:</strong> {{ usuario.email }}</p>
+            <p><strong>Teléfono:</strong> {{ usuario.phone }}</p>
+            <p><strong>Privilegios:</strong></p>
+            <ul>
+                {% for privilegio in usuario.privilegios %}
+                <li>{{ privilegio.name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Paginación (opcional, si la implementas en el futuro) -->
+<div class="pagination">
+    <!-- Aquí irían los controles de paginación -->
+</div>
+
+<!-- Incluir el archivo JavaScript -->
+<script src="{{ url_for('static', filename='js/components/filtro.js') }}"></script>
+
+{% endblock %}

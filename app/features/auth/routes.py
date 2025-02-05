@@ -34,3 +34,44 @@ def register():
 @guest_only
 def login():
     return render_template("auth/login.jinja")
+
+@auth_bp.get('/priv')
+@auth_required
+def priv():
+    return render_template("auth/manage_priv.jinja")
+
+@auth_bp.get('/con_users')
+@auth_required
+def consulta_usuarios():
+    usuarios = [
+        {
+            'id': 1,
+            'name': 'José',
+            'surnames': 'Pérez López',
+            'email': 'jose@example.com',
+            'phone': '555-1234',
+            'privilegios': [
+                {'name': 'Materias'},
+                {'name': 'Juegos'}
+            ]
+        },
+        {
+            'id': 2,
+            'name': 'María',
+            'surnames': 'García Sánchez',
+            'email': 'maria@example.com',
+            'phone': '555-5678',
+            'privilegios': [
+                {'name': 'Proyectos'}
+            ]
+        },
+        {
+            'id': 3,
+            'name': 'Carlos',
+            'surnames': 'Martínez Ruiz',
+            'email': 'carlos@example.com',
+            'phone': '555-9876',
+            'privilegios': []
+        }
+    ]
+    return render_template('auth/consulta_users.jinja', usuarios=usuarios)

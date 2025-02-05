@@ -3,7 +3,7 @@ from app.db.db import db
 from app.db.users_model import User
 from app.db.Privilege_model import Privilege
 from app.db.UserPrivilege_model import UserPrivilege
-from app.db.materias_model import Materia
+from app.db.Materias_model import Materia
 from app.db.Juegos_model import Juegos
 from app.db.proyectos_model import Proyectos
 from app.middleware.auth_middleware import active_tokens

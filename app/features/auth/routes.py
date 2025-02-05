@@ -1,6 +1,5 @@
 from flask import Blueprint, request, render_template
 from flask import jsonify, request, render_template
-
 from app.api.auth_api import register_user, login_user, logout_user, protected_route
 from app.middleware.auth_middleware import  auth_required
 from app.api.menu_api import get_user_menu
@@ -11,7 +10,7 @@ from app.db.Privilege_model import Privilege
 from app.db.UserPrivilege_model import UserPrivilege
 from werkzeug.security import generate_password_hash
 from app.db.Juegos_model import Juegos
-from app.db.materias_model import Materia
+from app.db.Materias_model import Materia
 from app.db.proyectos_model import Proyectos
 from app.db.UserPrivilege_model import UserPrivilege
 from app.api.menu_api import get_user_menu

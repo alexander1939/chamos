@@ -30,7 +30,6 @@ def menu_required(f):
         if error_response:
             return error_response, status_code
 
-        # Obtener los privilegios del usuario
         user_privileges = (
             db.session.query(UserPrivilege)
             .join(Privilege, UserPrivilege.privilege_id == Privilege.id)
@@ -76,7 +75,6 @@ def get_privilege_content(user, privileges):
             proyectos = Proyectos.query.filter_by(id_usuario=user.id).all()
             contenido = [{"id": p.id, "nombre": p.nombre, "descripcion": p.descripcion} for p in proyectos]
 
-        # Asegurar que cada módulo tenga su contenido y permisos asociados
         data[privilege_name] = {
             "items": contenido,
             "can_create": permission["can_create"],

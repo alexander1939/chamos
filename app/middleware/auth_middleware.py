@@ -64,16 +64,14 @@ def auth_required(f):
     def decorated_function(*args, **kwargs):
         token = request.cookies.get("token")
 
-        # Si el token es válido, permitir acceso
         if token and is_token_valid(token):
             return f(*args, **kwargs)
 
-        # Si el token expiró, intentar renovarlo con el refresh token
         refresh_token = request.cookies.get("refresh_token")
         if refresh_token and refresh_token in refresh_tokens:
             token_data = refresh_tokens[refresh_token]
 
-            if token_data["expires"] > time.time():  # Si el refresh token sigue válido
+            if token_data["expires"] > time.time(): 
                 new_token = generate_secure_token()
                 active_tokens[new_token] = {
                     "user_id": token_data["user_id"],
@@ -84,7 +82,7 @@ def auth_required(f):
                 response.set_cookie("token", new_token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
                 return response
 
-        return redirect(url_for("auth.login"))  # Si todo falla, redirigir a login
+        return redirect(url_for("auth.login"))  
 
     return decorated_function
 

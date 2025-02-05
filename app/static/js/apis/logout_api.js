@@ -3,19 +3,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (logoutButton) {
         logoutButton.addEventListener("click", async (event) => {
-            event.preventDefault(); // Evita que el enlace recargue la página
+            event.preventDefault();
 
             try {
                 const response = await fetch("/api/logout/", {
                     method: "POST",
-                    credentials: "include", // Asegura que se envíen las cookies
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
                     },
                 });
 
                 if (response.ok) {
-                    window.location.href = "/login"; // Redirige a la página de login
+                    window.location.href = "/login";
                 } else {
                     alert("Error al cerrar sesión");
                 }

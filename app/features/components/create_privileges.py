@@ -11,13 +11,11 @@ def create_privileges():
     ]
 
     for privilege_data in privileges:
-        # Verificamos si el privilegio ya existe
         existing_privilege = Privilege.query.filter_by(name=privilege_data["name"]).first()
         
         if not existing_privilege:
             print(f"Creando el privilegio {privilege_data['name']}...")
 
-            # Creamos el nuevo privilegio
             new_privilege = Privilege(
                 name=privilege_data["name"],
                 description=privilege_data["description"]

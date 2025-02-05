@@ -1,7 +1,21 @@
 {% extends "base.jinja" %}
 
-{% block title %}Página Principal{% endblock %}
+{% block title %}Consulta de Usuarios{% endblock %}
 
 {% block content %}
-index html
+<h1>Consulta de Usuarios</h1>
+
+<div class="search-container">
+    <input type="text" id="search-input" placeholder="Buscar por nombre, correo o teléfono...">
+</div>
+
+<div class="user-cards" id="user-cards">
+</div>
+
+<div class="pagination">
+</div>
+
+<script src="{{ url_for('static', filename='js/components/filtro.js') }}"></script>
+<script src="{{ url_for('static', filename='js/apis/user_api.js') }}"></script>
+
 {% endblock %}

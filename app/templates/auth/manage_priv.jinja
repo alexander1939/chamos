@@ -3,38 +3,22 @@
 {% block title %}Gestión de Usuarios{% endblock %}
 
 {% block content %}
+
 <h1>Gestión de Usuarios</h1>
-<table>
+<table border="1" cellspacing="0" cellpadding="10">
     <thead>
         <tr>
             <th>Nombre</th>
             <th>Materias</th>
             <th>Proyectos</th>
             <th>Juegos</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-        {% for usuario in usuarios %}
-        <tr>
-            <td>{{ usuario.nombre }}</td>
-            <td>
-                <input type="checkbox" 
-                       name="materias_{{ usuario.id }}" 
-                       {% if 'Materias' in usuario.privilegios %}checked{% endif %}>
-            </td>
-            <td>
-                <input type="checkbox" 
-                       name="proyectos_{{ usuario.id }}" 
-                       {% if 'Proyectos' in usuario.privilegios %}checked{% endif %}>
-            </td>
-            <td>
-                <input type="checkbox" 
-                       name="juegos_{{ usuario.id }}" 
-                       {% if 'Juegos' in usuario.privilegios %}checked{% endif %}>
-            </td>
-        </tr>
-        {% endfor %}
     </tbody>
 </table>
 
+
+<script src="{{ url_for('static', filename='js/apis/gestionar_usuarios_api.js') }}"></script>
 {% endblock %}

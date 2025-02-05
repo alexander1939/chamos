@@ -43,7 +43,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             const canCreate = moduleData.can_create || false;
             const canView = moduleData.can_view || false;
 
-            // Siempre mostrar la carpeta, incluso si no tiene contenido
             menuList.innerHTML += createDropdown(privilegeName, items, canCreate, canView);
         });
 
@@ -52,6 +51,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         alert("No se pudo cargar el menú. Verifica tu conexión e intenta nuevamente.");
     }
 });
+
+const privilegeRoutes = {
+    "Materias": "/gestion/materias",
+    "Juegos": "/gestion/juegos",
+    "Proyectos": "/gestion/proyectos",
+    "Gestionar Privilegios": "/gestionar_privilegios/"
+};
 
 function createDropdown(privilegeName, items, canCreate, canView) {
     let dropdown = `
@@ -63,17 +69,19 @@ function createDropdown(privilegeName, items, canCreate, canView) {
             <ul class="dropdown-options" style="display: none;">
     `;
 
-    // Siempre mostrar la opción de agregar si tiene permiso
+    const listRoute = privilegeRoutes[privilegeName] || `/${privilegeName.toLowerCase()}/listar`;
+    const addRoute = privilegeRoutes[privilegeName] ? `${privilegeRoutes[privilegeName]}/agregar` : `/${privilegeName.toLowerCase()}/agregar`;
+
     if (canCreate) {
         dropdown += `
-            <li><a href="/${privilegeName.toLowerCase()}/agregar">
+            <li><a href="${addRoute}">
                 <i class="fas fa-plus-circle"></i> Agregar</a></li>
         `;
     }
 
     if (canView) {
         dropdown += `
-            <li><a href="/${privilegeName.toLowerCase()}/listar">
+            <li><a href="${listRoute}">
                 <i class="fas fa-list"></i> Listar</a></li>
         `;
     }

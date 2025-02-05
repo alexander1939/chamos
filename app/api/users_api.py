@@ -12,7 +12,7 @@ usersApi = Blueprint('usersApi', __name__)
 @usersApi.route('/api/users/', methods=['GET'])
 @user_or_admin_required
 def get_users(current_user):
-    """Si el usuario es admin, obtiene todos los usuarios con rol 'Usuario'. Si es usuario, obtiene solo su información, incluyendo privilegios."""
+    """Si el usuario es admin, obtiene todos los usuarios con rol 'Usuario'. Si es usuario, obtiene solo su información, incluyendo privilegios y permisos."""
 
     if current_user.role.name == "Admin":
         users = User.query.options(
@@ -34,7 +34,11 @@ def get_users(current_user):
                 {
                     "id": p.privilege.id,
                     "name": p.privilege.name,
-                    "description": p.privilege.description
+                    "description": p.privilege.description,
+                    "can_create": p.can_create,
+                    "can_edit": p.can_edit,
+                    "can_view": p.can_view,
+                    "can_delete": p.can_delete
                 } for p in u.user_privileges
             ]
         } for u in users
@@ -45,24 +49,40 @@ def get_users(current_user):
 @usersApi.route('/api/users/<int:user_id>/privileges', methods=['PUT'])
 @admin_required 
 def update_user_privileges(user_id):
-    """Permite a un administrador modificar los privilegios de un usuario."""
+    """Permite a un administrador modificar los privilegios y permisos (can_create, can_edit, can_view, can_delete) de un usuario."""
     
     data = request.get_json()
     new_privileges = data.get("privileges")
 
     if not isinstance(new_privileges, list):
-        return jsonify({"error": "Se requiere una lista de IDs de privilegios"}), 400
+        return jsonify({"error": "Se requiere una lista de privilegios con permisos"}), 400
 
     user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "Usuario no encontrado"}), 404
 
+    # Eliminar privilegios actuales del usuario
     UserPrivilege.query.filter_by(user_id=user_id).delete()
 
-    for privilege_id in new_privileges:
+    # Asignar nuevos privilegios con los permisos definidos
+    for privilege_data in new_privileges:
+        privilege_id = privilege_data.get("id")
+        can_create = privilege_data.get("can_create", False)
+        can_edit = privilege_data.get("can_edit", False)
+        can_view = privilege_data.get("can_view", False)
+        can_delete = privilege_data.get("can_delete", False)
+
         privilege = Privilege.query.get(privilege_id)
         if privilege:
-            db.session.add(UserPrivilege(user_id=user_id, privilege_id=privilege_id))
+            new_user_privilege = UserPrivilege(
+                user_id=user_id,
+                privilege_id=privilege_id,
+                can_create=can_create,
+                can_edit=can_edit,
+                can_view=can_view,
+                can_delete=can_delete
+            )
+            db.session.add(new_user_privilege)
 
     db.session.commit()
-    return jsonify({"message": "Privilegios actualizados correctamente"}), 200
+    return jsonify({"message": "Privilegios y permisos actualizados correctamente"}), 200

@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from app.db.db import db
 from app.db.materias_model import Materia
-from app.middleware.auth_middleware import active_tokens
+from app.middleware.auth_middleware import active_tokens,is_token_valid
+
 
 materia_api = Blueprint('materias', __name__)  # Cambio en el nombre del Blueprint
 
@@ -28,16 +29,15 @@ def listar_materias():
         else:
             token = request.cookies.get("token")  # Alternativa si viene en cookies
 
-        # Validar si el token es válido
-        if not token or token not in active_tokens:
+        # Validar si el token es válido usando la función correcta
+        if not token or not is_token_valid(token):
             return jsonify({"error": "Token inválido o no proporcionado"}), 401
 
-        user_id = active_tokens[token]["user_id"]
+        user_id = active_tokens[token]["user_id"]  # Se obtiene de `active_tokens` ya que es válido
 
         # Obtener las materias asociadas al usuario
         materias = Materia.query.filter_by(id_usuario=user_id).all()
 
-        # Si no hay materias
         if not materias:
             return jsonify({"message": "No tienes materias registradas"}), 200
 

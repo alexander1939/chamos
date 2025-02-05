@@ -15,12 +15,10 @@ def agregar_juego_form():
 @juegos_bp.route('/juegos/detalle/<int:id>/', methods=['GET'])
 @auth_required
 def detalle_juego(id):
-    juego = Juegos.query.get_or_404(id)  # Obtener el juego por ID o devolver 404 si no existe
-    return render_template("juegos/detail_juego.jinja", juego=juego)
+    return render_template("juegos/detail_juego.jinja")
 
 # Ruta para mostrar el formulario de editar un juego
 @juegos_bp.route('/juegos/editar/<int:id>/', methods=['GET'])
 @auth_required
 def editar_juego_form(id):
-    juego = Juegos.query.get_or_404(id)  # Obtener el juego por ID o devolver 404 si no existe
-    return render_template("juegos/edit_juego.jinja", juego=juego)
+    return render_template("juegos/edit_juego.jinja")

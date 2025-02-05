@@ -14,6 +14,7 @@ from .api.users_api import usersApi
 from .features.components import generate_breadcrumbs, create_roles, create_privileges
 from .db.users_model import User
 from .features.components.create_admin import create_admin_user
+from .features.materia.routes import materia_bp
 
 def create_app():
     app = Flask(__name__)
@@ -40,6 +41,7 @@ def create_app():
     app.register_blueprint(juegos_api)
     app.register_blueprint(proyectos_api)
     app.register_blueprint(usersApi) 
+    app.register_blueprint(materia_bp)
 
 
     @app.context_processor

@@ -51,12 +51,12 @@ function agregarMateria() {
             "Content-Type": "application/x-www-form-urlencoded"
         }
     })
-    .then(response => {
-        if (response.redirected) {
-            window.location.href = response.url; // Redirigir después de agregar
-        }
-    })
-    .catch(error => console.error("Error al agregar materia:", error));
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url; // Redirigir después de agregar
+            }
+        })
+        .catch(error => console.error("Error al agregar materia:", error));
 }
 
 // 📌 Función para redirigir al formulario de edición
@@ -70,11 +70,11 @@ function eliminarMateria(id) {
         fetch(`/materias/eliminar/${id}/`, {
             method: "POST"
         })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url; // Redirigir después de eliminar
-            }
-        })
-        .catch(error => console.error("Error al eliminar materia:", error));
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url; // Redirigir después de eliminar
+                }
+            })
+            .catch(error => console.error("Error al eliminar materia:", error));
     }
 }

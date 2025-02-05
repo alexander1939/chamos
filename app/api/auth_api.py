@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request,make_response
+from flask import Blueprint, jsonify, request, make_response
 from app.db.db import db
 from app.db.users_model import User
 from app.db.Privilege_model import Privilege
@@ -35,14 +35,11 @@ def register_user():
     ).all()
 
     for privilege in privileges:
-        db.session.add(UserPrivilege(user_id=new_user.id, privilege_id=privilege.id,can_create=1,can_edit=1,can_view=1,can_delete=1))
+        db.session.add(UserPrivilege(user_id=new_user.id, privilege_id=privilege.id, can_create=1, can_edit=1, can_view=1, can_delete=1))
 
     db.session.commit()
     
     return jsonify({"message": "Usuario registrado con privilegios"}), 201
-
-
-
 
 @authApi.route('/api/login/', methods=['POST'])
 def login_user():
@@ -81,8 +78,6 @@ def login_user():
 
     return response
 
-
-
 @authApi.route('/api/refresh/', methods=['POST'])
 def refresh_access_token():
     refresh_token = request.cookies.get("refresh_token")
@@ -107,8 +102,6 @@ def refresh_access_token():
 
     return response
 
-
-
 @authApi.route('/api/logout/', methods=['POST'])
 @auth_required
 def logout_user():
@@ -122,7 +115,6 @@ def logout_user():
     response.set_cookie("refresh_token", "", expires=0)  
 
     return response, 200
-
 
 @authApi.route('/api/protected/', methods=['GET'])
 @auth_required

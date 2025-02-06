@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy.orm import joinedload
 from app.db.db import db
-from app.db.materias_model import Materia
+from app.db.Materias_model import Materia
 from app.middleware.auth_middleware import active_tokens,is_token_valid
 from app.middleware.auth_middleware import auth_required
 from app.db.UserPrivilege_model import UserPrivilege

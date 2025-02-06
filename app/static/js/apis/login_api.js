@@ -1,67 +1,27 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById('loginForm');
-    const errorMessagesDiv = document.getElementById('errorMessages');
-    const errorTextSpan = document.getElementById('errorText');
-    const successMessagesDiv = document.getElementById('successMessages');
-    const successTextSpan = document.getElementById('successText');
+document.getElementById("loginForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const errorDiv = document.getElementById("error-message");
 
-        const formData = {
-            email: document.getElementById('email').value.trim(),
-            password: document.getElementById('password').value.trim()
-        };
+    try {
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: formData
+        });
 
-        fetch('/api/login/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData),
-            credentials: 'include'
-        })
-            .then(response => response.json().then(data => ({ status: response.status, body: data })))
-            .then(({ status, body }) => {
-                if (status !== 200) {
-                    throw new Error(body.error || "Error al iniciar sesión");
-                }
+        const result = await response.json();
 
-                successMessagesDiv.style.display = 'block';
-                successTextSpan.textContent = body.message;
-                errorMessagesDiv.style.display = 'none';
-
-
-
-                setTimeout(() => {
-                    window.location.href = "/";
-                }, 2000);
-            })
-            .catch(error => {
-                errorMessagesDiv.style.display = 'block';
-                errorTextSpan.textContent = error.message;
-            });
-    });
+        if (response.ok && result.redirect_url) {
+            window.location.href = result.redirect_url;  // Redirigir manualmente
+        } else {
+            errorDiv.textContent = result.error || "Ocurrió un error al iniciar sesión.";
+            errorDiv.style.display = "block";
+        }
+    } catch (error) {
+        console.error("Error en la solicitud:", error);
+        errorDiv.textContent = "Error inesperado. Inténtalo de nuevo.";
+        errorDiv.style.display = "block";
+    }
 });
-
-function verificarSesion() {
-    fetch('/api/protected/', { method: 'GET', credentials: 'include' })
-        .then(response => {
-            if (response.status === 401) {
-                console.log("Token expirado, intentando renovar...");
-
-                return fetch('/api/refresh/', { method: 'POST', credentials: 'include' })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.token) {
-                            console.log("Token renovado con éxito");
-                        } else {
-                            window.location.href = "/login";
-                        }
-                    });
-            }
-        })
-        .catch(() => window.location.href = "/login");
-}
-
-verificarSesion();

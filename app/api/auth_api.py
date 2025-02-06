@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, make_response
+from flask import Blueprint, jsonify, request, make_response,url_for
 from app.db.db import db
 from app.db.users_model import User
 from app.db.Privilege_model import Privilege
@@ -12,7 +12,7 @@ import time
 
 authApi = Blueprint('authApi', __name__)
 
-@authApi.route('/api/register/', methods=['POST'])
+@authApi.post('/api/register/')
 @check_existing_user
 def register_user():
     data = request.json if request.is_json else request.form.to_dict()
@@ -43,12 +43,10 @@ def register_user():
     return jsonify({"message": "Usuario registrado con privilegios"}), 201  
 
 
-@authApi.route('/api/login/', methods=['POST'])
+@authApi.post('/api/login/')
 def login_user():
-    if not request.is_json:
-        return jsonify({"error": "Content-Type debe ser application/json"}), 415
+    data = request.json if request.is_json else request.form.to_dict()
 
-    data = request.get_json()
     if not data or 'email' not in data or 'password' not in data:
         return jsonify({"error": "Faltan datos"}), 400
 
@@ -71,6 +69,7 @@ def login_user():
 
     response = make_response(jsonify({
         "message": "Login exitoso",
+        "redirect_url": url_for('auth.index'),  # 🔹 Ahora el frontend sabe a dónde redirigir
         "token": token,
         "refresh_token": refresh_token
     }), 200)
@@ -80,7 +79,9 @@ def login_user():
 
     return response
 
-@authApi.route('/api/refresh/', methods=['POST'])
+
+
+@authApi.post('/api/refresh/')
 def refresh_access_token():
     refresh_token = request.cookies.get("refresh_token")
 
@@ -104,7 +105,7 @@ def refresh_access_token():
 
     return response
 
-@authApi.route('/api/logout/', methods=['POST'])
+@authApi.post('/api/logout/')
 @auth_required
 def logout_user():
     token = request.cookies.get("token")
@@ -118,7 +119,7 @@ def logout_user():
 
     return response, 200
 
-@authApi.route('/api/protected/', methods=['GET'])
+@authApi.get('/api/protected/')
 @auth_required
 def protected_route():
     return jsonify({"message": "Acceso autorizado"}), 200

@@ -14,9 +14,8 @@ from app.db.materias_model import Materia
 from app.db.proyectos_model import Proyectos
 from app.db.UserPrivilege_model import UserPrivilege
 from app.api.menu_api import get_user_menu
-from app.api.auth_api import register_user  
-from app.middleware.auth_middleware import validate_user_data, check_existing_user  # Importamos validaciones
-
+from app.api.auth_api import register_user,login_user
+from app.middleware.auth_middleware import validate_user_data, check_existing_user,guest_only 
 
 
 auth_bp = Blueprint('auth', __name__)
@@ -27,6 +26,7 @@ def index():
     return render_template("index.jinja")
 
 @auth_bp.route('/register/', methods=['GET', 'POST'])
+@guest_only 
 @check_existing_user
 def register():
     if request.method == 'POST':
@@ -59,10 +59,28 @@ def register():
 
 
 
-@auth_bp.get('/login/')
+@auth_bp.route('/login/', methods=['GET', 'POST'])
 @guest_only
 def login():
+    if request.method == "POST":
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+
+        if not email or not password:
+            return jsonify({"error": "Faltan datos"}), 400
+
+        response = login_user() 
+        status_code = response.status_code  
+
+        if status_code == 200:
+            return response  
+        else:
+            return jsonify({"error": "Error al iniciar sesión"}), status_code
+
     return render_template("auth/login.jinja")
+
+
+
 
 @auth_bp.get('/gestionar_privilegios/')
 @auth_required

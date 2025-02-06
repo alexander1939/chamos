@@ -8,13 +8,14 @@ document.getElementById("loginForm").addEventListener("submit", async function (
     try {
         const response = await fetch(form.action, {
             method: "POST",
-            body: formData
+            body: formData,
+            redirect: "follow"
         });
 
         const result = await response.json();
 
-        if (response.ok && result.redirect_url) {
-            window.location.href = result.redirect_url;  // Redirigir manualmente
+        if (response.ok) {
+            window.location.href = result.redirect_url;  // 🔹 Redirigir automáticamente al index
         } else {
             errorDiv.textContent = result.error || "Ocurrió un error al iniciar sesión.";
             errorDiv.style.display = "block";

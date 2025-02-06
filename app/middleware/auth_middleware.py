@@ -88,7 +88,7 @@ def auth_required(f):
                 response.set_cookie("token", new_token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
                 return response
 
-        return redirect(url_for("auth.login"))  
+        return jsonify({"message": "Login exitoso"}), 200
 
     return decorated_function
 

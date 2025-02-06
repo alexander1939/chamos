@@ -60,29 +60,39 @@ def register_post():
     return render_template("auth/register.jinja")
 
 
-
-
 @auth_bp.route('/login/', methods=['GET', 'POST'])
-@guest_only
 def login():
     if request.method == "POST":
-        email = request.form.get('email', '').strip()
-        password = request.form.get('password', '').strip()
+        form_data = {
+            "email": request.form.get('email', '').strip(),
+            "password": request.form.get('password', '').strip(),
+        }
 
-        if not email or not password:
-            return jsonify({"error": "Faltan datos"}), 400
+        if not form_data["email"] or not form_data["password"]:
+            flash("Faltan datos", "danger")
+            return redirect(url_for('auth.login'))
 
-        response = login_user() 
-        status_code = response.status_code  
+        # Llamar a la API para iniciar sesión
+        response = login_user()
+
+        if isinstance(response, tuple):
+            response_json, status_code = response  
+        else:
+            status_code = response.status_code
+            try:
+                response_json = response.json
+            except Exception:
+                response_json = {"error": "Respuesta inesperada del servidor"}
 
         if status_code == 200:
-            return response  
+            flash("Inicio de sesión exitoso", "success")
+            return redirect(url_for('auth.index'))  # 🔹 Redirección correcta
         else:
-            return jsonify({"error": "Error al iniciar sesión"}), status_code
+            error_message = response_json.get("error", "Error al iniciar sesión")
+            flash(error_message, "danger")
+            return redirect(url_for('auth.login'))  # 🔹 Redirige con el mensaje de error
 
     return render_template("auth/login.jinja")
-
-
 
 
 @auth_bp.get('/gestionar_privilegios/')

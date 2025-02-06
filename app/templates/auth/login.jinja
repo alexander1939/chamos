@@ -25,6 +25,8 @@
             {% endif %}
             {% endwith %}
 
+            <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+
             <!-- Campos del formulario -->
             <div class="form-group">
                 <input type="email" id="email" name="email" class="form-input" placeholder="Correo" required>
@@ -37,12 +39,10 @@
                 <div id="passwordError" class="text-danger"></div>
             </div>
 
-
             <!-- Botón de Iniciar sesión -->
             <button type="submit" class="form-button" id="submitButton">Iniciar sesión</button>
 
-            <p style="margin-top:20px">¿No tienes cuenta? <a href="{{ url_for('auth.register') }}">Crear cuenta</a>
-            </p>
+            <p style="margin-top:20px">¿No tienes cuenta? <a href="{{ url_for('auth.register') }}">Crear cuenta</a></p>
             <p style="margin-top:20px">¿Olvidaste tu contraseña? <a
                     href="{{ url_for('recovery.recuperar_contrasena') }}">Restablecer Contraseña</a></p>
         </form>
@@ -52,13 +52,35 @@
     <script src="{{ url_for('static', filename='js/apis/login_api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/components/loginvalidacion.js') }}"></script>
 
-
     <script>
+        document.getElementById("loginForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const errorDiv = document.getElementById("error-message");
+            errorDiv.style.display = "none";
 
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    window.location.href = result.redirect_url || "{{ url_for('auth.index') }}";
+                } else {
+                    errorDiv.textContent = result.error || "Ocurrió un error al iniciar sesión.";
+                    errorDiv.style.display = "block";
+                }
+            } catch (error) {
+                console.error("Error en la solicitud:", error);
+                errorDiv.textContent = "Error de conexión con el servidor. Inténtalo de nuevo.";
+                errorDiv.style.display = "block";
+            }
+        });
     </script>
-
-
-
 </body>
 
 </html>

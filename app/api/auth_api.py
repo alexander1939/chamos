@@ -69,7 +69,6 @@ def login_user():
 
     response = make_response(jsonify({
         "message": "Login exitoso",
-        "redirect_url": url_for('auth.index'),  # 🔹 Ahora el frontend sabe a dónde redirigir
         "token": token,
         "refresh_token": refresh_token
     }), 200)

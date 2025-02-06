@@ -1,7 +1,7 @@
 from flask import Blueprint, request, render_template, jsonify, redirect, url_for
 from app.middleware.auth_middleware import auth_required
 from app.db.db import db
-from app.db.Materias_model import Materia# Asegúrate de importar el modelo Materia
+from app.db.materias_model import Materia# Asegúrate de importar el modelo Materia
 
 materia_bp = Blueprint('materia', __name__)
 

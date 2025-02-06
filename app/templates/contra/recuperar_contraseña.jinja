@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,9 +13,9 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: linear-gradient(to right, #667eea, #764ba2);
             font-family: 'Arial', sans-serif;
         }
+
         .card {
             width: 100%;
             max-width: 400px;
@@ -24,35 +25,50 @@
             background-color: #ffffff;
             animation: fadeIn 0.6s ease-in-out;
         }
+
         .card h3 {
             color: #333;
             font-weight: bold;
         }
+
         .form-control {
             border-radius: 8px;
         }
+
         .form-control.is-invalid {
             border-color: #dc3545;
         }
+
         .btn-primary {
             border-radius: 8px;
             background: linear-gradient(to right, #667eea, #764ba2);
             border: none;
         }
+
         .btn-primary:hover {
             background: linear-gradient(to right, #5a67d8, #6b46c1);
         }
+
         .alert {
             border-radius: 8px;
             padding: 10px;
             font-size: 0.9rem;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="card">
@@ -79,7 +95,7 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const form = document.getElementById("recuperar-form");
             const emailInput = document.getElementById("email");
             const errorDiv = document.getElementById("email-error");
@@ -102,7 +118,7 @@
 
             emailInput.addEventListener("input", validateEmail);
 
-            form.addEventListener("submit", function(event) {
+            form.addEventListener("submit", function (event) {
                 validateEmail();
                 if (emailInput.classList.contains("is-invalid")) {
                     event.preventDefault(); // Evita que el formulario se envíe si el email no es válido
@@ -112,4 +128,5 @@
     </script>
 
 </body>
+
 </html>

@@ -31,6 +31,9 @@
         .form-control {
             border-radius: 8px;
         }
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
         .btn-primary {
             border-radius: 8px;
             background: linear-gradient(to right, #667eea, #764ba2);
@@ -54,7 +57,7 @@
 
     <div class="card">
         <h3 class="text-center mb-4">🔑 Recuperar Contraseña</h3>
-        <form method="POST">
+        <form id="recuperar-form" method="POST">
             {{ form.hidden_tag() }}
 
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -67,19 +70,46 @@
 
             <div class="mb-3">
                 <label for="email" class="form-label">📧 Correo electrónico:</label>
-                {{ form.email(class="form-control", placeholder="Ingresa tu correo") }}
-                {% if form.email.errors %}
-                <div class="text-danger">
-                    {% for error in form.email.errors %}
-                    <p class="mb-0">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
+                {{ form.email(id="email", class="form-control", placeholder="Ingresa tu correo") }}
+                <div id="email-error" class="text-danger mt-1"></div> <!-- Aquí se mostrará el error -->
             </div>
 
             <button type="submit" class="btn btn-primary w-100">🔄 Enviar enlace</button>
         </form>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.getElementById("recuperar-form");
+            const emailInput = document.getElementById("email");
+            const errorDiv = document.getElementById("email-error");
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Expresión regular para validar correos
+
+            function validateEmail() {
+                const email = emailInput.value.trim();
+                if (!email) {
+                    errorDiv.textContent = "El correo es obligatorio";
+                    emailInput.classList.add("is-invalid");
+                } else if (!emailRegex.test(email)) {
+                    errorDiv.textContent = "Ingresa un correo válido";
+                    emailInput.classList.add("is-invalid");
+                } else {
+                    errorDiv.textContent = "";
+                    emailInput.classList.remove("is-invalid");
+                }
+            }
+
+            emailInput.addEventListener("input", validateEmail);
+
+            form.addEventListener("submit", function(event) {
+                validateEmail();
+                if (emailInput.classList.contains("is-invalid")) {
+                    event.preventDefault(); // Evita que el formulario se envíe si el email no es válido
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>

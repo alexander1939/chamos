@@ -15,7 +15,8 @@ authApi = Blueprint('authApi', __name__)
 @authApi.route('/api/register/', methods=['POST'])
 @check_existing_user
 def register_user():
-    data = request.get_json()
+    data = request.json if request.is_json else request.form.to_dict()
+
     hashed_password = generate_password_hash(data["password"])
     
     new_user = User(
@@ -26,7 +27,7 @@ def register_user():
         phone=data["phone"],
         role_id=2
     )
-    
+
     db.session.add(new_user)
     db.session.flush()
 
@@ -39,7 +40,8 @@ def register_user():
 
     db.session.commit()
     
-    return jsonify({"message": "Usuario registrado con privilegios"}), 201
+    return jsonify({"message": "Usuario registrado con privilegios"}), 201  
+
 
 @authApi.route('/api/login/', methods=['POST'])
 def login_user():

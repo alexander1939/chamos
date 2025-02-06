@@ -1,63 +1,22 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById('registerForm');
-    const checkbox = document.getElementById('terms');
-    const button = document.getElementById('submitButton');
-    const errorMessagesDiv = document.getElementById('errorMessages');
-    const errorTextSpan = document.getElementById('errorText');
-    const successMessagesDiv = document.getElementById('successMessages');
-    const successTextSpan = document.getElementById('successText');
-    const termsErrorDiv = document.getElementById('termsError');
+document.getElementById("register-form").addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-    checkbox.addEventListener("change", function () {
-        button.disabled = !checkbox.checked;
+    const form = event.target;
+    const formData = new FormData(form);
+    const errorDiv = document.getElementById("error-message");
+
+    const response = await fetch(form.action, {
+        method: "POST",
+        body: formData,
+        redirect: "follow"
     });
 
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        const formData = {
-            name: document.getElementById('name').value.trim(),
-            phone: document.getElementById('phone').value.trim(),
-            surnames: document.getElementById('surnames').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            password: document.getElementById('password').value.trim()
-        };
-
-        if (!checkbox.checked) {
-            termsErrorDiv.style.display = 'block';
-            return;
-        } else {
-            termsErrorDiv.style.display = 'none';
-        }
-
-        fetch('/api/register/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    errorMessagesDiv.style.display = 'block';
-                    errorTextSpan.textContent = data.error;
-                    successMessagesDiv.style.display = 'none';
-                } else {
-                    successMessagesDiv.style.display = 'block';
-                    successTextSpan.textContent = data.message;
-                    errorMessagesDiv.style.display = 'none';
-
-                    form.reset();
-                    checkbox.checked = false;
-                    button.disabled = true;
-
-                    setTimeout(() => {
-                        window.location.href = "/login";
-                    }, 2000);
-                }
-            })
-            .catch(() => {
-                errorMessagesDiv.style.display = 'block';
-                errorTextSpan.textContent = 'Hubo un error. Inténtalo de nuevo.';
-            });
-    });
+    if (response.redirected) {
+        window.location.href = response.url;
+    } else {
+        const result = await response.json();
+        errorDiv.textContent = result.error || "Ocurrió un error";
+        errorDiv.style.display = "block";
+    }
 });
+

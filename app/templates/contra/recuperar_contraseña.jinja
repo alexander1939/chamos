@@ -1,25 +1,85 @@
-<form method="POST">
-    {{ form.hidden_tag() }}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Contraseña</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            font-family: 'Arial', sans-serif;
+        }
+        .card {
+            width: 100%;
+            max-width: 400px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            background-color: #ffffff;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        .card h3 {
+            color: #333;
+            font-weight: bold;
+        }
+        .form-control {
+            border-radius: 8px;
+        }
+        .btn-primary {
+            border-radius: 8px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #5a67d8, #6b46c1);
+        }
+        .alert {
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="alert alert-{{ messages[0][0] }}">
-        {{ messages[0][1] }}
+    <div class="card">
+        <h3 class="text-center mb-4">🔑 Recuperar Contraseña</h3>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="alert alert-{{ messages[0][0] }} text-center">
+                {{ messages[0][1] }}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <div class="mb-3">
+                <label for="email" class="form-label">📧 Correo electrónico:</label>
+                {{ form.email(class="form-control", placeholder="Ingresa tu correo") }}
+                {% if form.email.errors %}
+                <div class="text-danger">
+                    {% for error in form.email.errors %}
+                    <p class="mb-0">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">🔄 Enviar enlace</button>
+        </form>
     </div>
-    {% endif %}
-    {% endwith %}
 
-    <div class="form-group">
-        <label for="email">Correo electrónico:</label>
-        {{ form.email(class="form-control") }}
-        {% if form.email.errors %}
-        <div class="text-danger">
-            {% for error in form.email.errors %}
-            <p>{{ error }}</p>
-            {% endfor %}
-        </div>
-        {% endif %}
-    </div>
-
-    <button type="submit" class="btn btn-primary">Recuperar Contraseña</button>
-</form>
+</body>
+</html>

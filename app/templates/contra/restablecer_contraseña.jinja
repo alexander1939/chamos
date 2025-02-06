@@ -1,6 +1,26 @@
 <form method="POST">
     {{ form.hidden_tag() }}
-    <label for="nueva_contrasena">Nueva Contraseña:</label>
-    {{ form.nueva_contrasena(class="form-control") }}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="alert alert-{{ messages[0][0] }}">
+        {{ messages[0][1] }}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="form-group">
+        <label for="nueva_contrasena">Nueva Contraseña:</label>
+        {{ form.nueva_contrasena(class="form-control") }}
+
+        {% if form.nueva_contrasena.errors %}
+        <div class="text-danger">
+            {% for error in form.nueva_contrasena.errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
     <button type="submit" class="btn btn-primary">Restablecer Contraseña</button>
 </form>

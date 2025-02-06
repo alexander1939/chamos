@@ -26,9 +26,9 @@ def recuperar_contrasena():
 
             msg = Message('Recuperación de Contraseña', recipients=[email])
             msg.body = f'Para restablecer tu contraseña, haz clic en el siguiente enlace: {recovery_link}'
-            
+
             try:
-                mail.send(msg)  # ✅ Asegurar que 'mail' está accesible aquí
+                mail.send(msg)
                 flash('Correo de recuperación enviado.', 'success')
             except Exception as e:
                 flash(f'Error al enviar correo: {e}', 'danger')
@@ -57,9 +57,11 @@ def restablecer_contrasena(token):
 
         if usuario:
             hashed_password = generate_password_hash(nueva_contrasena, method='pbkdf2:sha256', salt_length=16)
-            usuario.password = hashed_password 
+            usuario.password = hashed_password
             db.session.commit()
             flash('Contraseña actualizada con éxito.', 'success')
             return redirect(url_for('auth.login'))  
+        else:
+            flash('No se ha encontrado un usuario con este correo.', 'danger')
 
     return render_template('contra/restablecer_contraseña.jinja', form=form)

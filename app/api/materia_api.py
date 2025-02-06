@@ -11,7 +11,7 @@ from app.db.users_model import User
 
 
 
-materia_api = Blueprint('materias', __name__)  # Cambio en el nombre del Blueprint
+materia_api = Blueprint('materias', __name__)  
 
 
 
@@ -59,7 +59,7 @@ def get_materias():
     }), 200
 
 
-@materia_api.route('/api/materias/agregar/', methods=['POST'])  
+@materia_api.post('/api/materias/agregar/')  
 def add_materia():
     token = request.cookies.get("token")
 
@@ -72,7 +72,6 @@ def add_materia():
     if not current_user:
         return jsonify({"error": "Usuario no encontrado"}), 404
 
-    # Buscar privilegios del usuario sobre "Materias"
     user_privileges = UserPrivilege.query.filter_by(user_id=current_user.id)\
         .join(Privilege)\
         .filter(Privilege.name == "Materias")\
@@ -81,7 +80,6 @@ def add_materia():
     has_materia_privilege = user_privileges is not None
     can_create = user_privileges.can_create if user_privileges else False
 
-    # Si no tiene permiso can_create, no permitir agregar materia
     if not can_create:
         return jsonify({
             "error": "No tienes permiso para agregar materias",
@@ -119,9 +117,8 @@ def add_materia():
         }
     }), 201
 
-@materia_api.route('/api/materias/<int:materia_id>/', methods=['PUT'])
+@materia_api.put('/api/materias/edit/<int:materia_id>/')
 def edit_materia_simple(materia_id):
-    # Obtener el token del header
     auth_header = request.headers.get("Authorization")
     token = auth_header.replace("Bearer ", "") if auth_header else None
 
@@ -169,6 +166,8 @@ def edit_materia_simple(materia_id):
 
     return jsonify({
         "message": "Materia editada exitosamente",
+        "has_materia_privilege": has_materia_privilege,
+        "can_edit": can_edit,
         "materia": {
             "id": materia.id,
             "nombre": materia.nombre,
@@ -178,7 +177,7 @@ def edit_materia_simple(materia_id):
     }), 200
 
 
-@materia_api.route('/api/materias/<int:materia_id>/', methods=['DELETE'])
+@materia_api.delete('/api/materias/<int:materia_id>/')
 @auth_required
 def delete_materia(materia_id):
     auth_header = request.headers.get("Authorization")

@@ -3,6 +3,9 @@ from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer
 from app.features.contra.forms import RecuperarContrasenaForm, RestablecerContrasenaForm
 from app.db.users_model import User
+from app.db.db import db
+from werkzeug.security import generate_password_hash
+
 
 recovery_bp = Blueprint('recovery', __name__)
 
@@ -10,7 +13,7 @@ serializer = URLSafeTimedSerializer('UUr09BTA_9ZGHjl6Mz75FuUn-ftJli7yN2XMyt1myeA
 
 @recovery_bp.route('/recuperar-contrasena', methods=['GET', 'POST'])
 def recuperar_contrasena():
-    from app import mail  # ✅ Importar dentro de la función
+    from app import mail  
 
     form = RecuperarContrasenaForm()
     if form.validate_on_submit():
@@ -36,10 +39,12 @@ def recuperar_contrasena():
 
     return render_template('contra/recuperar_contraseña.jinja', form=form)
 
+
+
+
 @recovery_bp.route('/restablecer/<token>', methods=['GET', 'POST'])
 def restablecer_contrasena(token):
     try:
-        # Verificar el token y obtener el email
         email = serializer.loads(token, salt='recover-password', max_age=3600)
     except Exception:
         flash('El token ha expirado o es inválido.', 'danger')
@@ -48,12 +53,13 @@ def restablecer_contrasena(token):
     form = RestablecerContrasenaForm()
     if form.validate_on_submit():
         nueva_contrasena = form.nueva_contrasena.data
-        usuario = User.query.filter_by(email=email).first()  # <-- Aquí también usamos 'email'
+        usuario = User.query.filter_by(email=email).first()
 
         if usuario:
-            usuario.password = nueva_contrasena  # Recuerda usar un hash para la contraseña
+            hashed_password = generate_password_hash(nueva_contrasena, method='pbkdf2:sha256', salt_length=16)
+            usuario.password = hashed_password 
             db.session.commit()
             flash('Contraseña actualizada con éxito.', 'success')
-            return redirect(url_for('auth.login'))  # Redirige a la página de inicio de sesión
+            return redirect(url_for('auth.login'))  
 
     return render_template('contra/restablecer_contraseña.jinja', form=form)

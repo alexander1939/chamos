@@ -42,6 +42,7 @@ def recuperar_contrasena():
 
 
 
+
 @recovery_bp.route('/restablecer/<token>', methods=['GET', 'POST'])
 def restablecer_contrasena(token):
     try:

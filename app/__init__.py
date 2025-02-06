@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from flask_mail import Mail
 from flask_migrate import Migrate
 from app.features.components.error_handlers import init_error_handlers
 from .config import Config
@@ -11,9 +12,21 @@ from .features.components import generate_breadcrumbs, create_roles, create_priv
 from .db.users_model import User
 from app.features.contra.recovery import recovery_bp
 
+mail = Mail()
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    # Configuración de Flask-Mail
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USERNAME'] = 'recuperaciondecontrasena7@gmail.com'
+    app.config['MAIL_PASSWORD'] = 'oecy hsou xktp kkzh'
+    app.config['MAIL_DEFAULT_SENDER'] = 'recuperaciondecontrasena7@gmail.com'
+
+    mail.init_app(app)  # ✅ Inicializar Flask-Mail con la app
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login' 

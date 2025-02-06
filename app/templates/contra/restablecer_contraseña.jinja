@@ -11,17 +11,18 @@
     {% endwith %}
 
     <div class="form-group">
-        <label for="nueva_contrasena">Nueva Contraseña:</label>
-        {{ form.nueva_contrasena(class="form-control") }}
+    <label for="nueva_contrasena">Nueva Contraseña:</label>
+    {{ form.nueva_contrasena(class="form-control", required=True, minlength="8", pattern="^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", title="Debe contener al menos 8 caracteres, una mayúscula, un número y un carácter especial.") }}
 
-        {% if form.nueva_contrasena.errors %}
-        <div class="text-danger">
-            {% for error in form.nueva_contrasena.errors %}
-            <p>{{ error }}</p>
-            {% endfor %}
-        </div>
-        {% endif %}
+    {% if form.nueva_contrasena.errors %}
+    <div class="text-danger">
+        {% for error in form.nueva_contrasena.errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
     </div>
+    {% endif %}
+</div>
+
 
     <button type="submit" class="btn btn-primary">Restablecer Contraseña</button>
 </form>

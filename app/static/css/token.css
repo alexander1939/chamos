@@ -19,6 +19,7 @@ form {
 
 .form-group {
     margin-bottom: 15px;
+    position: relative;
 }
 
 label {
@@ -33,6 +34,14 @@ label {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
+}
+
+.form-control:invalid {
+    border-color: #dc3545;
+}
+
+.form-control:valid {
+    border-color: #28a745;
 }
 
 button {
@@ -67,5 +76,29 @@ button:hover {
 
 .text-danger {
     color: #dc3545;
+    font-size: 14px;
+}
+
+input:required:invalid {
+    border-color: red;
+}
+
+input:required:valid {
+    border-color: green;
+}
+
+/* Estilos adicionales para mejorar el formulario */
+.form-group input {
+    transition: all 0.3s ease-in-out;
+}
+
+.form-group input:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    border-color: #007bff;
+}
+
+.text-danger p {
+    margin: 5px 0 0;
     font-size: 14px;
 }

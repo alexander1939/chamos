@@ -80,16 +80,26 @@ button:hover {
 }
 
 input:required:invalid {
-    border-color: red;
+    border-color: rgb(0, 0, 0);
 }
 
 input:required:valid {
     border-color: green;
 }
 
-/* Estilos adicionales para mejorar el formulario */
-.form-group input {
-    transition: all 0.3s ease-in-out;
+/* Estilos adicionales para el tooltip del title */
+.form-group input:hover::after {
+    content: attr(title);
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    top: 100%;
+    left: 0;
+    white-space: nowrap;
+    z-index: 1000;
 }
 
 .form-group input:focus {

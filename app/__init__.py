@@ -9,6 +9,7 @@ from .api.menu_api import menu
 from .api.auth_api import authApi
 from .features.components import generate_breadcrumbs, create_roles, create_privileges
 from .db.users_model import User
+from app.features.contra.recovery import recovery_bp
 
 def create_app():
     app = Flask(__name__)
@@ -31,6 +32,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(menu)  
     app.register_blueprint(authApi) 
+    app.register_blueprint(recovery_bp, url_prefix='/contra')    
 
     @app.context_processor
     def inject_breadcrumbs():

@@ -24,8 +24,14 @@ def recuperar_contrasena():
             token = serializer.dumps(email, salt='recover-password')
             recovery_link = url_for('recovery.restablecer_contrasena', token=token, _external=True)
 
-            msg = Message('Recuperación de Contraseña', recipients=[email])
-            msg.body = f'Para restablecer tu contraseña, haz clic en el siguiente enlace: {recovery_link}'
+            # Renderiza la plantilla del correo
+            html_body = render_template('contra/recuperar_contra.jinja', recovery_link=recovery_link)
+
+            msg = Message(
+                'Recuperación de Contraseña',
+                recipients=[email]
+            )
+            msg.html = html_body  # Usar HTML en lugar de texto plano
 
             try:
                 mail.send(msg)

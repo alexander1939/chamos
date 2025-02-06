@@ -25,37 +25,40 @@ auth_bp = Blueprint('auth', __name__)
 def index():
     return render_template("index.jinja")
 
-@auth_bp.route('/register/', methods=['GET', 'POST'])
-@guest_only 
-@check_existing_user
+@auth_bp.get('/register/')
+@guest_only
 def register():
-    if request.method == 'POST':
-        form_data = {
-            "name": request.form.get('name', '').strip(),
-            "surnames": request.form.get('surnames', '').strip(),
-            "phone": request.form.get('phone', '').strip(),
-            "email": request.form.get('email', '').strip(),
-            "password": request.form.get('password', '').strip(),
-        }
-
-        validation_error = validate_user_data(form_data)
-        if validation_error:
-            error_json = validation_error.get_json()
-            flash(error_json.get("error", "Error desconocido"), "danger")
-            return render_template("auth/register.jinja")
-
-        # Llamar a la función de la API para registrar el usuario
-        response, status_code = register_user()
-        response_json = response.get_json()
-
-        if status_code == 201:
-            flash("Usuario registrado exitosamente", "success")
-            return redirect(url_for('auth.login')) 
-
-        flash(response_json.get("error", "Error al registrar usuario"), "danger")
-        return render_template("auth/register.jinja")
-
     return render_template("auth/register.jinja")
+
+
+@auth_bp.post('/register/')
+@guest_only
+@check_existing_user
+def register_post():
+    form_data = {
+        "name": request.form.get('name', '').strip(),
+        "surnames": request.form.get('surnames', '').strip(),
+        "phone": request.form.get('phone', '').strip(),
+        "email": request.form.get('email', '').strip(),
+        "password": request.form.get('password', '').strip(),
+    }
+
+    validation_error = validate_user_data(form_data)
+    if validation_error:
+        error_json, status_code = validation_error.get_json(), validation_error.status_code
+        flash(error_json.get("error", "Error desconocido"), "danger")
+        return render_template("auth/register.jinja"), status_code
+
+    response, status_code = register_user()
+    response_json = response.get_json()
+
+    if status_code == 201:
+        flash("Usuario registrado exitosamente", "success")
+        return redirect(url_for('auth.login'))
+
+    flash(response_json.get("error", "Error al registrar usuario"), "danger")
+    return render_template("auth/register.jinja")
+
 
 
 

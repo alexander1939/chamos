@@ -20,7 +20,7 @@
 
     <div class="container">
         <div class="form-container">
-            <form id="registerForm" action="{{ url_for('auth.register') }}" method="POST">
+            <form id="registerForm" action="{{ url_for('auth.register_post') }}" method="POST">
                 <h1>Crear cuenta</h1>
 
                 {% with messages = get_flashed_messages(with_categories=true) %}

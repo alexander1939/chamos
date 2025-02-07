@@ -14,6 +14,5 @@ def create_roles():
             db.session.add(new_role)
             db.session.commit()
             print(f"Rol {role_name} creado con éxito.")
-        else:
-            print(f"El rol {role_name} ya existe.")
+
 

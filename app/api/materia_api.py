@@ -136,7 +136,6 @@ def add_new_content():
         return jsonify({"error": str(e)}), 500
 
 
-# Editar contenido de un módulo (PUT)
 @catalogo_api.put('/api/catalogo/editar/')
 def edit_content():
     token = request.cookies.get("token")
@@ -155,7 +154,6 @@ def edit_content():
     if error:
         return jsonify({"error": error}), 403
 
-    # Verificar si el usuario tiene permiso de editar contenido en el módulo
     permission_error = verify_edit_permission(user_privilege)
     if permission_error:
         return permission_error
@@ -183,7 +181,6 @@ def edit_content():
             return jsonify({"message": "Materia actualizada con éxito", "materia": {"nombre": nombre, "descripcion": descripcion}}), 200
 
         elif modulo == 'Proyectos':
-            # Editar proyecto
             proyecto_id = data.get('id')
             nombre = data.get('nombre')
             descripcion = data.get('descripcion')
@@ -229,7 +226,6 @@ def edit_content():
         return jsonify({"error": str(e)}), 500
 
 
-# Eliminar contenido de un módulo (DELETE)
 @catalogo_api.delete('/api/catalogo/delete/')
 def delete_content():
     token = request.cookies.get("token")
@@ -248,7 +244,6 @@ def delete_content():
     if error:
         return jsonify({"error": error}), 403
 
-    # Verificar si el usuario tiene permiso de eliminar contenido en el módulo
     permission_error = verify_delete_permission(user_privilege)
     if permission_error:
         return permission_error

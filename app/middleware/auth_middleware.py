@@ -1,12 +1,12 @@
 import re
-from flask import request, jsonify, redirect, url_for, make_response
+from flask import request, jsonify, redirect, url_for, make_response,flash
 from functools import wraps
 from app.db.users_model import User
+from app.db.db import db
 from werkzeug.security import check_password_hash
 import uuid
 import time
 
-# Token management
 active_tokens = {}
 refresh_tokens = {}
 TOKEN_EXPIRATION_TIME = 3600  # 1 hora
@@ -64,33 +64,46 @@ def check_existing_user(f):
 
     return decorated_function
 
+def get_current_user():
+    """Obtiene el usuario autenticado a partir del token."""
+    token = request.cookies.get("token")
+
+    if not token:
+        return None, "Token no proporcionado", 401  
+
+    if token not in active_tokens:
+        return None, "Token inválido", 401 
+
+    user_id = active_tokens[token]["user_id"]
+    user = db.session.query(User).filter_by(id=user_id).first()
+
+    if not user:
+        return None, "Usuario no encontrado", 404 
+
+    return user, None, None 
+
+
 def auth_required(f):
     """Middleware para proteger rutas que requieren autenticación"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        token = request.cookies.get("token")
-
-        if token and is_token_valid(token):
+        if request.endpoint == "auth.login":
             return f(*args, **kwargs)
 
-        refresh_token = request.cookies.get("refresh_token")
-        if refresh_token and refresh_token in refresh_tokens:
-            token_data = refresh_tokens[refresh_token]
+        user, error_message, status_code = get_current_user()
 
-            if token_data["expires"] > time.time(): 
-                new_token = generate_secure_token()
-                active_tokens[new_token] = {
-                    "user_id": token_data["user_id"],
-                    "expires": time.time() + TOKEN_EXPIRATION_TIME
-                }
+        if error_message:
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return jsonify({"error": error_message}), status_code
 
-                response = make_response(f(*args, **kwargs))
-                response.set_cookie("token", new_token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
-                return response
+            flash(error_message, "danger")
+            return redirect(url_for("auth.login"))
 
-        return jsonify({"message": "Login exitoso"}), 200
+        return f(user, *args, **kwargs)
 
     return decorated_function
+
+
 
 def guest_only(f):
     """Middleware para evitar que usuarios autenticados accedan a login y registro"""

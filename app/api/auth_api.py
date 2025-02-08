@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, make_response,url_for
+from flask import Blueprint, jsonify, request, make_response,url_for,flash
 from app.db.db import db
 from app.db.users_model import User
 from app.db.Privilege_model import Privilege
@@ -6,7 +6,7 @@ from app.db.UserPrivilege_model import UserPrivilege
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.middleware.auth_middleware import (
     check_existing_user, generate_secure_token, active_tokens, refresh_tokens, 
-    TOKEN_EXPIRATION_TIME, auth_required
+    TOKEN_EXPIRATION_TIME
 )
 import time
 
@@ -45,6 +45,7 @@ def register_user():
 
 @authApi.post('/api/login/')
 def login_user():
+
     data = request.json if request.is_json else request.form.to_dict()
 
     if not data or 'email' not in data or 'password' not in data:
@@ -67,16 +68,17 @@ def login_user():
         "expires": time.time() + TOKEN_EXPIRATION_TIME * 24
     }
 
-    response = make_response(jsonify({
+    response = jsonify({
         "message": "Login exitoso",
+        "redirect_url": url_for('auth.index'),
         "token": token,
         "refresh_token": refresh_token
-    }), 200)
+    })
 
     response.set_cookie("token", token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
     response.set_cookie("refresh_token", refresh_token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24)
 
-    return response
+    return response, 200
 
 
 
@@ -92,7 +94,6 @@ def refresh_access_token():
         del refresh_tokens[refresh_token]
         return jsonify({"error": "Refresh token expirado, inicie sesión nuevamente"}), 401
 
-    # Generar un nuevo access token
     new_access_token = generate_secure_token()
     active_tokens[new_access_token] = {
         "user_id": token_data["user_id"],
@@ -105,7 +106,6 @@ def refresh_access_token():
     return response
 
 @authApi.post('/api/logout/')
-@auth_required
 def logout_user():
     token = request.cookies.get("token")
 
@@ -119,6 +119,5 @@ def logout_user():
     return response, 200
 
 @authApi.get('/api/protected/')
-@auth_required
 def protected_route():
     return jsonify({"message": "Acceso autorizado"}), 200

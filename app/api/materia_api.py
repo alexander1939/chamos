@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from sqlalchemy.orm import joinedload
 from app.db.db import db
 from app.db.materias_model import Materia
+from app.db.Juegos_model import Juegos
+from app.db.proyectos_model import Proyectos
 from app.middleware.auth_middleware import active_tokens,is_token_valid
 from app.middleware.auth_middleware import auth_required
 from app.db.UserPrivilege_model import UserPrivilege
@@ -13,200 +15,65 @@ from app.db.users_model import User
 
 materia_api = Blueprint('materias', __name__)  
 
-
-
-@materia_api.get('/api/materias/')
-@auth_required
-def get_materias():
+# Materia API
+@materia_api.get('/api/user_privileges/')
+def get_user_privileges():
     token = request.cookies.get("token")
 
     if not token or token not in active_tokens:
-        return jsonify({"error": "No autorizado"}), 401  
+        return jsonify({"error": "Token inválido o expirado, inicie sesión nuevamente"}), 401
 
     user_id = active_tokens[token]["user_id"]
-    current_user = User.query.get(user_id)
+    user = db.session.query(User).filter_by(id=user_id).first()
 
-    if not current_user:
+    if not user:
         return jsonify({"error": "Usuario no encontrado"}), 404
 
-    user_privileges = UserPrivilege.query.filter_by(user_id=current_user.id)\
-        .join(Privilege)\
-        .filter(Privilege.name == "Materias")\
-        .first()
+    try:
+        privileges_data = []
 
-    has_materia_privilege = user_privileges is not None
-    can_view = user_privileges.can_view if user_privileges else False
+        user_privileges = db.session.query(UserPrivilege).filter(UserPrivilege.user_id == user.id).all()
+        
+        for user_privilege in user_privileges:
+            privilege = db.session.query(Privilege).filter(Privilege.id == user_privilege.privilege_id).first()
 
-    if not can_view:
+            if privilege:
+                privileges_data.append({
+                    'privilege_name': privilege.name,
+                    'can_create': user_privilege.can_create,
+                    'can_edit': user_privilege.can_edit,
+                    'can_view': user_privilege.can_view,
+                    'can_delete': user_privilege.can_delete
+                })
+
+                # Verificar si tiene privilegios para cada módulo y devolver los datos correspondientes
+                if privilege.name == 'Materias' and user_privilege.can_view:
+                    materias = db.session.query(Materia).filter_by(id_usuario=user.id).all()
+                    privileges_data[-1]['materias'] = [{"nombre": materia.nombre, "descripcion": materia.descripcion} for materia in materias]
+
+                elif privilege.name == 'Proyectos' and user_privilege.can_view:
+                    proyectos = db.session.query(Proyectos).filter_by(id_usuario=user.id).all()
+                    privileges_data[-1]['proyectos'] = [{"nombre": proyecto.nombre, "descripcion": proyecto.descripcion} for proyecto in proyectos]
+
+                elif privilege.name == 'Juegos' and user_privilege.can_view:
+                    juegos = db.session.query(Juegos).filter_by(id_usuario=user.id).all()
+                    privileges_data[-1]['juegos'] = [{"nombre": juego.nombre, "descripcion": juego.descripcion} for juego in juegos]
+
+        if not privileges_data:
+            return jsonify({"message": "Este usuario no tiene privilegios asignados."}), 404
+
+        for privilege in privileges_data:
+            if 'materias' not in privilege and privilege['privilege_name'] == 'Materias':
+                privilege['materias'] = "No tienes acceso a este módulo"
+            if 'proyectos' not in privilege and privilege['privilege_name'] == 'Proyectos':
+                privilege['proyectos'] = "No tienes acceso a este módulo"
+            if 'juegos' not in privilege and privilege['privilege_name'] == 'Juegos':
+                privilege['juegos'] = "No tienes acceso a este módulo"
+
         return jsonify({
-            "error": "No tienes permiso para ver las materias",
-            "has_materia_privilege": has_materia_privilege,
-            "can_view": can_view
-        }), 403
+            "user_id": user.id,
+            "privileges": privileges_data
+        }), 200
 
-    materias = Materia.query.all()
-    materias_data = [{
-        "id": materia.id,
-        "nombre": materia.nombre,
-        "descripcion": materia.descripcion,
-        "id_usuario": materia.id_usuario
-    } for materia in materias]
-
-    return jsonify({
-        "has_materia_privilege": has_materia_privilege,
-        "can_view": can_view,
-        "materias": materias_data
-    }), 200
-
-
-@materia_api.post('/api/materias/agregar/')  
-def add_materia():
-    token = request.cookies.get("token")
-
-    if not token or token not in active_tokens:
-        return jsonify({"error": "No autorizado"}), 401  
-
-    user_id = active_tokens[token]["user_id"]
-    current_user = User.query.get(user_id)
-
-    if not current_user:
-        return jsonify({"error": "Usuario no encontrado"}), 404
-
-    user_privileges = UserPrivilege.query.filter_by(user_id=current_user.id)\
-        .join(Privilege)\
-        .filter(Privilege.name == "Materias")\
-        .first()
-
-    has_materia_privilege = user_privileges is not None
-    can_create = user_privileges.can_create if user_privileges else False
-
-    if not can_create:
-        return jsonify({
-            "error": "No tienes permiso para agregar materias",
-            "has_materia_privilege": has_materia_privilege,
-            "can_create": can_create
-        }), 403
-
-    # Obtener datos del request
-    data = request.get_json()
-    nombre = data.get("nombre")
-    descripcion = data.get("descripcion")
-
-    if not nombre:
-        return jsonify({"error": "El nombre de la materia es obligatorio"}), 400
-
-    # Crear nueva materia
-    nueva_materia = Materia(
-        nombre=nombre,
-        descripcion=descripcion,
-        id_usuario=current_user.id
-    )
-
-    db.session.add(nueva_materia)
-    db.session.commit()
-
-    return jsonify({
-        "message": "Materia agregada exitosamente",
-        "has_materia_privilege": has_materia_privilege,
-        "can_create": can_create,
-        "materia": {
-            "id": nueva_materia.id,
-            "nombre": nueva_materia.nombre,
-            "descripcion": nueva_materia.descripcion,
-            "id_usuario": nueva_materia.id_usuario
-        }
-    }), 201
-
-@materia_api.put('/api/materias/edit/<int:materia_id>/')
-def edit_materia_simple(materia_id):
-    auth_header = request.headers.get("Authorization")
-    token = auth_header.replace("Bearer ", "") if auth_header else None
-
-    if not token or not is_token_valid(token):
-        return jsonify({"error": "No autorizado"}), 401
-
-    user_id = active_tokens[token]["user_id"]
-    current_user = User.query.get(user_id)
-
-    if not current_user:
-        return jsonify({"error": "Usuario no encontrado"}), 404
-
-    # Buscar privilegios del usuario sobre "Materias"
-    user_privileges = UserPrivilege.query.filter_by(user_id=current_user.id) \
-        .join(Privilege) \
-        .filter(Privilege.name == "Materias") \
-        .first()
-
-    has_materia_privilege = user_privileges is not None
-    can_edit = user_privileges.can_edit if user_privileges else False
-
-    # Verificar si tiene el privilegio de editar materias
-    if not can_edit:
-        return jsonify({
-            "error": "No tienes permiso para editar materias",
-            "has_materia_privilege": has_materia_privilege,
-            "can_edit": can_edit
-        }), 403
-
-    # Buscar la materia a editar
-    materia = Materia.query.get(materia_id)
-    if not materia:
-        return jsonify({"error": "Materia no encontrada"}), 404
-
-    # Obtener datos del request
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Datos no válidos"}), 400
-
-    # Actualizar los valores permitiendo nulos opcionales
-    materia.nombre = data.get("nombre", materia.nombre)
-    materia.descripcion = data.get("descripcion", materia.descripcion)
-
-    db.session.commit()
-
-    return jsonify({
-        "message": "Materia editada exitosamente",
-        "has_materia_privilege": has_materia_privilege,
-        "can_edit": can_edit,
-        "materia": {
-            "id": materia.id,
-            "nombre": materia.nombre,
-            "descripcion": materia.descripcion,
-            "id_usuario": materia.id_usuario
-        }
-    }), 200
-
-
-@materia_api.delete('/api/materias/<int:materia_id>/')
-@auth_required
-def delete_materia(materia_id):
-    auth_header = request.headers.get("Authorization")
-    token = auth_header.replace("Bearer ", "") if auth_header else None
-
-    if not token or not is_token_valid(token):
-        return jsonify({"error": "No autorizado"}), 401
-
-    user_id = active_tokens[token]["user_id"]
-    current_user = User.query.get(user_id)
-
-    if not current_user:
-        return jsonify({"error": "Usuario no encontrado"}), 404
-
-    user_privileges = UserPrivilege.query.filter_by(user_id=current_user.id) \
-        .join(Privilege) \
-        .filter(Privilege.name == "Materias") \
-        .first()
-
-    can_delete = user_privileges.can_delete if user_privileges else False
-
-    if not can_delete:
-        return jsonify({"error": "No tienes permiso para eliminar materias"}), 403
-
-    materia = Materia.query.get(materia_id)
-    if not materia:
-        return jsonify({"error": "Materia no encontrada"}), 404
-
-    db.session.delete(materia)
-    db.session.commit()
-
-    return jsonify({"message": "Materia eliminada exitosamente"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

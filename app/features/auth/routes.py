@@ -1,9 +1,8 @@
-from flask import Blueprint, request, render_template, redirect, url_for, flash
+from flask import Blueprint, request, render_template, redirect, url_for, flash,make_response
 from flask import jsonify, request, render_template
 from app.api.auth_api import register_user, login_user, logout_user, protected_route
-from app.middleware.auth_middleware import  auth_required
 from app.api.menu_api import get_user_menu
-from app.middleware.auth_middleware import auth_required, guest_only
+from app.middleware.auth_middleware import  guest_only
 from app.db.db import db
 from app.db.users_model import User
 from app.db.Privilege_model import Privilege
@@ -15,15 +14,17 @@ from app.db.proyectos_model import Proyectos
 from app.db.UserPrivilege_model import UserPrivilege
 from app.api.menu_api import get_user_menu
 from app.api.auth_api import register_user,login_user
-from app.middleware.auth_middleware import validate_user_data, check_existing_user,guest_only 
+from app.middleware.auth_middleware import validate_user_data, check_existing_user,guest_only,TOKEN_EXPIRATION_TIME
+from app.middleware.menu_middleware import menu_required, get_privilege_content
+
 
 
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/')
-@auth_required
-def index():
-    return render_template("index.jinja")
+def index(): 
+    """Ruta protegida que muestra la página de inicio solo si el usuario está autenticado"""
+    return render_template("index.jinja", )
 
 @auth_bp.get('/register/')
 @guest_only
@@ -63,6 +64,8 @@ def register_post():
 @auth_bp.route('/login/', methods=['GET', 'POST'])
 def login():
     if request.method == "POST":
+        print("🔹 login() ha sido llamado")  # Debug
+
         form_data = {
             "email": request.form.get('email', '').strip(),
             "password": request.form.get('password', '').strip(),
@@ -72,31 +75,36 @@ def login():
             flash("Faltan datos", "danger")
             return redirect(url_for('auth.login'))
 
-        # Llamar a la API para iniciar sesión
-        response = login_user()
+        # Llamar a la API de login
+        response, status_code = login_user()
+        response_json = response.get_json()
 
-        if isinstance(response, tuple):
-            response_json, status_code = response  
-        else:
-            status_code = response.status_code
-            try:
-                response_json = response.json
-            except Exception:
-                response_json = {"error": "Respuesta inesperada del servidor"}
+        print(f"🔹 Respuesta de login_user(): {response_json}")  # Debug
 
         if status_code == 200:
+            token = response_json.get("token")
+            refresh_token = response_json.get("refresh_token")
+
+            if not token:
+                flash("Error al generar token", "danger")
+                return redirect(url_for('auth.login'))
+
+            # 🔹 Crear la respuesta y establecer cookies
+            resp = make_response(redirect(url_for('auth.index')))
+            resp.set_cookie("token", token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
+            resp.set_cookie("refresh_token", refresh_token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24)
+
             flash("Inicio de sesión exitoso", "success")
-            return redirect(url_for('auth.index'))  # 🔹 Redirección correcta
-        else:
-            error_message = response_json.get("error", "Error al iniciar sesión")
-            flash(error_message, "danger")
-            return redirect(url_for('auth.login'))  # 🔹 Redirige con el mensaje de error
+            return resp
+
+        error_message = response_json.get("error", "Error al iniciar sesión")
+        flash(error_message, "danger")
+        return redirect(url_for('auth.login'))
 
     return render_template("auth/login.jinja")
 
 
 @auth_bp.get('/gestionar_privilegios/')
-@auth_required
 def priv():
     return render_template("auth/manage_priv.jinja")
 

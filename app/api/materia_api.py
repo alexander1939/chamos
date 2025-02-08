@@ -1,79 +1,318 @@
 from flask import Blueprint, request, jsonify
-from sqlalchemy.orm import joinedload
-from app.db.db import db
 from app.db.materias_model import Materia
-from app.db.Juegos_model import Juegos
 from app.db.proyectos_model import Proyectos
-from app.middleware.auth_middleware import active_tokens,is_token_valid
-from app.middleware.auth_middleware import auth_required
-from app.db.UserPrivilege_model import UserPrivilege
-from app.db.Privilege_model import Privilege
-from app.db.users_model import User
+from app.db.Juegos_model import Juegos
+from app.middleware.catalogo_middleware import get_user_from_token, has_access_to_module, verify_create_permission, verify_edit_permission, verify_delete_permission
+from app.db.db import db
 
+catalogo_api = Blueprint('catalogo', __name__)
 
-
-
-materia_api = Blueprint('materias', __name__)  
-
-# Materia API
-@materia_api.get('/api/user_privileges/')
-def get_user_privileges():
+@catalogo_api.get('/api/catalogo/')
+def get_user_catalog():
     token = request.cookies.get("token")
+    if not token:
+        return jsonify({"error": "Token no proporcionado."}), 400
 
-    if not token or token not in active_tokens:
-        return jsonify({"error": "Token inválido o expirado, inicie sesión nuevamente"}), 401
-
-    user_id = active_tokens[token]["user_id"]
-    user = db.session.query(User).filter_by(id=user_id).first()
-
+    user = get_user_from_token(token)
     if not user:
-        return jsonify({"error": "Usuario no encontrado"}), 404
+        return jsonify({"error": "Usuario no encontrado."}), 404
+
+    modulo = request.args.get('modulo')
+    if not modulo:
+        return jsonify({"error": "Debe especificar un módulo para ver."}), 400
+
+    user_privilege, error = has_access_to_module(user, modulo)
+    if error:
+        return jsonify({"error": error}), 403
 
     try:
-        privileges_data = []
+        if modulo == 'Materias':
+            materias = db.session.query(Materia).filter_by(id_usuario=user.id).all()
+            return jsonify({
+                "modulo": "Materias",
+                "can_create": user_privilege.can_create,
+                "can_edit": user_privilege.can_edit,
+                "can_view": user_privilege.can_view,
+                "can_delete": user_privilege.can_delete,
+                "materias": [{"nombre": materia.nombre, "descripcion": materia.descripcion} for materia in materias]
+            })
 
-        user_privileges = db.session.query(UserPrivilege).filter(UserPrivilege.user_id == user.id).all()
-        
-        for user_privilege in user_privileges:
-            privilege = db.session.query(Privilege).filter(Privilege.id == user_privilege.privilege_id).first()
+        elif modulo == 'Proyectos':
+            proyectos = db.session.query(Proyectos).filter_by(id_usuario=user.id).all()
+            return jsonify({
+                "modulo": "Proyectos",
+                "can_create": user_privilege.can_create,
+                "can_edit": user_privilege.can_edit,
+                "can_view": user_privilege.can_view,
+                "can_delete": user_privilege.can_delete,
+                "proyectos": [{"nombre": proyecto.nombre, "descripcion": proyecto.descripcion} for proyecto in proyectos]
+            })
 
-            if privilege:
-                privileges_data.append({
-                    'privilege_name': privilege.name,
-                    'can_create': user_privilege.can_create,
-                    'can_edit': user_privilege.can_edit,
-                    'can_view': user_privilege.can_view,
-                    'can_delete': user_privilege.can_delete
-                })
+        elif modulo == 'Juegos':
+            juegos = db.session.query(Juegos).filter_by(id_usuario=user.id).all()
+            return jsonify({
+                "modulo": "Juegos",
+                "can_create": user_privilege.can_create,
+                "can_edit": user_privilege.can_edit,
+                "can_view": user_privilege.can_view,
+                "can_delete": user_privilege.can_delete,
+                "juegos": [{"nombre": juego.nombre, "descripcion": juego.descripcion} for juego in juegos]
+            })
 
-                # Verificar si tiene privilegios para cada módulo y devolver los datos correspondientes
-                if privilege.name == 'Materias' and user_privilege.can_view:
-                    materias = db.session.query(Materia).filter_by(id_usuario=user.id).all()
-                    privileges_data[-1]['materias'] = [{"nombre": materia.nombre, "descripcion": materia.descripcion} for materia in materias]
+        else:
+            return jsonify({"error": "Módulo no válido."}), 400
 
-                elif privilege.name == 'Proyectos' and user_privilege.can_view:
-                    proyectos = db.session.query(Proyectos).filter_by(id_usuario=user.id).all()
-                    privileges_data[-1]['proyectos'] = [{"nombre": proyecto.nombre, "descripcion": proyecto.descripcion} for proyecto in proyectos]
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-                elif privilege.name == 'Juegos' and user_privilege.can_view:
-                    juegos = db.session.query(Juegos).filter_by(id_usuario=user.id).all()
-                    privileges_data[-1]['juegos'] = [{"nombre": juego.nombre, "descripcion": juego.descripcion} for juego in juegos]
 
-        if not privileges_data:
-            return jsonify({"message": "Este usuario no tiene privilegios asignados."}), 404
+# Crear nuevo contenido en un módulo (POST)
+@catalogo_api.post('/api/catalogo/agregar/')
+def add_new_content():
+    token = request.cookies.get("token")
+    if not token:
+        return jsonify({"error": "Token no proporcionado."}), 400
 
-        for privilege in privileges_data:
-            if 'materias' not in privilege and privilege['privilege_name'] == 'Materias':
-                privilege['materias'] = "No tienes acceso a este módulo"
-            if 'proyectos' not in privilege and privilege['privilege_name'] == 'Proyectos':
-                privilege['proyectos'] = "No tienes acceso a este módulo"
-            if 'juegos' not in privilege and privilege['privilege_name'] == 'Juegos':
-                privilege['juegos'] = "No tienes acceso a este módulo"
+    user = get_user_from_token(token)
+    if not user:
+        return jsonify({"error": "Usuario no encontrado."}), 404
 
-        return jsonify({
-            "user_id": user.id,
-            "privileges": privileges_data
-        }), 200
+    modulo = request.args.get('modulo')
+    if not modulo:
+        return jsonify({"error": "Debe especificar un módulo para agregar contenido."}), 400
+
+    user_privilege, error = has_access_to_module(user, modulo)
+    if error:
+        return jsonify({"error": error}), 403
+
+    # Verificar si el usuario tiene permiso de crear contenido en el módulo
+    permission_error = verify_create_permission(user_privilege)
+    if permission_error:
+        return permission_error
+
+    data = request.json
+    try:
+        if modulo == 'Materias':
+            # Crear nueva materia
+            nombre = data.get('nombre')
+            descripcion = data.get('descripcion')
+
+            if not nombre or not descripcion:
+                return jsonify({"error": "Debe proporcionar nombre y descripción."}), 400
+
+            nueva_materia = Materia(nombre=nombre, descripcion=descripcion, id_usuario=user.id)
+            db.session.add(nueva_materia)
+            db.session.commit()
+
+            return jsonify({"message": "Materia creada con éxito", "materia": {"nombre": nombre, "descripcion": descripcion}}), 201
+
+        elif modulo == 'Proyectos':
+            # Crear nuevo proyecto
+            nombre = data.get('nombre')
+            descripcion = data.get('descripcion')
+
+            if not nombre or not descripcion:
+                return jsonify({"error": "Debe proporcionar nombre y descripción."}), 400
+
+            nuevo_proyecto = Proyectos(nombre=nombre, descripcion=descripcion, id_usuario=user.id)
+            db.session.add(nuevo_proyecto)
+            db.session.commit()
+
+            return jsonify({"message": "Proyecto creado con éxito", "proyecto": {"nombre": nombre, "descripcion": descripcion}}), 201
+
+        elif modulo == 'Juegos':
+            # Crear nuevo juego
+            nombre = data.get('nombre')
+            descripcion = data.get('descripcion')
+
+            if not nombre or not descripcion:
+                return jsonify({"error": "Debe proporcionar nombre y descripción."}), 400
+
+            nuevo_juego = Juegos(nombre=nombre, descripcion=descripcion, id_usuario=user.id)
+            db.session.add(nuevo_juego)
+            db.session.commit()
+
+            return jsonify({"message": "Juego creado con éxito", "juego": {"nombre": nombre, "descripcion": descripcion}}), 201
+
+        else:
+            return jsonify({"error": "Módulo no válido."}), 400
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Editar contenido de un módulo (PUT)
+@catalogo_api.put('/api/catalogo/editar/')
+def edit_content():
+    token = request.cookies.get("token")
+    if not token:
+        return jsonify({"error": "Token no proporcionado."}), 400
+
+    user = get_user_from_token(token)
+    if not user:
+        return jsonify({"error": "Usuario no encontrado."}), 404
+
+    modulo = request.args.get('modulo')
+    if not modulo:
+        return jsonify({"error": "Debe especificar un módulo para editar contenido."}), 400
+
+    user_privilege, error = has_access_to_module(user, modulo)
+    if error:
+        return jsonify({"error": error}), 403
+
+    # Verificar si el usuario tiene permiso de editar contenido en el módulo
+    permission_error = verify_edit_permission(user_privilege)
+    if permission_error:
+        return permission_error
+
+    data = request.json
+    try:
+        if modulo == 'Materias':
+            # Editar materia
+            materia_id = data.get('id')
+            nombre = data.get('nombre')
+            descripcion = data.get('descripcion')
+
+            if not materia_id or not nombre or not descripcion:
+                return jsonify({"error": "Debe proporcionar id, nombre y descripción."}), 400
+
+            materia = db.session.query(Materia).filter_by(id=materia_id, id_usuario=user.id).first()
+
+            if not materia:
+                return jsonify({"error": "Materia no encontrada o no tienes acceso."}), 404
+
+            materia.nombre = nombre
+            materia.descripcion = descripcion
+            db.session.commit()
+
+            return jsonify({"message": "Materia actualizada con éxito", "materia": {"nombre": nombre, "descripcion": descripcion}}), 200
+
+        elif modulo == 'Proyectos':
+            # Editar proyecto
+            proyecto_id = data.get('id')
+            nombre = data.get('nombre')
+            descripcion = data.get('descripcion')
+
+            if not proyecto_id or not nombre or not descripcion:
+                return jsonify({"error": "Debe proporcionar id, nombre y descripción."}), 400
+
+            proyecto = db.session.query(Proyectos).filter_by(id=proyecto_id, id_usuario=user.id).first()
+
+            if not proyecto:
+                return jsonify({"error": "Proyecto no encontrado o no tienes acceso."}), 404
+
+            proyecto.nombre = nombre
+            proyecto.descripcion = descripcion
+            db.session.commit()
+
+            return jsonify({"message": "Proyecto actualizado con éxito", "proyecto": {"nombre": nombre, "descripcion": descripcion}}), 200
+
+        elif modulo == 'Juegos':
+            # Editar juego
+            juego_id = data.get('id')
+            nombre = data.get('nombre')
+            descripcion = data.get('descripcion')
+
+            if not juego_id or not nombre or not descripcion:
+                return jsonify({"error": "Debe proporcionar id, nombre y descripción."}), 400
+
+            juego = db.session.query(Juegos).filter_by(id=juego_id, id_usuario=user.id).first()
+
+            if not juego:
+                return jsonify({"error": "Juego no encontrado o no tienes acceso."}), 404
+
+            juego.nombre = nombre
+            juego.descripcion = descripcion
+            db.session.commit()
+
+            return jsonify({"message": "Juego actualizado con éxito", "juego": {"nombre": nombre, "descripcion": descripcion}}), 200
+
+        else:
+            return jsonify({"error": "Módulo no válido."}), 400
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Eliminar contenido de un módulo (DELETE)
+@catalogo_api.delete('/api/catalogo/delete/')
+def delete_content():
+    token = request.cookies.get("token")
+    if not token:
+        return jsonify({"error": "Token no proporcionado."}), 400
+
+    user = get_user_from_token(token)
+    if not user:
+        return jsonify({"error": "Usuario no encontrado."}), 404
+
+    modulo = request.args.get('modulo')
+    if not modulo:
+        return jsonify({"error": "Debe especificar un módulo para eliminar contenido."}), 400
+
+    user_privilege, error = has_access_to_module(user, modulo)
+    if error:
+        return jsonify({"error": error}), 403
+
+    # Verificar si el usuario tiene permiso de eliminar contenido en el módulo
+    permission_error = verify_delete_permission(user_privilege)
+    if permission_error:
+        return permission_error
+
+    data = request.json
+    try:
+        if modulo == 'Materias':
+            # Eliminar materia
+            materia_id = data.get('id')
+
+            if not materia_id:
+                return jsonify({"error": "Debe proporcionar el id de la materia a eliminar."}), 400
+
+            materia = db.session.query(Materia).filter_by(id=materia_id, id_usuario=user.id).first()
+
+            if not materia:
+                return jsonify({"error": "Materia no encontrada o no tienes acceso."}), 404
+
+            db.session.delete(materia)
+            db.session.commit()
+
+            return jsonify({"message": "Materia eliminada con éxito."}), 200
+
+        elif modulo == 'Proyectos':
+            # Eliminar proyecto
+            proyecto_id = data.get('id')
+
+            if not proyecto_id:
+                return jsonify({"error": "Debe proporcionar el id del proyecto a eliminar."}), 400
+
+            proyecto = db.session.query(Proyectos).filter_by(id=proyecto_id, id_usuario=user.id).first()
+
+            if not proyecto:
+                return jsonify({"error": "Proyecto no encontrado o no tienes acceso."}), 404
+
+            db.session.delete(proyecto)
+            db.session.commit()
+
+            return jsonify({"message": "Proyecto eliminado con éxito."}), 200
+
+        elif modulo == 'Juegos':
+            # Eliminar juego
+            juego_id = data.get('id')
+
+            if not juego_id:
+                return jsonify({"error": "Debe proporcionar el id del juego a eliminar."}), 400
+
+            juego = db.session.query(Juegos).filter_by(id=juego_id, id_usuario=user.id).first()
+
+            if not juego:
+                return jsonify({"error": "Juego no encontrado o no tienes acceso."}), 404
+
+            db.session.delete(juego)
+            db.session.commit()
+
+            return jsonify({"message": "Juego eliminado con éxito."}), 200
+
+        else:
+            return jsonify({"error": "Módulo no válido."}), 400
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

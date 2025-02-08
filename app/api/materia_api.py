@@ -66,7 +66,6 @@ def get_user_catalog():
         return jsonify({"error": str(e)}), 500
 
 
-# Crear nuevo contenido en un módulo (POST)
 @catalogo_api.post('/api/catalogo/agregar/')
 def add_new_content():
     token = request.cookies.get("token")
@@ -85,7 +84,6 @@ def add_new_content():
     if error:
         return jsonify({"error": error}), 403
 
-    # Verificar si el usuario tiene permiso de crear contenido en el módulo
     permission_error = verify_create_permission(user_privilege)
     if permission_error:
         return permission_error
@@ -93,7 +91,6 @@ def add_new_content():
     data = request.json
     try:
         if modulo == 'Materias':
-            # Crear nueva materia
             nombre = data.get('nombre')
             descripcion = data.get('descripcion')
 
@@ -107,7 +104,6 @@ def add_new_content():
             return jsonify({"message": "Materia creada con éxito", "materia": {"nombre": nombre, "descripcion": descripcion}}), 201
 
         elif modulo == 'Proyectos':
-            # Crear nuevo proyecto
             nombre = data.get('nombre')
             descripcion = data.get('descripcion')
 
@@ -121,7 +117,6 @@ def add_new_content():
             return jsonify({"message": "Proyecto creado con éxito", "proyecto": {"nombre": nombre, "descripcion": descripcion}}), 201
 
         elif modulo == 'Juegos':
-            # Crear nuevo juego
             nombre = data.get('nombre')
             descripcion = data.get('descripcion')
 

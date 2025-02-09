@@ -36,5 +36,3 @@ def create_admin_user():
 
         db.session.commit()
         print(f"Usuario administrador {admin_name} creado con éxito con privilegios.")
-    else:
-        print(f"El usuario administrador con el correo {admin_email} ya existe.")

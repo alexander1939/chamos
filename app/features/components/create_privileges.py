@@ -23,5 +23,3 @@ def create_privileges():
             db.session.add(new_privilege)
             db.session.commit()
             print(f"Privilegio {privilege_data['name']} creado con éxito.")
-        else:
-            print(f"El privilegio {privilege_data['name']} ya existe.")

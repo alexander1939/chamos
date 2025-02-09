@@ -53,10 +53,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 const privilegeRoutes = {
-    "Materias": "/gestion/materias",
-    "Juegos": "/gestion/juegos",
-    "Proyectos": "/gestion/proyectos",
-    "Gestionar Privilegios": "/gestionar_privilegios/"
+    "Materias": {
+        listar: "/catalogo/Materias/",
+        agregar: "/catalogo/Materias/agregar"
+    },
+    "Juegos": {
+        listar: "/catalogo/Juegos/",
+        agregar: "/catalogo/Juegos/agregar"
+    },
+    "Proyectos": {
+        listar: "/catalogo/Proyectos/",
+        agregar: "/catalogo/Proyectos/agregar"
+    },
+    "Gestionar Privilegios": {
+        listar: "/gestionar_privilegios/",
+        agregar: "/gestionar_privilegios/agregar"
+    }
 };
 
 function createDropdown(privilegeName, items, canCreate, canView) {
@@ -69,19 +81,22 @@ function createDropdown(privilegeName, items, canCreate, canView) {
             <ul class="dropdown-options" style="display: none;">
     `;
 
-    const listRoute = privilegeRoutes[privilegeName] || `/${privilegeName.toLowerCase()}/listar`;
-    const addRoute = privilegeRoutes[privilegeName] ? `${privilegeRoutes[privilegeName]}/agregar` : `/${privilegeName.toLowerCase()}/agregar`;
+    // Obtener las rutas de "Listar" y "Agregar" desde privilegeRoutes
+    const routes = privilegeRoutes[privilegeName] || {
+        listar: `/${privilegeName.toLowerCase()}/listar`,
+        agregar: `/${privilegeName.toLowerCase()}/agregar`
+    };
 
     if (canCreate) {
         dropdown += `
-            <li><a href="${addRoute}">
+            <li><a href="${routes.agregar}">
                 <i class="fas fa-plus-circle"></i> Agregar</a></li>
         `;
     }
 
     if (canView) {
         dropdown += `
-            <li><a href="${listRoute}">
+            <li><a href="${routes.listar}">
                 <i class="fas fa-list"></i> Listar</a></li>
         `;
     }

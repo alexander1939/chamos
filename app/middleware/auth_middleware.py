@@ -69,18 +69,22 @@ def get_current_user():
     token = request.cookies.get("token")
 
     if not token:
-        return None, "Token no proporcionado", 401  
+        return None, "Inicie sesion para acceder", 401
 
     if token not in active_tokens:
-        return None, "Token inválido", 401 
+        return None, "Token inválido", 401
+
+    # Verificar si el token ha expirado
+    if active_tokens[token]["expires"] <= time.time():
+        return None, "Token expirado", 401
 
     user_id = active_tokens[token]["user_id"]
     user = db.session.query(User).filter_by(id=user_id).first()
 
     if not user:
-        return None, "Usuario no encontrado", 404 
+        return None, "Usuario no encontrado", 404
 
-    return user, None, None 
+    return user, None, None
 
 
 def auth_required(f):

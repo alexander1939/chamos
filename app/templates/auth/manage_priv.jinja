@@ -22,7 +22,8 @@
 </div>
 
 <!-- Agregar el script de SweetAlert2 aquí -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/libs/sweetalert2.min.css') }}">
+<script src="{{ url_for('static', filename='js/libs/sweetalert2.min.js') }}"></script>
 
 <!-- Script de gestión de usuarios -->
 <script src="{{ url_for('static', filename='js/apis/gestionar_usuarios_api.js') }}"></script>

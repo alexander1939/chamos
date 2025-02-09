@@ -28,7 +28,7 @@ def create_app():
     app.config['MAIL_PASSWORD'] = 'oecy hsou xktp kkzh'
     app.config['MAIL_DEFAULT_SENDER'] = 'recuperaciondecontrasena7@gmail.com'
 
-    mail.init_app(app)  # ✅ Inicializar Flask-Mail con la app
+    mail.init_app(app) 
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login' 
@@ -69,4 +69,4 @@ def create_app():
 
     return app
 
-active_tokens = {}  # Diccionario global para almacenar los tokens activos
+active_tokens = {}  

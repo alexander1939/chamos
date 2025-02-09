@@ -66,6 +66,80 @@ def get_user_catalog():
         return jsonify({"error": str(e)}), 500
 
 
+
+@catalogo_api.get('/api/catalogo/detalle/')
+def get_catalogo_detalle():
+    token = request.cookies.get("token")
+    if not token:
+        return jsonify({"error": "Token no proporcionado."}), 400
+
+    user = get_user_from_token(token)
+    if not user:
+        return jsonify({"error": "Usuario no encontrado."}), 404
+
+    modulo = request.args.get('modulo')
+    if not modulo:
+        return jsonify({"error": "Debe especificar un módulo."}), 400
+
+    data = request.get_json()
+    if not data or "id" not in data:
+        return jsonify({"error": "Debe proporcionar un ID en el cuerpo de la solicitud."}), 400
+
+    item_id = data["id"]
+
+    user_privilege, error = has_access_to_module(user, modulo)
+    if error:
+        return jsonify({"error": error}), 403
+
+    try:
+        if modulo == 'Materias':
+            materia = db.session.query(Materia).filter_by(id=item_id, id_usuario=user.id).first()
+            if not materia:
+                return jsonify({"error": "Materia no encontrada."}), 404
+            return jsonify({
+                "modulo": "Materias",
+                "can_view": user_privilege.can_view,
+                "detalle": {
+                    "id": materia.id,
+                    "nombre": materia.nombre,
+                    "descripcion": materia.descripcion
+                }
+            })
+
+        elif modulo == 'Proyectos':
+            proyecto = db.session.query(Proyectos).filter_by(id=item_id, id_usuario=user.id).first()
+            if not proyecto:
+                return jsonify({"error": "Proyecto no encontrado."}), 404
+            return jsonify({
+                "modulo": "Proyectos",
+                "can_view": user_privilege.can_view,
+                "detalle": {
+                    "id": proyecto.id,
+                    "nombre": proyecto.nombre,
+                    "descripcion": proyecto.descripcion
+                }
+            })
+
+        elif modulo == 'Juegos':
+            juego = db.session.query(Juegos).filter_by(id=item_id, id_usuario=user.id).first()
+            if not juego:
+                return jsonify({"error": "Juego no encontrado."}), 404
+            return jsonify({
+                "modulo": "Juegos",
+                "can_view": user_privilege.can_view,
+                "detalle": {
+                    "id": juego.id,
+                    "nombre": juego.nombre,
+                    "descripcion": juego.descripcion
+                }
+            })
+
+        else:
+            return jsonify({"error": "Módulo no válido."}), 400
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @catalogo_api.post('/api/catalogo/agregar/')
 def add_new_content():
     token = request.cookies.get("token")

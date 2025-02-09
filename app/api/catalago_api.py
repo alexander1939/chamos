@@ -34,8 +34,8 @@ def get_user_catalog():
                 "can_edit": user_privilege.can_edit,
                 "can_view": user_privilege.can_view,
                 "can_delete": user_privilege.can_delete,
-                "materias": [{"nombre": materia.nombre, "descripcion": materia.descripcion} for materia in materias]
-            })
+                "materias": [{"id": materia.id, "nombre": materia.nombre, "descripcion": materia.descripcion} for materia in materias]
+    })
 
         elif modulo == 'Proyectos':
             proyectos = db.session.query(Proyectos).filter_by(id_usuario=user.id).all()
@@ -45,7 +45,7 @@ def get_user_catalog():
                 "can_edit": user_privilege.can_edit,
                 "can_view": user_privilege.can_view,
                 "can_delete": user_privilege.can_delete,
-                "proyectos": [{"nombre": proyecto.nombre, "descripcion": proyecto.descripcion} for proyecto in proyectos]
+                "proyectos": [{"id": proyecto.id,"nombre": proyecto.nombre, "descripcion": proyecto.descripcion} for proyecto in proyectos]
             })
 
         elif modulo == 'Juegos':
@@ -56,7 +56,7 @@ def get_user_catalog():
                 "can_edit": user_privilege.can_edit,
                 "can_view": user_privilege.can_view,
                 "can_delete": user_privilege.can_delete,
-                "juegos": [{"nombre": juego.nombre, "descripcion": juego.descripcion} for juego in juegos]
+                "juegos": [{"id": juego.id,"nombre": juego.nombre, "descripcion": juego.descripcion} for juego in juegos]
             })
 
         else:

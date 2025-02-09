@@ -8,12 +8,13 @@ from .db import db
 from .features.auth.routes import auth_bp
 from .api.menu_api import menu 
 from .api.auth_api import authApi
-from .api.materia_api import catalogo_api
+from .api.catalago_api import catalogo_api
 from .api.users_api import usersApi
 from .features.components import generate_breadcrumbs, create_roles, create_privileges
 from .db.users_model import User
 from .features.components.create_admin import create_admin_user
 from app.features.contra.recovery import recovery_bp
+from app.features.router_catalago import catalo_bp
 mail = Mail()
 def create_app():
     app = Flask(__name__)
@@ -48,6 +49,7 @@ def create_app():
     app.register_blueprint(authApi)
     app.register_blueprint(catalogo_api)
     app.register_blueprint(usersApi) 
+    app.register_blueprint(catalo_bp)
     app.register_blueprint(recovery_bp, url_prefix='/contra')    
 
 

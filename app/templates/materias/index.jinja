@@ -10,22 +10,54 @@
             <p class="lead text-muted">Aquí puedes ver todas las materias que has registrado.</p>
         </div>
 
-        <!-- Contenedor donde se mostrarán las materias -->
-        <div id="materias-container" class="row row-cols-1 row-cols-md-3 g-4">
-            <!-- Las materias se insertarán aquí dinámicamente con JavaScript -->
-        </div>
+        {% if materias %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for materia in materias %}
+            <div class="col">
+                <div class="card shadow-sm border-light rounded">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ materia.nombre }}</h5>
+                        <p class="card-text">{{ materia.descripcion }}</p>
 
-        <!-- Mensaje de que no hay materias registradas -->
-        <div id="mensaje-no-materias" class="alert alert-info" role="alert" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="#" class="btn btn-primary btn-sm">Ver Detalles</a>
+
+                            <div class="d-flex">
+                                {% if can_edit %}
+                                <a href="{{ url_for('catalo.editar_materia', materia_id=materia.id) }}"
+                                    class="btn btn-warning btn-sm me-2">
+                                    <img src="{{ url_for('static', filename='images/edit.png') }}" alt="Editar"
+                                        width="20" height="20">
+                                </a>
+                                {% endif %}
+
+                                {% if can_delete %}
+                                <form action="{{ url_for('catalo.eliminar_materia', materia_id=materia.id) }}"
+                                    method="POST" style="display:inline-block;">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <img src="{{ url_for('static', filename='images/delete.png') }}" alt="Eliminar"
+                                            width="20" height="20">
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info" role="alert">
             No tienes materias registradas.
         </div>
+        {% endif %}
 
+        {% if can_create %}
         <div class="text-center mt-4">
-            <a href="#" class="btn btn-success btn-lg">Agregar Nueva Materia</a>
+            <a href="{{ url_for('catalo.agregar_materia') }}" class="btn btn-success btn-lg">Agregar Nueva Materia</a>
         </div>
+        {% endif %}
     </div>
 </section>
-
-<!-- Incluir el script de JavaScript -->
-<script src="{{ url_for('static', filename='js/apis/materia_api.js') }}"></script>
 {% endblock %}

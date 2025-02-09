@@ -25,7 +25,7 @@ def recuperar_contrasena():
             recovery_link = url_for('recovery.restablecer_contrasena', token=token, _external=True)
 
             # Renderiza la plantilla del correo
-            html_body = render_template('contra/recuperar_contra.jinja', recovery_link=recovery_link)
+            html_body = render_template('contra/recuperar_contraseña.jinja', recovery_link=recovery_link, form=form)
 
             msg = Message(
                 'Recuperación de Contraseña',

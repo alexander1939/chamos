@@ -1,0 +1,24 @@
+{% extends "base.jinja" %}
+
+{% block title %}Gestión de Usuarios{% endblock %}
+
+{% block content %}
+
+<h1>Gestión de Usuarios</h1>
+<table border="1" cellspacing="0" cellpadding="10">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Materias</th>
+            <th>Proyectos</th>
+            <th>Juegos</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+
+<script src="{{ url_for('static', filename='js/apis/gestionar_usuarios_api.js') }}"></script>
+{% endblock %}

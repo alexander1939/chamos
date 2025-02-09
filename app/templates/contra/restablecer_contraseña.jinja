@@ -1,0 +1,57 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/token.css') }}">
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="alert alert-{{ messages[0][0] }}">
+        {{ messages[0][1] }}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="form-group">
+        <label for="nueva_contrasena">Nueva Contraseña:</label>
+        {{ form.nueva_contrasena(class="form-control", required=True, minlength="8",
+        pattern="^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$", title="Debe contener al menos 8 caracteres, una mayúscula y un
+        número.") }}
+
+        {% if form.nueva_contrasena.errors %}
+        <div class="text-danger">
+            {% for error in form.nueva_contrasena.errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label for="confirmar_contrasena">Confirmar Contraseña:</label>
+        <input type="password" id="confirmar_contrasena" name="confirmar_contrasena" class="form-control" required
+            minlength="8" pattern="^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$"
+            title="Debe coincidir con la contraseña anterior.">
+
+        <div class="text-danger" id="error-contrasena" style="display: none;">
+            <p>Las contraseñas no coinciden.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const password = document.querySelector("[name='nueva_contrasena']");
+            const confirmPassword = document.querySelector("[name='confirmar_contrasena']");
+            const errorDiv = document.getElementById("error-contrasena");
+
+            confirmPassword.addEventListener("input", function () {
+                if (password.value !== confirmPassword.value) {
+                    errorDiv.style.display = "block";
+                } else {
+                    errorDiv.style.display = "none";
+                }
+            });
+        });
+    </script>
+
+
+    <button type="submit" class="btn btn-primary">Restablecer Contraseña</button>
+</form>

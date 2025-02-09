@@ -32,14 +32,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         menuList.innerHTML = `<li><a href="/"><i class="fas fa-home"></i> Inicio</a></li>`;
 
-        if (!Array.isArray(data.privilegios) || data.privilegios.length === 0) {
-            console.warn("El usuario no tiene privilegios asignados.");
+        if (!data.contenido || Object.keys(data.contenido).length === 0) {
+            console.warn("El usuario no tiene contenido asignado.");
             return;
         }
 
-        data.privilegios.forEach((privilegio) => {
-            const items = data.contenido[privilegio] || [];
-            menuList.innerHTML += createDropdown(privilegio, items);
+        data.privilegios.forEach((privilegeName) => {
+            const moduleData = data.contenido[privilegeName] || {};
+            const items = moduleData.items || [];
+            const canCreate = moduleData.can_create || false;
+            const canView = moduleData.can_view || false;
+
+            menuList.innerHTML += createDropdown(privilegeName, items, canCreate, canView);
         });
 
     } catch (error) {
@@ -48,28 +52,63 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
-function createDropdown(title, items) {
+const privilegeRoutes = {
+    "Materias": {
+        listar: "/catalogo/Materias/",
+        agregar: "/catalogo/Materias/agregar"
+    },
+    "Juegos": {
+        listar: "/catalogo/Juegos/",
+        agregar: "/catalogo/Juegos/agregar"
+    },
+    "Proyectos": {
+        listar: "/catalogo/Proyectos/",
+        agregar: "/catalogo/Proyectos/agregar"
+    },
+    "Gestionar Privilegios": {
+        listar: "/gestionar_privilegios/",
+        agregar: "/gestionar_privilegios/agregar"
+    }
+};
+
+function createDropdown(privilegeName, items, canCreate, canView) {
     let dropdown = `
-          <li>
-              <a href="#" class="dropdown-btn">
-                  <i class="fas fa-folder"></i> ${title} 
-                  <i class="fas fa-chevron-down dropdown-icon"></i>
-              </a>
-              <ul class="dropdown-options" style="display: none;">
-                  <li><a href="/${title.toLowerCase()}/agregar">
-                      <i class="fas fa-plus-circle"></i> Agregar</a></li>
-                  <li><a href="/${title.toLowerCase()}/listar">
-                      <i class="fas fa-list"></i> Listar</a></li>
+        <li>
+            <a href="#" class="dropdown-btn">
+                <i class="fas fa-folder"></i> ${privilegeName} 
+                <i class="fas fa-chevron-down dropdown-icon"></i>
+            </a>
+            <ul class="dropdown-options" style="display: none;">
     `;
+
+    // Obtener las rutas de "Listar" y "Agregar" desde privilegeRoutes
+    const routes = privilegeRoutes[privilegeName] || {
+        listar: `/${privilegeName.toLowerCase()}/listar`,
+        agregar: `/${privilegeName.toLowerCase()}/agregar`
+    };
+
+    if (canCreate) {
+        dropdown += `
+            <li><a href="${routes.agregar}">
+                <i class="fas fa-plus-circle"></i> Agregar</a></li>
+        `;
+    }
+
+    if (canView) {
+        dropdown += `
+            <li><a href="${routes.listar}">
+                <i class="fas fa-list"></i> Listar</a></li>
+        `;
+    }
 
     if (Array.isArray(items) && items.length > 0) {
         items.forEach((item) => {
-            dropdown += `<li><a href="#"><i class="fas fa-file-alt"></i> ${item.nombre}</a></li>`;
+            dropdown += `<li><a href="#"><i class="fas fa-file-alt"></i> ${item.nombre || item.name}</a></li>`;
         });
     } else {
         dropdown += `<li><span class="no-items">No hay elementos disponibles</span></li>`;
     }
 
-    dropdown += "</ul></li>";
+    dropdown += `</ul></li>`;
     return dropdown;
 }

@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request,make_response
+from flask import Blueprint, jsonify, request, make_response,url_for,flash
 from app.db.db import db
 from app.db.users_model import User
 from app.db.Privilege_model import Privilege
@@ -6,16 +6,17 @@ from app.db.UserPrivilege_model import UserPrivilege
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.middleware.auth_middleware import (
     check_existing_user, generate_secure_token, active_tokens, refresh_tokens, 
-    TOKEN_EXPIRATION_TIME, auth_required
+    TOKEN_EXPIRATION_TIME
 )
 import time
 
 authApi = Blueprint('authApi', __name__)
 
-@authApi.route('/api/register/', methods=['POST'])
+@authApi.post('/api/register/')
 @check_existing_user
 def register_user():
-    data = request.get_json()
+    data = request.json if request.is_json else request.form.to_dict()
+
     hashed_password = generate_password_hash(data["password"])
     
     new_user = User(
@@ -26,7 +27,7 @@ def register_user():
         phone=data["phone"],
         role_id=2
     )
-    
+
     db.session.add(new_user)
     db.session.flush()
 
@@ -35,21 +36,18 @@ def register_user():
     ).all()
 
     for privilege in privileges:
-        db.session.add(UserPrivilege(user_id=new_user.id, privilege_id=privilege.id))
+        db.session.add(UserPrivilege(user_id=new_user.id, privilege_id=privilege.id, can_create=1, can_edit=1, can_view=1, can_delete=1))
 
     db.session.commit()
     
-    return jsonify({"message": "Usuario registrado con privilegios"}), 201
+    return jsonify({"message": "Usuario registrado con privilegios"}), 201  
 
 
-
-
-@authApi.route('/api/login/', methods=['POST'])
+@authApi.post('/api/login/')
 def login_user():
-    if not request.is_json:
-        return jsonify({"error": "Content-Type debe ser application/json"}), 415
 
-    data = request.get_json()
+    data = request.json if request.is_json else request.form.to_dict()
+
     if not data or 'email' not in data or 'password' not in data:
         return jsonify({"error": "Faltan datos"}), 400
 
@@ -70,21 +68,21 @@ def login_user():
         "expires": time.time() + TOKEN_EXPIRATION_TIME * 24
     }
 
-    response = make_response(jsonify({
+    response = jsonify({
         "message": "Login exitoso",
+        "redirect_url": url_for('auth.index'),
         "token": token,
         "refresh_token": refresh_token
-    }), 200)
+    })
 
-    # Guardar tokens en cookies
     response.set_cookie("token", token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
     response.set_cookie("refresh_token", refresh_token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24)
 
-    return response
+    return response, 200
 
 
 
-@authApi.route('/api/refresh/', methods=['POST'])
+@authApi.post('/api/refresh/')
 def refresh_access_token():
     refresh_token = request.cookies.get("refresh_token")
 
@@ -92,11 +90,10 @@ def refresh_access_token():
         return jsonify({"error": "Refresh token inválido"}), 401
 
     token_data = refresh_tokens[refresh_token]
-    if token_data["expires"] < time.time():  # Si el refresh token expiró
+    if token_data["expires"] < time.time(): 
         del refresh_tokens[refresh_token]
         return jsonify({"error": "Refresh token expirado, inicie sesión nuevamente"}), 401
 
-    # Generar un nuevo access token
     new_access_token = generate_secure_token()
     active_tokens[new_access_token] = {
         "user_id": token_data["user_id"],
@@ -108,22 +105,19 @@ def refresh_access_token():
 
     return response
 
-
-
-@authApi.route('/api/logout/', methods=['POST'])
-@auth_required
+@authApi.post('/api/logout/')
 def logout_user():
-    token = request.headers.get("Authorization")
-    if token and token.startswith("Bearer "):
-        token = token.split(" ")[1]
+    token = request.cookies.get("token")
 
     if token in active_tokens:
         del active_tokens[token]
-        return jsonify({"message": "Sesión cerrada correctamente"}), 200
 
-    return jsonify({"error": "Token inválido"}), 401
+    response = jsonify({"message": "Sesión cerrada correctamente"})
+    response.set_cookie("token", "", expires=0)  
+    response.set_cookie("refresh_token", "", expires=0)  
 
-@authApi.route('/api/protected/', methods=['GET'])
-@auth_required
+    return response, 200
+
+@authApi.get('/api/protected/')
 def protected_route():
     return jsonify({"message": "Acceso autorizado"}), 200

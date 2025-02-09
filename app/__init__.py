@@ -8,15 +8,13 @@ from .db import db
 from .features.auth.routes import auth_bp
 from .api.menu_api import menu 
 from .api.auth_api import authApi
-from .api.materia_api import materia_api
-from .api.juego_api import juegos_api
-from .api.proyecto_api import proyectos_api
+from .api.catalago_api import catalogo_api
 from .api.users_api import usersApi
 from .features.components import generate_breadcrumbs, create_roles, create_privileges
 from .db.users_model import User
 from .features.components.create_admin import create_admin_user
-from .features.materia.routes import materia_bp
 from app.features.contra.recovery import recovery_bp
+from app.features.router_catalago import catalo_bp
 mail = Mail()
 def create_app():
     app = Flask(__name__)
@@ -30,7 +28,7 @@ def create_app():
     app.config['MAIL_PASSWORD'] = 'oecy hsou xktp kkzh'
     app.config['MAIL_DEFAULT_SENDER'] = 'recuperaciondecontrasena7@gmail.com'
 
-    mail.init_app(app)  # ✅ Inicializar Flask-Mail con la app
+    mail.init_app(app) 
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login' 
@@ -49,11 +47,9 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(menu)  
     app.register_blueprint(authApi)
-    app.register_blueprint(materia_api)
-    app.register_blueprint(juegos_api)
-    app.register_blueprint(proyectos_api)
+    app.register_blueprint(catalogo_api)
     app.register_blueprint(usersApi) 
-    app.register_blueprint(materia_bp)
+    app.register_blueprint(catalo_bp)
     app.register_blueprint(recovery_bp, url_prefix='/contra')    
 
 
@@ -73,4 +69,4 @@ def create_app():
 
     return app
 
-active_tokens = {}  # Diccionario global para almacenar los tokens activos
+active_tokens = {}  

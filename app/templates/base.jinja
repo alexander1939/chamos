@@ -6,21 +6,26 @@
     <title>{% block title %}Happy Box{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1 , maximum-scale=1, user-scalable=0">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
+    {# ESTILOS CSS #}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/seccion_option.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/seccion_option-lista.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/sidebar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/breadcrumb.css') }}">
-    <script src="{{ url_for('static', filename='js/components/sidebar.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/components/breadcrumb.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/filtro_g.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/styles.css') }}">
-    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth/profile.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth/ma_priv.css') }}">
+
+    {# SCRIPTS JS #}
+    <script src="{{ url_for('static', filename='js/components/sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/breadcrumb.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/filtro_global.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/menu_api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/logout_api.js') }}"></script>
 
@@ -43,6 +48,11 @@
                     <img src="https://mdbcdn.b-cdn.net/img/logo/mdb-transaprent-noshadows.webp" height="15"
                         alt="MDB Logo" loading="lazy" />
                 </a>
+                <!-- Input de búsqueda -->
+                <form class="d-flex me-3" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Buscar" id="search-input">
+                    <button class="btn btn-outline-success" type="submit">🔍</button>
+                </form>
 
                 <div class="d-lg-flex align-items-center">
                     <div class="dropdown">

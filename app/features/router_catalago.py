@@ -3,7 +3,7 @@ from app.api.catalago_api import get_user_catalog,add_new_content,get_catalogo_d
 from app.middleware.auth_middleware import active_tokens
 from app.middleware.catalogo_middleware import get_user_from_token, has_access_to_module, verify_create_permission, verify_edit_permission, verify_delete_permission
 import requests  # Asegúrate de importar requests
-from app.db.materias_model import Materia
+from app.db.Materias_model import Materia
 from app.db.Juegos_model import Juegos
 from app.db.proyectos_model import Proyectos
 

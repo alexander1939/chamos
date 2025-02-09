@@ -15,6 +15,8 @@ from .db.users_model import User
 from .features.components.create_admin import create_admin_user
 from app.features.contra.recovery import recovery_bp
 from app.features.router_catalago import catalo_bp
+from app.api.search_api import searchApi
+
 mail = Mail()
 def create_app():
     app = Flask(__name__)

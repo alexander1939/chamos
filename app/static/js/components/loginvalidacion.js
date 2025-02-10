@@ -1,38 +1,72 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("loginForm"); // Cambié el id del formulario a 'loginForm'
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const submitButton = document.getElementById("submitButton");
+    console.log("Script de validación cargado");
 
-    // Contenedores de error
-    const emailError = document.getElementById("emailError");
-    const passwordError = document.getElementById("passwordError");
-
-    function validateInput(input, errorElement, regex, errorMessage) {
-        input.addEventListener("input", function () {
-            if (!regex.test(input.value.trim())) {
-                errorElement.innerText = errorMessage;
-            } else {
-                errorElement.innerText = "";
-            }
-            checkFormValidity();
-        });
-    }
-
-    function checkFormValidity() {
-        submitButton.disabled = !(
-            emailError.innerText === "" &&
-            passwordError.innerText === ""
-        );
-    }
-
-    // Validaciones en tiempo real
-    validateInput(emailInput, emailError, /^[^\s@]+@[^\s@]+\.[^\s@]+$/, "El correo electrónico no es válido.");
-    validateInput(passwordInput, passwordError, /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/, "La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula y un número.");
-
-    form.addEventListener("submit", function (event) {
-        if (submitButton.disabled) {
-            event.preventDefault();
+    function validarEmail(input, errorElement) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!regex.test(input.value.trim())) {
+            errorElement.innerText = "Por favor, introduce un correo válido.";
+            input.classList.add("is-invalid");
+            return false;
+        } else {
+            errorElement.innerText = "";
+            input.classList.remove("is-invalid");
+            return true;
         }
-    });
+    }
+
+    function validarPassword(input, errorElement) {
+        if (input.value.trim().length < 6) {
+            errorElement.innerText = "La contraseña debe tener al menos 8 caracteres.";
+            input.classList.add("is-invalid");
+            return false;
+        } else {
+            errorElement.innerText = "";
+            input.classList.remove("is-invalid");
+            return true;
+        }
+    }
+
+    function agregarValidacion(formulario) {
+        const emailInput = formulario.querySelector("input[name='email']");
+        const passwordInput = formulario.querySelector("input[name='password']");
+        const emailError = formulario.querySelector("#email-error") || document.createElement("div");
+        const passwordError = formulario.querySelector("#password-error") || document.createElement("div");
+
+        emailError.classList.add("invalid-feedback");
+        passwordError.classList.add("invalid-feedback");
+
+        if (!formulario.querySelector("#email-error")) {
+            emailInput.insertAdjacentElement("afterend", emailError);
+        }
+        if (passwordInput && !formulario.querySelector("#password-error")) {
+            passwordInput.insertAdjacentElement("afterend", passwordError);
+        }
+
+        formulario.addEventListener("submit", function (event) {
+            let emailValido = validarEmail(emailInput, emailError);
+            let passwordValido = passwordInput ? validarPassword(passwordInput, passwordError) : true;
+
+            if (!emailValido || !passwordValido) {
+                event.preventDefault();
+            }
+        });
+
+        emailInput.addEventListener("input", () => validarEmail(emailInput, emailError));
+        if (passwordInput) {
+            passwordInput.addEventListener("input", () => validarPassword(passwordInput, passwordError));
+        }
+    }
+
+    // Aplicar validación a ambos formularios si existen
+    const loginForm = document.getElementById("loginForm");
+    const recuperarForm = document.getElementById("recuperar-form");
+
+    if (loginForm) {
+        console.log("Validación aplicada al formulario de login");
+        agregarValidacion(loginForm);
+    }
+    if (recuperarForm) {
+        console.log("Validación aplicada al formulario de recuperación de contraseña");
+        agregarValidacion(recuperarForm);
+    }
 });

@@ -3,6 +3,13 @@
 {% block title %}Gestión de Usuarios{% endblock %}
 
 {% block content %}
+<div class="search-container d-flex">
+    <input type="text" id="search-input" placeholder="Buscar por nombre o descripción..." class="form-control"
+        onkeyup="filterContent()">
+    <button type="button" id="cancel-search" class="btn btn-secondary ms-2" style="display:none;"
+        onclick="cancelSearch()">Cancelar</button>
+</div>
+
 <div class="container mt-4">
     <h1 class="text-center mb-4">Gestión de Usuarios</h1>
     <div class="table-responsive">
@@ -15,17 +22,17 @@
                     <th>Juegos</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="user-table-body">
             </tbody>
         </table>
     </div>
 </div>
 
-<!-- Agregar el script de SweetAlert2 aquí -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/sweetalert2.min.css') }}">
 <script src="{{ url_for('static', filename='js/libs/sweetalert2.min.js') }}"></script>
 
-<!-- Script de gestión de usuarios -->
 <script src="{{ url_for('static', filename='js/apis/gestionar_usuarios_api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/components/filtro_ad.js') }}"></script>
+
 
 {% endblock %}

@@ -3,6 +3,13 @@
 {% block title %}{{ modulo }} Registrados{% endblock %}
 
 {% block content %}
+<div class="search-container d-flex">
+    <input type="text" id="search-input" placeholder="Buscar por nombre o descripcion....." class="form-control"
+        onkeyup="filterContent()">
+    <button type="button" id="cancel-search" class="btn btn-secondary ms-2" style="display:none;"
+        onclick="cancelSearch()">Cancelar</button>
+</div>
+
 <section class="section-modulo py-5">
     <div class="container">
         <div class="text-center mb-5">
@@ -11,9 +18,9 @@
         </div>
 
         {% if contenido %}
-        <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="content-container">
             {% for item in contenido %}
-            <div class="col">
+            <div class="col content-item">
                 <div class="card shadow-sm border-light rounded">
                     <div class="card-body">
                         <h5 class="card-title">{{ item.nombre }}</h5>
@@ -21,15 +28,11 @@
 
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <!-- Aquí cambiamos contenido.id por item.id -->
-                                    <a href="{{ url_for('catalo.mostrar_detalle', modulo=modulo, item_id=item.id) }}"
-                                        class="btn btn-primary btn-sm">
-                                        Ver Detalles
-                                    </a>
-                                </div>
+                                <a href="{{ url_for('catalo.mostrar_detalle', modulo=modulo, item_id=item.id) }}"
+                                    class="btn btn-primary btn-sm">
+                                    Ver Detalles
+                                </a>
                             </div>
-
                             <div class="d-flex">
                                 {% if can_edit %}
                                 <a href="#" class="btn btn-warning btn-sm me-2">
@@ -63,11 +66,14 @@
 
         {% if can_create %}
         <div class="text-center mt-4">
-            <a href="#" class="btn btn-success btn-lg">
+            <a href="{{ url_for('catalo.agregar_contenido', modulo=modulo) }}" class="btn btn-success btn-lg">
                 Agregar Nuevo {{ modulo[:-1] }}
             </a>
         </div>
         {% endif %}
     </div>
 </section>
+
+<script src="{{ url_for('static', filename='js/components/filtro_catalago.js') }}"></script>
+
 {% endblock %}

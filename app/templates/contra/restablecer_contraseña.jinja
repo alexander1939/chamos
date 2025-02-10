@@ -1,4 +1,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/token.css') }}">
+<script src="{{ url_for('static', filename='js/components/validacionrestablecer.js') }}"></script>
+
+
 <form method="POST">
     {{ form.hidden_tag() }}
 
@@ -12,9 +15,11 @@
 
     <div class="form-group">
         <label for="nueva_contrasena">Nueva Contraseña:</label>
-        {{ form.nueva_contrasena(class="form-control", required=True, minlength="8",
-        pattern="^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$", title="Debe contener al menos 8 caracteres, una mayúscula y un
-        número.") }}
+        {{ form.nueva_contrasena(class="form-control", required=True, id="nueva_contrasena") }}
+
+        <div class="text-danger" id="error-nueva-contrasena" style="display: none;">
+            <p>Debe contener al menos 8 caracteres, una mayúscula y un número.</p>
+        </div>
 
         {% if form.nueva_contrasena.errors %}
         <div class="text-danger">
@@ -27,31 +32,11 @@
 
     <div class="form-group">
         <label for="confirmar_contrasena">Confirmar Contraseña:</label>
-        <input type="password" id="confirmar_contrasena" name="confirmar_contrasena" class="form-control" required
-            minlength="8" pattern="^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$"
-            title="Debe coincidir con la contraseña anterior.">
+        <input type="password" id="confirmar_contrasena" name="confirmar_contrasena" class="form-control" required>
 
         <div class="text-danger" id="error-contrasena" style="display: none;">
             <p>Las contraseñas no coinciden.</p>
         </div>
     </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const password = document.querySelector("[name='nueva_contrasena']");
-            const confirmPassword = document.querySelector("[name='confirmar_contrasena']");
-            const errorDiv = document.getElementById("error-contrasena");
-
-            confirmPassword.addEventListener("input", function () {
-                if (password.value !== confirmPassword.value) {
-                    errorDiv.style.display = "block";
-                } else {
-                    errorDiv.style.display = "none";
-                }
-            });
-        });
-    </script>
-
-
     <button type="submit" class="btn btn-primary">Restablecer Contraseña</button>
 </form>

@@ -1,0 +1,30 @@
+{% extends "base.jinja" %}
+
+{% block content %}
+<h2>Resultados para "{{ query }}" en {{ category }}</h2>
+
+{% if resultados %}
+<table class="table">
+    <thead>
+        <tr>
+            {% for key in resultados[0].keys() %}
+            <th>{{ key | capitalize }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in resultados %}
+        <tr>
+            {% for value in item.values() %}
+            <td>{{ value }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No se encontraron resultados.</p>
+{% endif %}
+
+<a href="{{ url_for('auth.index') }}" class="btn btn-primary">Volver</a>
+{% endblock %}

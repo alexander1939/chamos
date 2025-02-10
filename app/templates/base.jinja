@@ -49,11 +49,45 @@
                         alt="MDB Logo" loading="lazy" />
                 </a>
                 <!-- Input de búsqueda -->
-                <form class="d-flex me-3" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Buscar" id="search-input">
+                <form class="d-flex me-3" role="search" action="{{ url_for('search_bp.buscar') }}" method="GET">
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Buscar"
+                        name="query" required>
+
+                    <select class="form-select me-2" name="category" id="category-select"
+                        data-api-url="{{ url_for('search_bp.buscar') }}">
+                        <option value="" disabled selected>Cargando categorías...</option>
+                    </select>
+
                     <button class="btn btn-outline-success" type="submit">🔍</button>
                 </form>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        let select = document.getElementById("category-select");
 
+                        fetch("{{ url_for('search_bp.obtener_categorias') }}")  // Obtener categorías desde el nuevo endpoint
+                            .then(response => {
+                                if (!response.ok) throw new Error("No autorizado");
+                                return response.json();
+                            })
+                            .then(data => {
+                                select.innerHTML = "";  // Limpiar opciones anteriores
+                                if (Object.keys(data).length === 0) {
+                                    select.innerHTML = '<option value="" disabled>No tienes acceso a ninguna categoría</option>';
+                                } else {
+                                    for (let key in data) {
+                                        let option = document.createElement("option");
+                                        option.value = key;
+                                        option.textContent = data[key];
+                                        select.appendChild(option);
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error al cargar categorías:", error);
+                                select.innerHTML = '<option value="" disabled>Error al cargar categorías</option>';
+                            });
+                    });
+                </script>
                 <div class="d-lg-flex align-items-center">
                     <div class="dropdown">
                         <a data-bs-toggle="dropdown" class="dropdown-toggle d-flex align-items-center hidden-arrow"

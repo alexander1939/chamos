@@ -96,3 +96,35 @@ def obtener_categorias():
     categorias_disponibles = {p.privilege.name.split()[-1].lower(): p.privilege.name.split()[-1] for p in privilegios_usuario}
 
     return categorias_disponibles, 200
+
+
+
+
+@search_bp.route('/buscar/<category>', methods=['GET'])
+def buscar_categoria(category):
+    query = request.args.get('query', '').strip()
+
+    if not query:
+        return jsonify([])
+
+    model_map = {
+        'materias': Materia,
+        'juegos': Juegos,
+        'proyectos': Proyectos
+    }
+
+    if category not in model_map:
+        return jsonify([])
+
+    # Realizar la búsqueda sobre el modelo adecuado
+    model = model_map[category]
+    results = db.session.query(model).filter(model.nombre.ilike(f'%{query}%')).all()
+
+    # Devolver los resultados como JSON
+    resultado_json = [{
+        'nombre': r.nombre,
+        'descripcion': r.descripcion,
+        'detalles_url': url_for('catalo.mostrar_detalle', modulo=category, item_id=r.id)
+    } for r in results]
+
+    return jsonify(resultado_json)

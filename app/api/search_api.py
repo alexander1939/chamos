@@ -59,7 +59,6 @@ def advanced_search():
         ).all()
 
         return jsonify([{
-            "id": r.id,
             "nombre": r.nombre,
             "descripcion": getattr(r, 'descripcion', None)
         } for r in results])
@@ -73,7 +72,6 @@ def advanced_search():
             user_id = up.user_id
             if user_id not in user_privileges:
                 user_privileges[user_id] = {
-                    "id": user_id,
                     "nombre": up.user.name,
                     "descripcion": f"Email: {up.user.email}, Teléfono: {up.user.phone}",
                 }
@@ -82,9 +80,12 @@ def advanced_search():
 
         result_list = list(user_privileges.values())
 
+        # Ahora aseguramos que "Gestionar Privilegios" se convierte en "privilegios"
         for user in result_list:
             privilegios = user.pop("privilegios", [])
             for privilegio in privilegios:
-                user[privilegio] = privilegio  
+                if privilegio == "Gestionar Privilegios":
+                    privilegio = "privilegios"  # Cambiamos el nombre del privilegio
+                user[privilegio] = privilegio  # Asignamos el privilegio con el nuevo nombre
 
         return jsonify(result_list)

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.middleware.catalogo_middleware import get_user_from_token, has_access_to_module, verify_create_permission, verify_edit_permission, verify_delete_permission
-from app.db.materias_model import Materia
+from app.db.Materias_model import Materia
 from app.db.proyectos_model import Proyectos
 from app.db.Juegos_model import Juegos
 from app.db.UserPrivilege_model import UserPrivilege

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, flash, redirect, url_for, render_template
 import requests
 from app.middleware.catalogo_middleware import get_user_from_token
-from app.db.materias_model import Materia
+from app.db.Materias_model import Materia
 from app.db.proyectos_model import Proyectos
 from app.db.Juegos_model import Juegos
 from app.db.UserPrivilege_model import UserPrivilege

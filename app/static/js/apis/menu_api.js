@@ -102,12 +102,15 @@ function createDropdown(privilegeName, items, canCreate, canView) {
     }
 
     if (Array.isArray(items) && items.length > 0) {
-        items.forEach((item) => {
-            dropdown += `<li><a href="#"><i class="fas fa-file-alt"></i> ${item.nombre || item.name}</a></li>`;
+        items.slice(0, 5).forEach(item => {
+            dropdown += `<li><a href="/catalogo/${privilegeName}/detalle/${item.id}">
+                            <i class="fas fa-file-alt"></i> ${item.nombre || item.name}
+                         </a></li>`;
         });
     } else {
         dropdown += `<li><span class="no-items">No hay elementos disponibles</span></li>`;
     }
+
 
     dropdown += `</ul></li>`;
     return dropdown;

@@ -4,6 +4,9 @@ from app.db.proyectos_model import Proyectos
 from app.db.Juegos_model import Juegos
 from app.middleware.catalogo_middleware import get_user_from_token, has_access_to_module, verify_create_permission, verify_edit_permission, verify_delete_permission
 from app.db.db import db
+from app.db.UserPrivilege_model import UserPrivilege
+from app.db.users_model import User
+
 
 catalogo_api = Blueprint('catalogo', __name__)
 
@@ -134,11 +137,45 @@ def get_catalogo_detalle():
                 }
             })
 
+        elif modulo == 'Gestionar Privilegios':
+    # Obtener usuario con el ID proporcionado y sus privilegios
+            user_priv = db.session.query(UserPrivilege).join(User).filter(User.id == item_id).first()
+
+            if not user_priv:
+                return jsonify({"error": "Usuario no encontrado o sin privilegios."}), 404
+
+    # Asegurar que las variables siempre tengan un valor
+            can_create = user_priv.can_create if user_priv else False
+            can_edit = user_priv.can_edit if user_priv else False
+            can_view = user_priv.can_view if user_priv else False
+            can_delete = user_priv.can_delete if user_priv else False
+
+            return jsonify({
+                "modulo": "Gestionar Privilegios",
+                "can_view": can_view,
+                "detalle": {
+                    "id": user_priv.user.id,
+                    "nombre": user_priv.user.name,
+                    "descripcion": f"Email: {user_priv.user.email}, Teléfono: {user_priv.user.phone}",
+                    "privilegio": user_priv.privilege.name,
+                    "puede_crear": can_create,
+                    "puede_editar": can_edit,
+                    "puede_ver": can_view,
+                    "puede_eliminar": can_delete
+            }
+        })
+
+
+
         else:
             return jsonify({"error": "Módulo no válido."}), 400
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+
 
 @catalogo_api.post('/api/catalogo/agregar/')
 def add_new_content():

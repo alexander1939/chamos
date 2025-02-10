@@ -102,8 +102,17 @@ def obtener_categorias():
 
 @search_bp.route('/buscar/<category>', methods=['GET'])
 def buscar_categoria(category):
-    query = request.args.get('query', '').strip()
+    token = request.cookies.get("token")
+    if not token:
+        flash("Debes iniciar sesión para acceder a la búsqueda.", "danger")
+        return redirect(url_for('auth.login'))
 
+    user = get_user_from_token(token)
+    if not user:
+        flash("Usuario no encontrado.", "danger")
+        return redirect(url_for('auth.login'))
+
+    query = request.args.get('query', '').strip()
     if not query:
         return jsonify([])
 
@@ -113,16 +122,38 @@ def buscar_categoria(category):
         'proyectos': Proyectos
     }
 
-    if category not in model_map:
+    if category not in model_map and category != "privilegios":
         return jsonify([])
 
-    model = model_map[category]
-    results = db.session.query(model).filter(model.nombre.ilike(f'%{query}%')).all()
+    # Si la categoría es "privilegios", traer usuarios con privilegios
+    if category == "privilegios":
+        results = db.session.query(User).join(UserPrivilege).join(Privilege).filter(
+            User.name.ilike(f"%{query}%") | User.surnames.ilike(f"%{query}%")
+        ).all()
 
-    resultado_json = [{
-        'nombre': r.nombre,
-        'descripcion': r.descripcion,
-        'detalles_url': url_for('catalo.mostrar_detalle', modulo=category, item_id=r.id)
-    } for r in results]
+        resultado_json = [{
+            "id": user.id,
+            "name": user.name,
+            "surnames": user.surnames,
+            "privileges": [{
+                "name": priv.privilege.name,
+                "can_create": priv.can_create,
+                "can_edit": priv.can_edit,
+                "can_delete": priv.can_delete,
+                "can_view": priv.can_view
+            } for priv in user.user_privileges],
+            "detalles_url": url_for('auth.priv')  # Redirección a la gestión de privilegios
+        } for user in results]
+
+    else:
+        # Para materias, juegos y proyectos
+        model = model_map[category]
+        results = db.session.query(model).filter(model.nombre.ilike(f'%{query}%')).all()
+
+        resultado_json = [{
+            'nombre': r.nombre,
+            'descripcion': r.descripcion,
+            'detalles_url': url_for('catalo.mostrar_detalle', modulo=category, item_id=r.id)
+        } for r in results]
 
     return jsonify(resultado_json)

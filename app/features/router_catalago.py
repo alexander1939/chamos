@@ -6,6 +6,8 @@ import requests  # Asegúrate de importar requests
 from app.db.Materias_model import Materia
 from app.db.Juegos_model import Juegos
 from app.db.proyectos_model import Proyectos
+from app.db.UserPrivilege_model import UserPrivilege
+
 
 
 

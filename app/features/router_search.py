@@ -16,7 +16,6 @@ search_bp = Blueprint('search_bp', __name__)
 def buscar():
     token = request.cookies.get("token")
     print("Token recibido router: ", token)
-
     if not token:
         flash("Debes iniciar sesión para acceder a la búsqueda.", "danger")
         return redirect(url_for('auth.login'))
@@ -94,6 +93,6 @@ def obtener_categorias():
         UserPrivilege.can_view == True
     ).all()
 
-    categorias_disponibles = {p.privilege.name.lower(): p.privilege.name for p in privilegios_usuario}
+    categorias_disponibles = {p.privilege.name.split()[-1].lower(): p.privilege.name.split()[-1] for p in privilegios_usuario}
 
     return categorias_disponibles, 200

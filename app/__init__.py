@@ -15,6 +15,9 @@ from .db.users_model import User
 from .features.components.create_admin import create_admin_user
 from app.features.contra.recovery import recovery_bp
 from app.features.router_catalago import catalo_bp
+from app.api.search_api import searchApi
+from app.features.router_search import search_bp
+
 mail = Mail()
 def create_app():
     app = Flask(__name__)
@@ -50,6 +53,8 @@ def create_app():
     app.register_blueprint(catalogo_api)
     app.register_blueprint(usersApi) 
     app.register_blueprint(catalo_bp)
+    app.register_blueprint(searchApi)
+    app.register_blueprint(search_bp)
     app.register_blueprint(recovery_bp, url_prefix='/contra')    
 
 

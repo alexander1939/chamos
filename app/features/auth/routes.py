@@ -2,14 +2,14 @@ from flask import Blueprint, request, render_template, redirect, url_for, flash,
 from flask import jsonify, request, render_template
 from app.api.auth_api import register_user, login_user, logout_user, protected_route
 from app.api.menu_api import get_user_menu
-from app.middleware.auth_middleware import  guest_only
+from app.middleware.auth_middleware import  auth_required, guest_only
 from app.db.db import db
 from app.db.users_model import User
 from app.db.Privilege_model import Privilege
 from app.db.UserPrivilege_model import UserPrivilege
 from werkzeug.security import generate_password_hash
 from app.db.Juegos_model import Juegos
-from app.db.materias_model import Materia
+from app.db.Materias_model import Materia
 from app.db.proyectos_model import Proyectos
 from app.db.UserPrivilege_model import UserPrivilege
 from app.api.menu_api import get_user_menu
@@ -22,9 +22,10 @@ from app.middleware.menu_middleware import menu_required, get_privilege_content
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/')
-def index(): 
+@auth_required
+def index(user):  # Acepta el argumento `user`
     """Ruta protegida que muestra la página de inicio solo si el usuario está autenticado"""
-    return render_template("index.jinja", )
+    return render_template("index.jinja", user=user)
 
 @auth_bp.get('/register/')
 @guest_only
@@ -62,6 +63,7 @@ def register_post():
 
 
 @auth_bp.route('/login/', methods=['GET', 'POST'])
+@guest_only
 def login():
     if request.method == "POST":
         print("🔹 login() ha sido llamado")  # Debug
@@ -105,6 +107,6 @@ def login():
 
 
 @auth_bp.get('/gestionar_privilegios/')
-def priv():
-    return render_template("auth/manage_priv.jinja")
-
+@auth_required
+def priv(user):
+    return render_template("auth/manage_priv.jinja", user=user)

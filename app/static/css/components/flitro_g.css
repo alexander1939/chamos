@@ -1,0 +1,17 @@
+.search-dropdown {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.search-dropdown div {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.search-dropdown div:hover {
+    background: #f0f0f0;
+}

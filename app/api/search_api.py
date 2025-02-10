@@ -45,7 +45,6 @@ def advanced_search():
     if not user_privilege:
         return jsonify({"error": "No tienes permisos para ver esta categoría"}), 403
 
-    # Obtener resultados de la categoría
     if category in ["juegos", "materias", "proyectos"]:
         model_map = {
             "juegos": Juegos,
@@ -80,12 +79,11 @@ def advanced_search():
 
         result_list = list(user_privileges.values())
 
-        # Ahora aseguramos que "Gestionar Privilegios" se convierte en "privilegios"
         for user in result_list:
             privilegios = user.pop("privilegios", [])
             for privilegio in privilegios:
                 if privilegio == "Gestionar Privilegios":
-                    privilegio = "privilegios"  # Cambiamos el nombre del privilegio
-                user[privilegio] = privilegio  # Asignamos el privilegio con el nuevo nombre
+                    privilegio = "privilegios" 
+                user[privilegio] = privilegio  
 
         return jsonify(result_list)

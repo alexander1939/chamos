@@ -116,11 +116,9 @@ def buscar_categoria(category):
     if category not in model_map:
         return jsonify([])
 
-    # Realizar la búsqueda sobre el modelo adecuado
     model = model_map[category]
     results = db.session.query(model).filter(model.nombre.ilike(f'%{query}%')).all()
 
-    # Devolver los resultados como JSON
     resultado_json = [{
         'nombre': r.nombre,
         'descripcion': r.descripcion,

@@ -7,4 +7,4 @@ Flask-Migrate
 email-validator
 pyjwt
 Flask-Mail
-requests
+requests 

@@ -6,4 +6,4 @@ from .Privilege_model import Privilege
 from .UserPrivilege_model import UserPrivilege
 from .Juegos_model import Juegos
 from .proyectos_model import Proyectos
-from .materias_model import Materia
+from .Materias_model import Materia

@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const tableBody = document.querySelector("tbody");
-    const saveChangesBtn = document.getElementById("saveChangesBtn");
 
     let usersData = [];
 
@@ -28,7 +27,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             let row = `<tr data-user-id="${user.id}">
                 <td>${user.name} ${user.surnames}</td>
                 ${generatePrivilegesCells(user)}
-                <td><button class="update-user-btn">Actualizar</button></td>
             </tr>`;
             tableBody.innerHTML += row;
         });
@@ -64,38 +62,47 @@ function generatePrivilegesCells(user) {
     return cells;
 }
 
-document.addEventListener("change", (event) => {
+document.addEventListener("change", async (event) => {
     if (event.target.classList.contains("privilege-toggle")) {
         const privilegeContainer = event.target.closest("td").querySelector(".privilege-options");
         privilegeContainer.style.display = event.target.checked ? "block" : "none";
-    }
-});
 
-document.addEventListener("click", async (event) => {
-    if (event.target.classList.contains("update-user-btn")) {
+        // Actualizar privilegios automáticamente
         const row = event.target.closest("tr");
         const userId = row.getAttribute("data-user-id");
+        await updateUserPrivileges(userId, getUpdatedPrivileges(row));
+    }
 
-        const updatedPrivileges = [];
-
-        row.querySelectorAll(".privilege-toggle").forEach(privilegeCheckbox => {
-            if (privilegeCheckbox.checked) {
-                const privilegeName = privilegeCheckbox.getAttribute("data-privilege");
-                const privilegeOptions = privilegeCheckbox.closest("td").querySelector(".privilege-options");
-
-                updatedPrivileges.push({
-                    id: getPrivilegeIdByName(privilegeName),
-                    can_create: privilegeOptions.querySelector(".can-create").checked,
-                    can_edit: privilegeOptions.querySelector(".can-edit").checked,
-                    can_delete: privilegeOptions.querySelector(".can-delete").checked,
-                    can_view: privilegeOptions.querySelector(".can-view").checked
-                });
-            }
-        });
-
-        await updateUserPrivileges(userId, updatedPrivileges);
+    if (event.target.classList.contains("can-create") || 
+        event.target.classList.contains("can-edit") || 
+        event.target.classList.contains("can-delete") || 
+        event.target.classList.contains("can-view")) {
+        const row = event.target.closest("tr");
+        const userId = row.getAttribute("data-user-id");
+        await updateUserPrivileges(userId, getUpdatedPrivileges(row));
     }
 });
+
+function getUpdatedPrivileges(row) {
+    const updatedPrivileges = [];
+
+    row.querySelectorAll(".privilege-toggle").forEach(privilegeCheckbox => {
+        if (privilegeCheckbox.checked) {
+            const privilegeName = privilegeCheckbox.getAttribute("data-privilege");
+            const privilegeOptions = privilegeCheckbox.closest("td").querySelector(".privilege-options");
+
+            updatedPrivileges.push({
+                id: getPrivilegeIdByName(privilegeName),
+                can_create: privilegeOptions.querySelector(".can-create").checked,
+                can_edit: privilegeOptions.querySelector(".can-edit").checked,
+                can_delete: privilegeOptions.querySelector(".can-delete").checked,
+                can_view: privilegeOptions.querySelector(".can-view").checked
+            });
+        }
+    });
+
+    return updatedPrivileges;
+}
 
 function getPrivilegeIdByName(privilegeName) {
     const privilegeMap = {
@@ -118,13 +125,30 @@ async function updateUserPrivileges(userId, privileges) {
         const result = await response.json();
 
         if (response.ok) {
-            alert(result.message);
+            Swal.fire({
+                title: "¡Éxito!",
+                text: result.message,
+                icon: "success",
+                confirmButtonText: "OK",
+                timer: 3000,  
+                timerProgressBar: true
+            });
         } else {
             console.error("Error al actualizar:", result.error);
-            alert("Error al actualizar privilegios.");
+            Swal.fire({
+                title: "Error",
+                text: "No se pudieron actualizar los privilegios.",
+                icon: "error",
+                confirmButtonText: "Intentar de nuevo"
+            });
         }
     } catch (error) {
         console.error("Error al conectar con la API:", error);
-        alert("No se pudo actualizar los privilegios.");
+        Swal.fire({
+            title: "Error de conexión",
+            text: "No se pudo conectar con el servidor.",
+            icon: "error",
+            confirmButtonText: "Cerrar"
+        });
     }
 }

@@ -61,7 +61,7 @@ def get_privilege_content(user, privileges):
             contenido = [{"id": u.id, "name": u.name, "email": u.email} for u in users]
 
         elif privilege_name == "Materias":
-            from app.db.materias_model import Materia
+            from app.db.Materias_model import Materia
             materias = Materia.query.filter_by(id_usuario=user.id).all()
             contenido = [{"id": m.id, "nombre": m.nombre, "descripcion": m.descripcion} for m in materias]
 

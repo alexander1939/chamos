@@ -1,4 +1,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/token.css') }}">
+<script src="{{ url_for('static', filename='js/components/loginvalidacion.js') }}"></script>
+
 
 <form method="POST">
     {{ form.hidden_tag() }}
@@ -36,36 +38,5 @@
             <p>Las contraseñas no coinciden.</p>
         </div>
     </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const password = document.getElementById("nueva_contrasena");
-            const confirmPassword = document.getElementById("confirmar_contrasena");
-            const errorDiv = document.getElementById("error-contrasena");
-            const errorNuevaContrasena = document.getElementById("error-nueva-contrasena");
-
-            function validarContrasena() {
-                const regex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
-
-                // Validar formato de la nueva contraseña
-                if (password.value.length > 0 && !regex.test(password.value)) {
-                    errorNuevaContrasena.style.display = "block";
-                } else {
-                    errorNuevaContrasena.style.display = "none";
-                }
-
-                // Validar que las contraseñas coincidan (solo si ambas están llenas)
-                if (password.value !== "" && confirmPassword.value !== "" && password.value !== confirmPassword.value) {
-                    errorDiv.style.display = "block";
-                } else {
-                    errorDiv.style.display = "none";
-                }
-            }
-
-            password.addEventListener("input", validarContrasena);
-            confirmPassword.addEventListener("input", validarContrasena);
-        });
-    </script>
-
     <button type="submit" class="btn btn-primary">Restablecer Contraseña</button>
 </form>

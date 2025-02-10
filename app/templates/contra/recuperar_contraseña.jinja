@@ -94,38 +94,7 @@
         </form>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.getElementById("recuperar-form");
-            const emailInput = document.getElementById("email");
-            const errorDiv = document.getElementById("email-error");
-
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Expresión regular para validar correos
-
-            function validateEmail() {
-                const email = emailInput.value.trim();
-                if (!email) {
-                    errorDiv.textContent = "El correo es obligatorio";
-                    emailInput.classList.add("is-invalid");
-                } else if (!emailRegex.test(email)) {
-                    errorDiv.textContent = "Ingresa un correo válido";
-                    emailInput.classList.add("is-invalid");
-                } else {
-                    errorDiv.textContent = "";
-                    emailInput.classList.remove("is-invalid");
-                }
-            }
-
-            emailInput.addEventListener("input", validateEmail);
-
-            form.addEventListener("submit", function (event) {
-                validateEmail();
-                if (emailInput.classList.contains("is-invalid")) {
-                    event.preventDefault(); // Evita que el formulario se envíe si el email no es válido
-                }
-            });
-        });
-    </script>
+    <script src="{{ url_for('static', filename='js/components/loginvalidacion.js') }}"></script>
 
 </body>
 

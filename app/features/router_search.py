@@ -113,24 +113,42 @@ def buscar_categoria(category):
         return redirect(url_for('auth.login'))
 
     query = request.args.get('query', '').strip()
+
+    category = category.lower()
+
     if not query:
-        return jsonify([])
+        model_map = {
+            'materias': Materia,
+            'juegos': Juegos,
+            'proyectos': Proyectos
+        }
 
-    model_map = {
-        'materias': Materia,
-        'juegos': Juegos,
-        'proyectos': Proyectos
-    }
+        if category == "privilegios":
+            results = db.session.query(User).join(UserPrivilege).join(Privilege).all()
+        elif category in model_map:
+            model = model_map[category]
+            results = db.session.query(model).all()
+        else:
+            return jsonify([]) 
 
-    if category not in model_map and category != "privilegios":
-        return jsonify([])
+    else:
+        model_map = {
+            'materias': Materia,
+            'juegos': Juegos,
+            'proyectos': Proyectos
+        }
 
-    # Si la categoría es "privilegios", traer usuarios con privilegios
+        if category == "privilegios":
+            results = db.session.query(User).join(UserPrivilege).join(Privilege).filter(
+                User.name.ilike(f"%{query}%") | User.surnames.ilike(f"%{query}%")
+            ).all()
+        elif category in model_map:
+            model = model_map[category]
+            results = db.session.query(model).filter(model.nombre.ilike(f'%{query}%')).all()
+        else:
+            return jsonify([])
+
     if category == "privilegios":
-        results = db.session.query(User).join(UserPrivilege).join(Privilege).filter(
-            User.name.ilike(f"%{query}%") | User.surnames.ilike(f"%{query}%")
-        ).all()
-
         resultado_json = [{
             "id": user.id,
             "name": user.name,
@@ -142,18 +160,19 @@ def buscar_categoria(category):
                 "can_delete": priv.can_delete,
                 "can_view": priv.can_view
             } for priv in user.user_privileges],
-            "detalles_url": url_for('auth.priv')  # Redirección a la gestión de privilegios
+            "detalles_url": url_for('auth.priv')
         } for user in results]
-
     else:
-        # Para materias, juegos y proyectos
-        model = model_map[category]
-        results = db.session.query(model).filter(model.nombre.ilike(f'%{query}%')).all()
-
         resultado_json = [{
             'nombre': r.nombre,
             'descripcion': r.descripcion,
-            'detalles_url': url_for('catalo.mostrar_detalle', modulo=category, item_id=r.id)
+            'detalles_url': url_for('catalo.mostrar_detalle', modulo=category, item_id=r.id),
+            'edit_url': url_for('catalo.editar_contenido', modulo=category, item_id=r.id),
+            'delete_url': url_for('catalo.eliminar_contenido', modulo=category, item_id=r.id),  
+            'can_edit': True,  
+            'can_delete': True,  
+            'edit_image_url': url_for('static', filename='images/edit.png'),  
+            'delete_image_url': url_for('static', filename='images/delete.png')  
         } for r in results]
 
     return jsonify(resultado_json)

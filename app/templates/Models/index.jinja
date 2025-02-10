@@ -9,6 +9,7 @@
     <button type="button" id="cancel-search" class="btn btn-secondary ms-2" style="display:none;"
         onclick="cancelSearch()">Cancelar</button>
 </div>
+
 <section class="section-modulo py-5">
     <div class="container">
         <div class="text-center mb-5">
@@ -72,7 +73,7 @@
         {% endif %}
     </div>
 </section>
-<script src="{{ url_for('static', filename='js/components/filtro_catalago.js') }}"></script>
 
+<script src="{{ url_for('static', filename='js/components/filtro_catalago.js') }}"></script>
 
 {% endblock %}

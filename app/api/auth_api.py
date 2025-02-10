@@ -121,3 +121,23 @@ def logout_user():
 @authApi.get('/api/protected/')
 def protected_route():
     return jsonify({"message": "Acceso autorizado"}), 200
+
+
+@authApi.get('/api/auth/user/')
+def get_user():
+    token = request.cookies.get("token")
+    if not token or token not in active_tokens:
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
+    return jsonify({
+        "id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "surnames": user.surnames,
+        "phone": user.phone
+    }), 200

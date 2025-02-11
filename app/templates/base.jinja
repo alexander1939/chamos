@@ -29,15 +29,7 @@
     <script src="{{ url_for('static', filename='js/apis/menu_api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/logout_api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/select_api.js') }}"></script>
-
-
-
-
-
-
-
-
-
+    <script src="{{ url_for('static', filename='js/apis/load_user.js') }}"></script>
 
     {% block head %}{% endblock %}
 </head>
@@ -65,10 +57,8 @@
                     <div class="dropdown">
                         <a data-bs-toggle="dropdown" class="dropdown-toggle d-flex align-items-center hidden-arrow"
                             href="#" id="navbarDropdownMenuAvatar" role="button" aria-expanded="false">
-                            <!-- Imagen del usuario (puedes cambiarla dinámicamente si el backend la provee) -->
                             <img src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp" class="rounded-circle"
                                 height="35" alt="User Avatar" loading="lazy" id="user-avatar" />
-                            <!-- Aquí se actualizará el nombre del usuario autenticado -->
                             <span id="user-name" class="ms-2" style="text-decoration: none;"></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
@@ -80,12 +70,8 @@
                         </ul>
                     </div>
                 </div>
-
-
             </div>
         </nav>
-
-
 
         <nav aria-label="breadcrumb">
             <ol class="breadcrumbsx">
@@ -105,7 +91,8 @@
                 </li>
                 {% endif %}
                 {% endfor %}
-
+            </ol>
+        </nav>
     </header>
 
     <div class="menu-container">
@@ -123,8 +110,6 @@
         </div>
     </div>
 
-
-
     <main id="main" class="main">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -139,12 +124,9 @@
         {% endif %}
         {% endwith %}
 
-
         {% block content %}
         {% endblock %}
     </main>
-
-    </div>
 
     <footer>
         <div class="footer-container">
@@ -155,7 +137,6 @@
             </p>
         </div>
     </footer>
-
 </body>
 
 </html>

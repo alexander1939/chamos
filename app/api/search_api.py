@@ -153,6 +153,6 @@ def advanced_search():
             results_list.extend(result_list)
 
     if not results_list:
-        return jsonify({"mensaje": "No se encontraron resultados"}), 200
+        return jsonify([]), 200
 
     return jsonify(results_list)

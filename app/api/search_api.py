@@ -98,7 +98,6 @@ def advanced_search():
                 "descripcion": getattr(r, 'descripcion', None)
             } for r in results]
 
-    # Si la categoría es "todos"
     elif category == "todos":
         model_map = {
             "juegos": Juegos,
@@ -114,6 +113,7 @@ def advanced_search():
                     results = db.session.query(model).filter(
                         (model.nombre.ilike(f'%{query}%')) |
                         (model.descripcion.ilike(f'%{query}%'))).all()
+
 
                     results_list.extend([{
                         "categoria": key,
@@ -136,7 +136,8 @@ def advanced_search():
                     user_privileges_data[user_id] = {
                         "categoria": "privilegios",
                         "nombre": up.user.name,
-                        "descripcion": f"Email: {up.user.email}, Teléfono: {up.user.phone}",
+                        "email":up.user.email,
+                        "Teléfono":up.user.phone
                     }
                 user_privileges_data[user_id].setdefault("privilegios", []).append(up.privilege.name)
 

@@ -5,8 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cancelButton.style.display = 'none';
 
     searchInput.addEventListener('input', debounce(function () {
-        const query = searchInput.value.trim();
-        filterContent(query);
+        filterContent();
     }, 300));
 
     cancelButton.addEventListener('click', function () {
@@ -17,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadContent(query) {
     const modulo = window.location.pathname.split("/")[2];
     const tableBody = document.getElementById('content-container');
+    const cancelButton = document.getElementById('cancel-search');
 
     try {
         const response = await fetch(`/buscar/${modulo}?query=${query}`, {
@@ -74,25 +74,34 @@ async function loadContent(query) {
             });
         }
 
-        cancelButton.style.display = query.trim() !== '' ? 'inline' : 'none';
+        cancelButton.style.display = query.trim() !== '' ? 'inline-block' : 'none';
 
     } catch (error) {
         console.error('Error al obtener los contenidos:', error);
     }
 }
 
-function filterContent(query) {
-    if (query.trim() !== "") {
+function filterContent() {
+    const searchInput = document.getElementById('search-input');
+    const cancelButton = document.getElementById('cancel-search');
+    const query = searchInput.value.trim();
+
+    if (query !== "") {
         loadContent(query);
+        cancelButton.style.display = "inline-block";
     } else {
         cancelSearch();
     }
 }
 
 function cancelSearch() {
+    const searchInput = document.getElementById('search-input');
     const tableBody = document.getElementById('content-container');
-    document.getElementById('search-input').value = '';
+    const cancelButton = document.getElementById('cancel-search');
+
+    searchInput.value = '';
     tableBody.innerHTML = '';
+    cancelButton.style.display = "none";
 
     loadContent('');
 }

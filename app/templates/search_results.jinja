@@ -9,17 +9,43 @@
         {% for item in resultados %}
         <div class="col">
             <div class="card shadow-lg h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title">{{ item.nombre }}</h5>
+                    {% if "categoria" in item %}
+                    <p><strong>Categoria:</strong> {{ item.categoria }}</p>
+                    {% endif %}
+                </div>
                 <div class="card-body">
-                    {% for key, value in item.items() %}
-                    {% if loop.first %}
-                    <!-- Mostrar el nombre (el primer valor) arriba -->
-                    <h5 class="card-title">{{ value }}</h5>
-                    {% else %}
-                    <div class="mb-2">
-                        <span>{{ value }}</span>
-                    </div>
+                    {% if "descripcion" in item %}
+                    <p>{{ item.descripcion }}</p>
+                    {% endif %}
+
+                    {% if "email" in item %}
+                    <p><strong>Correo:</strong> {{ item.email }}</p>
+                    {% endif %}
+
+                    {% if "Teléfono" in item %}
+                    <p><strong>Teléfono:</strong> {{ item["Teléfono"] }}</p>
+                    {% endif %}
+
+                    {% set filtered_keys = item.keys() | list %}
+                    {% set ignored_keys = ["nombre", "descripcion", "email", "Teléfono", "categoria"] %}
+
+                    {% set privileges = [] %}
+                    {% for key in filtered_keys %}
+                    {% if key not in ignored_keys %}
+                    {% set _ = privileges.append(key) %}
                     {% endif %}
                     {% endfor %}
+
+                    {% if privileges %}
+                    <p><strong>Privilegios:</strong></p>
+                    <ul class="list-group">
+                        {% for privilege in privileges %}
+                        <li class="list-group-item">{{ privilege }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
                 </div>
             </div>
         </div>

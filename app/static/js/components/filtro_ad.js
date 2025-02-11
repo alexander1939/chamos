@@ -43,7 +43,6 @@ async function fetchAndRenderUsers(query = '') {
     }
 }
 
-// Función para generar las celdas de privilegios
 function generatePrivilegesCells(user) {
     const privilegeNames = ["Materias", "Proyectos", "Juegos"];
     let cells = "";

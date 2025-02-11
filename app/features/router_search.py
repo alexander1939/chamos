@@ -34,6 +34,7 @@ def buscar():
         flash("Debes ingresar un término de búsqueda y seleccionar una categoría.", "warning")
         return redirect(url_for('auth.index'))
 
+    # Definir las categorías con privilegios
     category_privileges = {
         "juegos": "Juegos",
         "materias": "Materias",
@@ -41,21 +42,29 @@ def buscar():
         "privilegios": "Gestionar Privilegios"
     }
 
-    if category not in category_privileges:
-        flash("Categoría no válida.", "warning")
-        return redirect(url_for('auth.index'))
+    # 🚀 Si la categoría es "todos", no se necesita validación de privilegios
+    if category == "todos":
+        privilege_name = None
+    else:
+        if category not in category_privileges:
+            flash("Categoría no válida.", "warning")
+            return redirect(url_for('auth.index'))
+        
+        privilege_name = category_privileges[category]
 
-    privilege_name = category_privileges[category]
-    user_privilege = db.session.query(UserPrivilege).join(Privilege).filter(
-        UserPrivilege.user_id == user.id, 
-        Privilege.name == privilege_name,
-        UserPrivilege.can_view == True
-    ).first()
+    # 🔹 Solo validar privilegios si la categoría no es "todos"
+    if privilege_name:
+        user_privilege = db.session.query(UserPrivilege).join(Privilege).filter(
+            UserPrivilege.user_id == user.id, 
+            Privilege.name == privilege_name,
+            UserPrivilege.can_view == True
+        ).first()
 
-    if not user_privilege:
-        flash("No tienes permisos para ver esta categoría.", "danger")
-        return redirect(url_for('auth.index'))
+        if not user_privilege:
+            flash("No tienes permisos para ver esta categoría.", "danger")
+            return redirect(url_for('auth.index'))
 
+    # 🔹 Llamar a la API correctamente
     api_url = request.host_url + "api/search"
     params = {'query': query, 'category': category}
 
@@ -76,7 +85,7 @@ def buscar():
 
     return render_template("search_results.jinja", resultados=resultados, query=query, category=category)
 
-    
+
 @search_bp.route('/categorias', methods=['GET'])
 def obtener_categorias():
     token = request.cookies.get("token")
@@ -98,8 +107,6 @@ def obtener_categorias():
     return categorias_disponibles, 200
 
 
-
-
 @search_bp.route('/buscar/<category>', methods=['GET'])
 def buscar_categoria(category):
     token = request.cookies.get("token")
@@ -113,40 +120,31 @@ def buscar_categoria(category):
         return redirect(url_for('auth.login'))
 
     query = request.args.get('query', '').strip()
-
     category = category.lower()
 
-    if not query:
-        model_map = {
-            'materias': Materia,
-            'juegos': Juegos,
-            'proyectos': Proyectos
-        }
+    model_map = {
+        'materias': Materia,
+        'juegos': Juegos,
+        'proyectos': Proyectos
+    }
 
-        if category == "privilegios":
-            results = db.session.query(User).join(UserPrivilege).join(Privilege).all()
-        elif category in model_map:
-            model = model_map[category]
-            results = db.session.query(model).all()
-        else:
-            return jsonify([]) 
-
-    else:
-        model_map = {
-            'materias': Materia,
-            'juegos': Juegos,
-            'proyectos': Proyectos
-        }
-
-        if category == "privilegios":
+    if category == "privilegios":
+        if query:
             results = db.session.query(User).join(UserPrivilege).join(Privilege).filter(
                 User.name.ilike(f"%{query}%") | User.surnames.ilike(f"%{query}%")
             ).all()
-        elif category in model_map:
-            model = model_map[category]
-            results = db.session.query(model).filter(model.nombre.ilike(f'%{query}%')).all()
         else:
-            return jsonify([])
+            results = db.session.query(User).join(UserPrivilege).join(Privilege).all()
+    elif category in model_map:
+        model = model_map[category]
+        if query:
+            results = db.session.query(model).filter(
+                model.nombre.ilike(f'%{query}%') | model.descripcion.ilike(f'%{query}%')
+            ).all()
+        else:
+            results = db.session.query(model).all()
+    else:
+        return jsonify([])
 
     if category == "privilegios":
         resultado_json = [{
@@ -168,11 +166,11 @@ def buscar_categoria(category):
             'descripcion': r.descripcion,
             'detalles_url': url_for('catalo.mostrar_detalle', modulo=category, item_id=r.id),
             'edit_url': url_for('catalo.editar_contenido', modulo=category, item_id=r.id),
-            'delete_url': url_for('catalo.eliminar_contenido', modulo=category, item_id=r.id),  
-            'can_edit': True,  
-            'can_delete': True,  
-            'edit_image_url': url_for('static', filename='images/edit.png'),  
-            'delete_image_url': url_for('static', filename='images/delete.png')  
+            'delete_url': url_for('catalo.eliminar_contenido', modulo=category, item_id=r.id),
+            'can_edit': True,
+            'can_delete': True,
+            'edit_image_url': url_for('static', filename='images/edit.png'),
+            'delete_image_url': url_for('static', filename='images/delete.png')
         } for r in results]
 
     return jsonify(resultado_json)

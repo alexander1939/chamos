@@ -49,17 +49,15 @@ async function loadContent(query) {
                             <h5 class="card-title">${item.nombre}</h5>
                             <p class="card-text">${item.descripcion}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex justify-content-between align-items-center">
+                                <div>
                                     <a href="${item.detalles_url}" class="btn btn-primary btn-sm">Ver Detalles</a>
                                 </div>
                                 <div class="d-flex">
-                                    <!-- Botón de Editar -->
-                                    ${item.can_edit ? ` 
+                                    ${item.can_edit ? `
                                         <a href="${item.edit_url}" class="btn btn-warning btn-sm me-2">
                                             <img src="${item.edit_image_url}" alt="Editar" width="20" height="20">
                                         </a>
                                     ` : ''}
-                                    <!-- Botón de Eliminar -->
                                     ${item.can_delete ? `
                                         <form action="${item.delete_url}" method="POST" style="display:inline-block;">
                                             <button type="submit" class="btn btn-danger btn-sm">

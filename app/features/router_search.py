@@ -15,14 +15,11 @@ search_bp = Blueprint('search_bp', __name__)
 @search_bp.route('/buscar', methods=['GET'])
 def buscar():
     token = request.cookies.get("token")
-    print("Token recibido router: ", token)
     if not token:
         flash("Debes iniciar sesión para acceder a la búsqueda.", "danger")
         return redirect(url_for('auth.login'))
 
     user = get_user_from_token(token)  
-    print("Usuario obtenido desde el token: ", user)
-
     if not user:
         flash("Usuario no encontrado.", "danger")
         return redirect(url_for('auth.login'))
@@ -34,7 +31,6 @@ def buscar():
         flash("Debes ingresar un término de búsqueda y seleccionar una categoría.", "warning")
         return redirect(url_for('auth.index'))
 
-    # Definir las categorías con privilegios
     category_privileges = {
         "juegos": "Juegos",
         "materias": "Materias",
@@ -42,18 +38,15 @@ def buscar():
         "privilegios": "Gestionar Privilegios"
     }
 
-    # 🚀 Si la categoría es "todos", no se necesita validación de privilegios
     if category == "todos":
         privilege_name = None
     else:
-        if category not in category_privileges:
+        privilege_name = category_privileges.get(category)
+
+        if not privilege_name:
             flash("Categoría no válida.", "warning")
             return redirect(url_for('auth.index'))
-        
-        privilege_name = category_privileges[category]
 
-    # 🔹 Solo validar privilegios si la categoría no es "todos"
-    if privilege_name:
         user_privilege = db.session.query(UserPrivilege).join(Privilege).filter(
             UserPrivilege.user_id == user.id, 
             Privilege.name == privilege_name,
@@ -64,7 +57,6 @@ def buscar():
             flash("No tienes permisos para ver esta categoría.", "danger")
             return redirect(url_for('auth.index'))
 
-    # 🔹 Llamar a la API correctamente
     api_url = request.host_url + "api/search"
     params = {'query': query, 'category': category}
 
@@ -83,7 +75,31 @@ def buscar():
         flash("Error al conectar con el servidor.", "danger")
         return redirect(url_for('auth.index'))
 
-    return render_template("search_results.jinja", resultados=resultados, query=query, category=category)
+    if privilege_name:
+        can_edit = db.session.query(UserPrivilege).join(Privilege).filter(
+            UserPrivilege.user_id == user.id,
+            Privilege.name == privilege_name,
+            UserPrivilege.can_edit == True
+        ).first() is not None
+
+        can_delete = db.session.query(UserPrivilege).join(Privilege).filter(
+            UserPrivilege.user_id == user.id,
+            Privilege.name == privilege_name,
+            UserPrivilege.can_delete == True
+        ).first() is not None
+    else:
+        can_edit = False
+        can_delete = False
+
+    return render_template(
+        "search_results.jinja",
+        resultados=resultados,
+        query=query,
+        category=category,
+        can_edit=can_edit,
+        can_delete=can_delete
+    )
+
 
 
 @search_bp.route('/categorias', methods=['GET'])

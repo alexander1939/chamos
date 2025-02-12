@@ -1,8 +1,6 @@
 from flask import request
 from flask_login import current_user
-
-
-
+from app.db.users_model import User
 
 BREADCRUMB_NAMES = {
     "/error-404": "Página no encontrada"
@@ -14,7 +12,7 @@ def generate_breadcrumbs():
     """
     MODELS_MAP = {
         # "materias": Materia,
-        # "juegos":Juegos,
+        # "juegos": Juegos,
         # "proyectos": Proyectos
     }
 
@@ -24,6 +22,10 @@ def generate_breadcrumbs():
 
     for i, segment in enumerate(path_segments):
         accumulated_path += f"/{segment}"
+
+        # Evitar que "catalogo" aparezca en la visualización, pero mantener su estructura en la URL
+        if segment.lower() == "catalogo":
+            continue
 
         if segment in ["detalles", "editar"] and i + 1 < len(path_segments):
             parent_segment = path_segments[i - 1] if i > 0 else None
@@ -36,14 +38,13 @@ def generate_breadcrumbs():
                     if current_user.is_authenticated and current_user.role == "Admin":
                         user = User.query.get(item.id_usuario)  
                         if user:
-                            # Insertamos el breadcrumb del usuario en la posición 1 (después de "Home")
                             breadcrumbs.insert(0, {
                                 "name": user.name,  
                                 "url": None  
                             })
                     
                     if segment == "detalles":
-                        name = f"Detalle de {item.nombre}"
+                        name = f"Detalles {item.nombre}"
                     elif segment == "editar":
                         name = f"Editar {item.nombre}"
                 else:

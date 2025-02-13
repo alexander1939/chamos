@@ -9,12 +9,9 @@ from app.db.users_model import User
 from app.db.db import db
 
 searchApi = Blueprint('searchApi', __name__)
-
 @searchApi.get('/api/search')
 def advanced_search():
     token = request.cookies.get("token")
-    print("Token recibido api: ", token)
-
     if not token:
         return jsonify({"error": "Token no proporcionado."}), 400
 
@@ -53,50 +50,31 @@ def advanced_search():
         if not has_privilege:
             return jsonify({"error": "No tienes permisos para ver esta categoría"}), 403
 
-        if category == "privilegios":
-            results = db.session.query(UserPrivilege).join(User).join(Privilege).filter(
-                (User.name.ilike(f'%{query}%')) |
-                (User.email.ilike(f'%{query}%')) |
-                (User.phone.ilike(f'%{query}%')) |
-                (Privilege.name.ilike(f'%{query}%'))
-            ).all()
+        model_map = {
+            "juegos": Juegos,
+            "materias": Materia,
+            "proyectos": Proyectos
+        }
 
-            user_privileges_data = {}
-            for up in results:
-                user_id = up.user_id
-                if user_id not in user_privileges_data:
-                    user_privileges_data[user_id] = {
-                        "nombre": up.user.name,
-                        "descripcion": f"Email: {up.user.email}, Teléfono: {up.user.phone}",
-                    }
-                user_privileges_data[user_id].setdefault("privilegios", []).append(up.privilege.name)
+        results = db.session.query(model_map[category]).filter(
+            (model_map[category].nombre.ilike(f'%{query}%')) |
+            (model_map[category].descripcion.ilike(f'%{query}%'))
+        ).all()
 
-            results_list = list(user_privileges_data.values())
+        for r in results:
+            user_privilege = db.session.query(UserPrivilege).join(Privilege).filter(
+                UserPrivilege.user_id == user.id,
+                Privilege.name == privilege_name
+            ).first()
 
-            for user in results_list:
-                privilegios = user.pop("privilegios", [])
-                for privilegio in privilegios:
-                    if privilegio == "Gestionar Privilegios":
-                        privilegio = "privilegios"
-                    user[privilegio] = privilegio
-
-        else:
-            model_map = {
-                "juegos": Juegos,
-                "materias": Materia,
-                "proyectos": Proyectos
-            }
-
-            results = db.session.query(model_map[category]).filter(
-                (model_map[category].nombre.ilike(f'%{query}%')) |
-                (model_map[category].descripcion.ilike(f'%{query}%')),
-                model_map[category].id_usuario == user.id
-            ).all()
-
-            results_list = [{
+            results_list.append({
+                "id": r.id,
                 "nombre": r.nombre,
-                "descripcion": getattr(r, 'descripcion', None)
-            } for r in results]
+                "descripcion": getattr(r, 'descripcion', None),
+                "categoria": category,
+                "can_edit": user_privilege.can_edit if user_privilege else False,
+                "can_delete": user_privilege.can_delete if user_privilege else False
+            })
 
     elif category == "todos":
         model_map = {
@@ -112,45 +90,18 @@ def advanced_search():
                 if module_name == category_privileges[key].lower():
                     results = db.session.query(model).filter(
                         (model.nombre.ilike(f'%{query}%')) |
-                        (model.descripcion.ilike(f'%{query}%'))).all()
+                        (model.descripcion.ilike(f'%{query}%'))
+                    ).all()
 
-
-                    results_list.extend([{
-                        "categoria": key,
-                        "nombre": r.nombre,
-                        "descripcion": getattr(r, 'descripcion', None)
-                    } for r in results])
-
-        if any(up.privilege.name == "Gestionar Privilegios" for up in user_privileges):
-            privilege_results = db.session.query(UserPrivilege).join(User).join(Privilege).filter(
-                (User.name.ilike(f'%{query}%')) |
-                (User.email.ilike(f'%{query}%')) |
-                (User.phone.ilike(f'%{query}%')) |
-                (Privilege.name.ilike(f'%{query}%'))
-            ).all()
-
-            user_privileges_data = {}
-            for up in privilege_results:
-                user_id = up.user_id
-                if user_id not in user_privileges_data:
-                    user_privileges_data[user_id] = {
-                        "categoria": "privilegios",
-                        "nombre": up.user.name,
-                        "email":up.user.email,
-                        "Teléfono":up.user.phone
-                    }
-                user_privileges_data[user_id].setdefault("privilegios", []).append(up.privilege.name)
-
-            result_list = list(user_privileges_data.values())
-
-            for user in result_list:
-                privilegios = user.pop("privilegios", [])
-                for privilegio in privilegios:
-                    if privilegio == "Gestionar Privilegios":
-                        privilegio = "privilegios"
-                    user[privilegio] = privilegio
-
-            results_list.extend(result_list)
+                    for r in results:
+                        results_list.append({
+                            "id": r.id,
+                            "nombre": r.nombre,
+                            "descripcion": getattr(r, 'descripcion', None),
+                            "categoria": key.capitalize(), 
+                            "can_edit": up.can_edit,
+                            "can_delete": up.can_delete
+                        })
 
     if not results_list:
         return jsonify([]), 200

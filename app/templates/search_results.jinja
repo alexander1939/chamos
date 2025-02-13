@@ -29,7 +29,8 @@
                     {% endif %}
 
                     {% set filtered_keys = item.keys() | list %}
-                    {% set ignored_keys = ["nombre", "descripcion", "email", "Teléfono", "categoria"] %}
+                    {% set ignored_keys = ["nombre", "descripcion", "email", "Teléfono", "categoria", "id", "can_edit",
+                    "can_delete"] %}
 
                     {% set privileges = [] %}
                     {% for key in filtered_keys %}
@@ -45,6 +46,36 @@
                         <li class="list-group-item">{{ privilege }}</li>
                         {% endfor %}
                     </ul>
+                    {% endif %}
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    {% set modulo = (item.categoria if category == "todos" else category).capitalize() %}
+
+                    {% if item.id %}
+                    <a href="{{ url_for('catalo.mostrar_detalle', modulo=modulo, item_id=item.id) }}"
+                        class="btn btn-primary btn-sm">Ver Detalles</a>
+
+                    <div class="d-flex">
+                        {% if item.can_edit %}
+                        <a href="{{ url_for('catalo.editar_contenido', modulo=modulo, item_id=item.id) }}"
+                            class="btn btn-warning btn-sm me-2">
+                            <img src="{{ url_for('static', filename='images/edit.png') }}" alt="Editar" width="20"
+                                height="20">
+                        </a>
+                        {% endif %}
+
+                        {% if item.can_delete %}
+                        <form action="{{ url_for('catalo.eliminar_contenido', modulo=modulo, item_id=item.id) }}"
+                            method="POST" style="display:inline-block;">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <img src="{{ url_for('static', filename='images/delete.png') }}" alt="Eliminar"
+                                    width="20" height="20">
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <button class="btn btn-secondary btn-sm" disabled>Sin ID</button>
                     {% endif %}
                 </div>
             </div>

@@ -149,7 +149,8 @@ def agregar_contenido(modulo):
         'desc_title': f'Descripción de {modulo}',
         'button_text': f'Agregar {modulo}',
         'item_name': '',
-        'item_description': ''
+        'item_description': '',
+        'modulo': modulo 
     }
 
     return render_template("models/add_categoria.jinja", **context)
@@ -199,7 +200,6 @@ def editar_contenido(modulo, item_id):
             flash(f"Error al editar {modulo}: {error_message}", "danger")
             return redirect(url_for('catalo.editar_contenido', modulo=modulo, item_id=item_id))
 
-    # Obtener los datos actuales del contenido
     if modulo == 'Materias':
         item = Materia.query.filter_by(id=item_id, id_usuario=user.id).first()
     elif modulo == 'Proyectos':
@@ -221,10 +221,12 @@ def editar_contenido(modulo, item_id):
         'desc_title': f'Descripción de {modulo}',
         'button_text': f'Editar {modulo}',
         'item_name': item.nombre,
-        'item_description': item.descripcion
+        'item_description': item.descripcion,
+        'modulo': modulo 
     }
 
     return render_template("models/edit_categoria.jinja", **context)
+
 
 @catalo_bp.post('/catalogo/<modulo>/eliminar/<int:item_id>/')
 def eliminar_contenido(modulo, item_id):

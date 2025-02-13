@@ -35,7 +35,8 @@
                             </div>
                             <div class="d-flex">
                                 {% if can_edit %}
-                                <a href="#" class="btn btn-warning btn-sm me-2">
+                                <a href="{{ url_for('catalo.editar_contenido', modulo=modulo, item_id=item.id) }}"
+                                    class="btn btn-warning btn-sm me-2">
                                     <img src="{{ url_for('static', filename='images/edit.png') }}" alt="Editar"
                                         width="20" height="20">
                                 </a>
@@ -75,5 +76,6 @@
 </section>
 
 <script src="{{ url_for('static', filename='js/components/filtro_catalago.js') }}"></script>
+<script src="{{ url_for('static', filename='js/apis/catalago.js') }}"></script>
 
 {% endblock %}

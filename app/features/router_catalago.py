@@ -17,12 +17,6 @@ catalo_bp = Blueprint('catalo', __name__)
 
 @catalo_bp.route('/catalogo/<modulo>/')
 def mostrar_contenido(modulo):
-    token = request.cookies.get("token")
-
-    if not token or token not in active_tokens:
-        flash("Debes iniciar sesión para acceder a esta página.", "danger")
-        return redirect(url_for('auth.login'))
-
     return render_template("models/index.jinja",modulo=modulo)
 
 

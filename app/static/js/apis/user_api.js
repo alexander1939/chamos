@@ -1,9 +1,27 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const userCardsContainer = document.getElementById("user-cards");
+    const userNameSpan = document.getElementById("user-name");
 
     try {
+        const authResponse = await fetch("/api/auth/user", {
+            method: "GET",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+        });
 
-        // Obtener la lista de usuarios
+        if (authResponse.ok) {
+            const user = await authResponse.json();
+            if (user && user.name) {
+                userNameSpan.textContent = `${user.name} ${user.surnames}`;
+
+                if (user.role === "admin") {
+                    userNameSpan.classList.add("text-danger", "fw-bold");
+                }
+            }
+        } else {
+            console.error(`Error al obtener usuario autenticado: ${authResponse.statusText}`);
+        }
+
         const response = await fetch("/api/users/", {
             method: "GET",
             credentials: "include",

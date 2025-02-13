@@ -39,6 +39,7 @@
 
 
 
+
     {% block head %}{% endblock %}
 </head>
 
@@ -85,31 +86,6 @@
         </nav>
 
 
-
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumbsx">
-                <li class="breadcrumbsx-item">
-                    <a href="{{ url_for('auth.index') }}">Home</a>
-                </li>
-                {% for crumb in breadcrumbs %}
-                {% if crumb.url %}
-                <li class="breadcrumbsx-item">
-                    <a href="{{ crumb.url }}" class="breadcrumbsx-link">
-                        <span class="breadcrumbsx-text">{{ crumb.name }}</span>
-                    </a>
-                </li>
-                {% else %}
-                <li class="breadcrumbsx-item active" aria-current="page">
-                    <span class="breadcrumbsx-text">{{ crumb.name }}</span>
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ol>
-        </nav>
-
-
-
-
     </header>
 
     <div class="menu-container">
@@ -131,6 +107,27 @@
 
 
     <main id="main" class="main">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumbsx">
+                <li class="breadcrumbsx-item">
+                    <a href="{{ url_for('auth.index') }}">Home</a>
+                </li>
+                {% for crumb in breadcrumbs %}
+                {% if crumb.url %}
+                <li class="breadcrumbsx-item">
+                    <a href="{{ crumb.url }}" class="breadcrumbsx-link">
+                        <span class="breadcrumbsx-text">{{ crumb.name }}</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="breadcrumbsx-item active" aria-current="page">
+                    <span class="breadcrumbsx-text">{{ crumb.name }}</span>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ol>
+        </nav>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         <div>

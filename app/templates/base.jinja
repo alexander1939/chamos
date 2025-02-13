@@ -29,7 +29,7 @@
     <script src="{{ url_for('static', filename='js/apis/menu_api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/logout_api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/select_api.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='js/components/main.js') }}"></script>
 
 
 
@@ -54,8 +54,7 @@
                     <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Buscar"
                         name="query" required>
 
-                    <select class="form-select me-2" name="category" id="category-select"
-                        data-api-url="{{ url_for('search_bp.obtener_categorias') }}">
+                    <select class="form-select me-2" name="category" id="category-select">
                         <option value="" disabled selected>Cargando categorías...</option>
                     </select>
 
@@ -121,6 +120,7 @@
             </div>
             <ul class="menu" id="menu-list">
                 <!-- Aquí se llenará el menú dinámicamente con JS -->
+
             </ul>
         </div>
         <div class="contents">

@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    const menuList = document.getElementById("menu-list");
+    await cargarDatos();
+});
 
+async function cargarDatos() {
     try {
         const response = await fetch("/api/menu", {
             method: "GET",
@@ -30,88 +32,115 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        menuList.innerHTML = `<li><a href="/"><i class="fas fa-home"></i> Inicio</a></li>`;
+        // Mostrar nombre del usuario
+        actualizarNombreUsuario(data.usuario);
 
-        if (!data.contenido || Object.keys(data.contenido).length === 0) {
-            console.warn("El usuario no tiene contenido asignado.");
-            return;
-        }
+        // Cargar el menú
+        cargarMenu(data.menu, data.privilegios);
 
-        data.privilegios.forEach((privilegeName) => {
-            const moduleData = data.contenido[privilegeName] || {};
-            const items = moduleData.items || [];
-            const canCreate = moduleData.can_create || false;
-            const canView = moduleData.can_view || false;
-
-            menuList.innerHTML += createDropdown(privilegeName, items, canCreate, canView);
-        });
-
+        // Actualizar el select con las categorías basadas en los privilegios
+        actualizarSelect(data.menu, data.privilegios);
     } catch (error) {
         console.error("Error al conectar con la API del menú:", error);
-        alert("No se pudo cargar el menú. Verifica tu conexión e intenta nuevamente.");
     }
-});
+}
 
-const privilegeRoutes = {
-    "Materias": {
-        listar: "/catalogo/Materias/",
-        agregar: "/catalogo/Materias/agregar"
-    },
-    "Juegos": {
-        listar: "/catalogo/Juegos/",
-        agregar: "/catalogo/Juegos/agregar"
-    },
-    "Proyectos": {
-        listar: "/catalogo/Proyectos/",
-        agregar: "/catalogo/Proyectos/agregar"
-    },
-    "Gestionar Privilegios": {
-        listar: "/gestionar_privilegios/",
-        agregar: "/gestionar_privilegios/agregar"
+// 🔹 **Actualiza el nombre del usuario en la interfaz**
+function actualizarNombreUsuario(usuario) {
+    const userNameElement = document.getElementById("user-name");
+    if (usuario && userNameElement) {
+        userNameElement.textContent = usuario.name || "Usuario desconocido";
     }
-};
+}
 
-function createDropdown(privilegeName, items, canCreate, canView) {
+// 🔹 **Carga el menú en la interfaz**
+function cargarMenu(menu, privilegios) {
+    const menuList = document.getElementById("menu-list");
+    if (!menuList) return;
+
+    menuList.innerHTML = `<li><a href="/"><i class="fas fa-home"></i> Inicio</a></li>`;
+
+    if (!Array.isArray(menu) || menu.length === 0) {
+        console.warn("No hay módulos en el menú.");
+        return;
+    }
+
+    menu.forEach(modulo => {
+        if (!privilegios.includes(modulo.nombre)) return; // Si no está en privilegios, ignorarlo
+
+        const { nombre, contenido, can_create, can_view } = modulo;
+        menuList.innerHTML += createDropdown(nombre, contenido, can_create, can_view);
+    });
+
+    // Habilitar funcionalidad de dropdowns
+    activarDropdowns();
+}
+
+// 🔹 **Crea el menú desplegable**
+function createDropdown(nombre, contenido, canCreate, canView) {
     let dropdown = `
         <li>
             <a href="#" class="dropdown-btn">
-                <i class="fas fa-folder"></i> ${privilegeName} 
+                <i class="fas fa-folder"></i> ${nombre} 
                 <i class="fas fa-chevron-down dropdown-icon"></i>
             </a>
             <ul class="dropdown-options" style="display: none;">
+                        <li><a href="/contact" class="nav-link">Contacto</a></li>
+
     `;
 
-    // Obtener las rutas de "Listar" y "Agregar" desde privilegeRoutes
-    const routes = privilegeRoutes[privilegeName] || {
-        listar: `/${privilegeName.toLowerCase()}/listar`,
-        agregar: `/${privilegeName.toLowerCase()}/agregar`
-    };
-
     if (canCreate) {
-        dropdown += `
-            <li><a href="${routes.agregar}">
-                <i class="fas fa-plus-circle"></i> Agregar</a></li>
-        `;
+        dropdown += `<li><a href="/catalogo/${nombre}/agregar/"><i class="fas fa-plus-circle"></i> Agregar</a></li>`;
     }
 
     if (canView) {
-        dropdown += `
-            <li><a href="${routes.listar}">
-                <i class="fas fa-list"></i> Listar</a></li>
-        `;
+        dropdown += `<li><a href="/catalogo/${nombre}/"><i class="fas fa-list"></i> Listar</a></li>`;
     }
 
-    if (Array.isArray(items) && items.length > 0) {
-        items.slice(0, 5).forEach(item => {
-            dropdown += `<li><a href="/catalogo/${privilegeName}/detalle/${item.id}">
-                            <i class="fas fa-file-alt"></i> ${item.nombre || item.name}
+    if (Array.isArray(contenido) && contenido.length > 0) {
+        contenido.forEach(item => {
+            dropdown += `<li><a href="/catalogo/${nombre}/detalle/${item.id}">
+                            <i class="fas fa-file-alt"></i> ${item.nombre}
                          </a></li>`;
         });
     } else {
         dropdown += `<li><span class="no-items">No hay elementos disponibles</span></li>`;
     }
 
-
     dropdown += `</ul></li>`;
     return dropdown;
+}
+
+// 🔹 **Activa los dropdowns del menú**
+function activarDropdowns() {
+    document.querySelectorAll(".dropdown-btn").forEach(btn => {
+        btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            const submenu = this.nextElementSibling;
+            if (submenu.style.display === "none") {
+                submenu.style.display = "block";
+            } else {
+                submenu.style.display = "none";
+            }
+        });
+    });
+}
+
+// 🔹 **Actualiza el select con las categorías basadas en los privilegios**
+function actualizarSelect(menu, privilegios) {
+    const selectElement = document.getElementById("category-select");
+    if (!selectElement) return;
+
+    // Limpiar el select
+    selectElement.innerHTML = '<option value="" disabled selected>Selecciona una categoría...</option>';
+
+    // Filtrar las categorías basadas en los privilegios
+    menu.forEach(modulo => {
+        if (privilegios.includes(modulo.nombre)) {
+            const option = document.createElement("option");
+            option.value = modulo.nombre;
+            option.textContent = modulo.nombre;
+            selectElement.appendChild(option);
+        }
+    });
 }

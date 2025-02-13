@@ -23,36 +23,7 @@ def mostrar_contenido(modulo):
         flash("Debes iniciar sesión para acceder a esta página.", "danger")
         return redirect(url_for('auth.login'))
 
-    request.args = {'modulo': modulo}  
-    response = get_user_catalog()  
-    
-    if isinstance(response, tuple):
-        response, status_code = response  
-    else:
-        status_code = response.status_code  
-
-    response_json = response.get_json() if hasattr(response, 'get_json') else response
-
-    if status_code == 200:
-        can_view = response_json.get("can_view", False)
-        can_create = response_json.get("can_create", False)
-        can_edit = response_json.get("can_edit", False)
-        can_delete = response_json.get("can_delete", False)
-
-        if not can_view:
-            flash("No tienes acceso a este módulo.", "warning")
-            return redirect(url_for('auth.index'))
-
-        contenido = response_json.get(modulo.lower(), []) 
-
-    elif status_code == 403:
-        flash("No tienes acceso a este módulo.", "warning")
-        return redirect(url_for('auth.index'))
-    else:
-        flash(response_json.get("error", f"Error al obtener {modulo.lower()}"), "danger")
-        contenido = []
-
-    return render_template("models/index.jinja", contenido=contenido, modulo=modulo, can_create=can_create, can_edit=can_edit, can_delete=can_delete)
+    return render_template("models/index.jinja",modulo=modulo)
 
 
 

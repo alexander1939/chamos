@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function obtenerModulo() {
     const pathSegments = window.location.pathname.split("/");
-    return pathSegments[2] || null;
+    return pathSegments[2] || null;  // Asumiendo que el módulo está en la 3ra parte de la URL
 }
 
 async function obtenerDatos(modulo) {
@@ -27,19 +27,21 @@ async function obtenerDatos(modulo) {
 
 function mostrarDatos(data, modulo) {
     const contentContainer = document.getElementById("content-container");
-    contentContainer.innerHTML = "";
+    contentContainer.innerHTML = "";  // Limpiar contenido previo
 
-    if (data.error) {
-        mostrarError(data.error);
+    // Verificar si hay datos o si hay error
+    if (!data || data.error || !data.materias && !data.proyectos && !data.juegos) {
+        mostrarError("No tienes proyectos registrados.");
         return;
     }
 
-    const items = data.materias || data.proyectos || data.juegos || [];
+    const items = data.materias || data.proyectos || data.juegos;
     if (items.length === 0) {
-        contentContainer.innerHTML = `<div class="alert alert-info">No hay registros disponibles.</div>`;
+        mostrarError("No tienes proyectos registrados.");
         return;
     }
 
+    // Crear y agregar tarjetas de datos
     items.forEach(item => {
         contentContainer.appendChild(crearTarjeta(item, modulo, data));
     });
@@ -75,5 +77,11 @@ function crearTarjeta(item, modulo, data) {
 }
 
 function mostrarError(error) {
-    document.getElementById("content-container").innerHTML = `<p style="color: red;">${error}</p>`;
+    const contentContainer = document.getElementById("content-container");
+    if (!contentContainer) {
+        console.error("Error: No se encontró el elemento #content-container en el DOM.");
+        return;
+    }
+
+    contentContainer.innerHTML = `<p style="color: red;">${error}</p>`;
 }

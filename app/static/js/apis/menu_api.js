@@ -90,11 +90,11 @@ function createDropdown(nombre, contenido, canCreate, canView) {
     `;
 
     if (canCreate) {
-        dropdown += `<li><a href="/catalogo/${nombre}/agregar/"><i class="fas fa-plus-circle"></i> Agregar</a></li>`;
+        dropdown += `<li><a href="/catalogo/${nombre}/agregar/"class="nav-link" ><i class="fas fa-plus-circle"></i> Agregar</a></li>`;
     }
 
     if (canView) {
-        dropdown += `<li><a href="/catalogo/${nombre}/"><i class="fas fa-list"></i> Listar</a></li>`;
+        dropdown += `<li><a href="/catalogo/${nombre}/"class="nav-link"><i class="fas fa-list"></i> Listar</a></li>`;
     }
 
     if (Array.isArray(contenido) && contenido.length > 0) {

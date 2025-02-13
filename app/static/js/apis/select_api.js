@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("search-form");
     const select = document.getElementById("category-select");
@@ -101,3 +102,5 @@ function populateCategories(select, categorias) {
 function displaySearchResults(data) {
     console.log("Resultados de la búsqueda:", data);
 }
+=======
+>>>>>>> b8496881b31cb2b37953143364eb31f749221f09

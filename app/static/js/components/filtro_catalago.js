@@ -1,14 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
     const cancelButton = document.getElementById('cancel-search');
 
     cancelButton.style.display = 'none';
 
-    searchInput.addEventListener('input', debounce(function () {
-        filterContent();
-    }, 300));
+    // Ejecutar búsqueda al presionar Enter
+    searchInput.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            filterContent();
+        }
+    });
 
-    cancelButton.addEventListener('click', function () {
+    // Ejecutar búsqueda al hacer clic en el botón
+    searchButton.addEventListener("click", function () {
+        filterContent();
+    });
+
+    // Cancelar búsqueda
+    cancelButton.addEventListener("click", function () {
         cancelSearch();
     });
 });
@@ -75,7 +86,6 @@ async function loadContent(query) {
         }
 
         cancelButton.style.display = query.trim() !== '' ? 'inline-block' : 'none';
-
     } catch (error) {
         console.error('Error al obtener los contenidos:', error);
     }
@@ -83,16 +93,15 @@ async function loadContent(query) {
 
 function filterContent() {
     const searchInput = document.getElementById('search-input');
-    const cancelButton = document.getElementById('cancel-search');
     const query = searchInput.value.trim();
 
-    if (query !== "") {
-        loadContent(query);
-        cancelButton.style.display = "inline-block";
+    if (query === "") {
+        cancelSearch(); // Si el campo está vacío, volver al estado inicial
     } else {
-        cancelSearch();
+        loadContent(query);
     }
 }
+
 
 function cancelSearch() {
     const searchInput = document.getElementById('search-input');
@@ -104,12 +113,4 @@ function cancelSearch() {
     cancelButton.style.display = "none";
 
     loadContent('');
-}
-
-function debounce(func, delay) {
-    let timeout;
-    return function () {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, arguments), delay);
-    };
 }

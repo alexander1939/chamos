@@ -18,7 +18,7 @@ catalo_bp = Blueprint('catalo', __name__)
 
 @catalo_bp.route('/catalogo/<modulo>/')
 def mostrar_contenido(modulo):
-    return render_template("models/index.jinja",modulo=modulo)
+    return render_template("index.jinja",modulo=modulo)
 
 
 

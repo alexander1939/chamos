@@ -22,6 +22,15 @@ function iniciarCatalogo() {
         .then(data => mostrarDatos(data, modulo))
         .catch(error => mostrarError(error));
 }
+/*
+    La función obtenerModulo() se encarga de extraer el módulo actual desde la URL de la página.
+    Esto es útil para identificar en qué sección o categoría se encuentra el usuario, como "materias", "proyectos", "juegos", etc.
+*/
+
+function obtenerModulo() {
+    const pathSegments = window.location.pathname.split("/");
+    return pathSegments[2] || null; // Obtiene el módulo de la URL (materias, proyectos, juegos)
+}
 
 /*
     Este bloque verifica si el documento ya está completamente cargado utilizando `document.readyState`.
@@ -74,22 +83,55 @@ async function obtenerDatos(modulo) {
 */
 function mostrarDatos(data, modulo) {
     const contentContainer = document.getElementById("content-container");
-    contentContainer.innerHTML = "";
+    contentContainer.innerHTML = ""; // Limpia el contenedor
 
     if (!data || data.error || !data.materias && !data.proyectos && !data.juegos) {
-        mostrarError("No tienes proyectos registrados.");
+        mostrarError("No se encontraron datos.");
         return;
     }
 
     const items = data.materias || data.proyectos || data.juegos;
     if (items.length === 0) {
-        mostrarError("No tienes proyectos registrados.");
+        mostrarError("No hay registros disponibles.");
         return;
     }
 
+    // Crear el título y la descripción del módulo dinámicamente
+    const titulo = document.createElement("h2");
+    titulo.className = "display-4 text-primary text-center";
+    titulo.textContent = `${modulo} Registrados`;
+
+    const descripcion = document.createElement("p");
+    descripcion.className = "lead text-muted text-center";
+    descripcion.textContent = `Aquí puedes ver todos los ${modulo.toLowerCase()} registrados.`;
+
+    // Agregar el título y la descripción al contenedor
+    contentContainer.appendChild(titulo);
+    contentContainer.appendChild(descripcion);
+
+    // Crear un contenedor para las tarjetas
+    const cardContainer = document.createElement("div");
+    cardContainer.className = "row row-cols-1 row-cols-md-3 g-4";
+    contentContainer.appendChild(cardContainer);
+
+    // Renderizar las tarjetas
     items.forEach(item => {
-        contentContainer.appendChild(crearTarjeta(item, modulo, data));
+        cardContainer.appendChild(crearTarjeta(item, modulo, data));
     });
+
+    // Mostrar el botón de agregar si hay permisos
+    if (data.can_create) {
+        const addButton = document.createElement("a");
+        addButton.href = `/catalogo/agregar/${modulo}`;
+        addButton.className = "btn btn-success btn-lg";
+        addButton.textContent = `Agregar Nuevo ${modulo.slice(0, -1)}`;
+
+        const addButtonContainer = document.createElement("div");
+        addButtonContainer.className = "text-center mt-4";
+        addButtonContainer.appendChild(addButton);
+
+        contentContainer.appendChild(addButtonContainer);
+    }
 }
 
 /*

@@ -1,4 +1,5 @@
-from flask import Blueprint, request, render_template, redirect, url_for, flash
+from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
+from app import db
 from app.api.catalago_api import get_user_catalog,add_new_content,get_catalogo_detalle    # Importamos la función directamente
 from app.middleware.auth_middleware import active_tokens
 from app.middleware.catalogo_middleware import get_user_from_token, has_access_to_module, verify_create_permission, verify_edit_permission, verify_delete_permission
@@ -55,9 +56,6 @@ def mostrar_detalle(modulo, item_id):
 
         detalle = response_json.get("detalle", {})
         return render_template("models/detail_categoria.jinja", detalle=detalle, modulo=modulo)
-    
-    flash(response.json().get("error", "Error al obtener detalles del contenido"), "danger")
-    return redirect(url_for('catalo.mostrar_contenido', modulo=modulo))
 
 
 

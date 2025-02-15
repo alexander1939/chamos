@@ -1,11 +1,3 @@
-/*
-    Este bloque de código espera que el contenido del DOM se cargue completamente antes de ejecutar cualquier acción. 
-    El evento "DOMContentLoaded" es disparado cuando el DOM ha terminado de cargarse, 
-    pero no necesariamente las imágenes o los recursos externos. 
-    Esto asegura que el código que depende del DOM pueda ser ejecutado sin problemas.
-    Luego, se obtiene el módulo desde la URL utilizando la función obtenerModulo(). 
-    Si no se obtiene un módulo válido, la ejecución se detiene con `return`.
-*/
 document.addEventListener("DOMContentLoaded", () => {
     const modulo = obtenerModulo();
     if (!modulo) return;
@@ -115,14 +107,14 @@ function crearTarjeta(item, modulo, data) {
                 <h5 class="card-title">${item.nombre}</h5>
                 <p class="card-text">${item.descripcion}</p>
                 <div class="d-flex justify-content-between align-items-center">
-                    <a href="/catalogo/${modulo}/${item.id}" class="btn btn-primary btn-sm">Ver Detalles</a>
+                    <a href="/catalogo/${modulo}/detalle/${item.id}" class="btn btn-primary btn-sm">Ver Detalles</a>
                     <div class="d-flex">
                         ${data.can_edit ? `
-                        <a href="#" class="btn btn-warning btn-sm me-2">
+                        <a href="/catalogo/${modulo}/editar/${item.id}" class="btn btn-warning btn-sm me-2">
                             <img src="/static/images/edit.png" alt="Editar" width="20" height="20">
                         </a>` : ""}
                         ${data.can_delete ? `
-                        <form action="/catalo/eliminar/${modulo}/${item.id}" method="POST" style="display:inline-block;">
+                        <form action="/catalogo/${modulo}/eliminar/${item.id}" method="POST" style="display:inline-block;">
                             <button type="submit" class="btn btn-danger btn-sm">
                                 <img src="/static/images/delete.png" alt="Eliminar" width="20" height="20">
                             </button>

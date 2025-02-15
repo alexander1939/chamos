@@ -29,6 +29,7 @@
     <script src="{{ url_for('static', filename='js/apis/menu_api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/logout_api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/select_api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/main.js') }}"></script>
 
 
 
@@ -54,8 +55,7 @@
                     <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Buscar"
                         name="query" required>
 
-                    <select class="form-select me-2" name="category" id="category-select"
-                        data-api-url="{{ url_for('search_bp.obtener_categorias') }}">
+                    <select class="form-select me-2" name="category" id="category-select">
                         <option value="" disabled selected>Cargando categorías...</option>
                     </select>
 
@@ -86,7 +86,27 @@
         </nav>
 
 
+    </header>
 
+    <div class="menu-container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Menú</h2>
+                <button class="close-menu" id="close-menu"><i class="fas fa-times"></i></button>
+            </div>
+            <ul class="menu" id="menu-list">
+                <!-- Aquí se llenará el menú dinámicamente con JS -->
+
+            </ul>
+        </div>
+        <div class="contents">
+            <button class="toggle-menu" id="toggle-menu"><i class="fas fa-bars"></i></button>
+        </div>
+    </div>
+
+
+
+    <main id="main" class="main">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumbsx">
                 <li class="breadcrumbsx-item">
@@ -108,29 +128,6 @@
             </ol>
         </nav>
 
-
-
-
-    </header>
-
-    <div class="menu-container">
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h2>Menú</h2>
-                <button class="close-menu" id="close-menu"><i class="fas fa-times"></i></button>
-            </div>
-            <ul class="menu" id="menu-list">
-                <!-- Aquí se llenará el menú dinámicamente con JS -->
-            </ul>
-        </div>
-        <div class="contents">
-            <button class="toggle-menu" id="toggle-menu"><i class="fas fa-bars"></i></button>
-        </div>
-    </div>
-
-
-
-    <main id="main" class="main">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         <div>

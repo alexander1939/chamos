@@ -6,14 +6,15 @@ menu = Blueprint('menu', __name__)
 @menu.route('/api/menu', methods=['GET'])
 @menu_required
 def get_user_menu(user, privileges):
-    """Devuelve los privilegios del usuario, incluyendo permisos `can_create` y `can_view`."""
+    """Devuelve los privilegios del usuario y el contenido del menú."""
     
     user_data = {
         "id": user.id,
         "name": user.name,
         "email": user.email
     }
+    
+    menu_data = get_privilege_content(user, privileges)
+    privilege_list = list(privileges.keys())
 
-    data = get_privilege_content(user, privileges)
-
-    return jsonify({"usuario": user_data, "privilegios": list(privileges.keys()), "contenido": data}), 200
+    return jsonify({"usuario": user_data, "menu": menu_data, "privilegios": privilege_list}), 200

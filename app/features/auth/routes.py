@@ -110,3 +110,7 @@ def login():
 @auth_required
 def priv(user):
     return render_template("auth/manage_priv.jinja", user=user)
+
+@auth_bp.route("/contact")
+def contact():
+    return render_template("contact.jinja")

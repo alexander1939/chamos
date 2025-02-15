@@ -102,25 +102,6 @@ def buscar():
 
 
 
-@search_bp.route('/categorias', methods=['GET'])
-def obtener_categorias():
-    token = request.cookies.get("token")
-
-    if not token:
-        return {}, 403  
-
-    user, error_message, status_code = get_current_user()
-    if error_message:
-        return {}, 403
-
-    privilegios_usuario = db.session.query(UserPrivilege).join(Privilege).filter(
-        UserPrivilege.user_id == user.id,
-        UserPrivilege.can_view == True
-    ).all()
-
-    categorias_disponibles = {p.privilege.name.split()[-1].lower(): p.privilege.name.split()[-1] for p in privilegios_usuario}
-
-    return categorias_disponibles, 200
 
 
 @search_bp.route('/buscar/<category>', methods=['GET'])

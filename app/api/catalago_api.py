@@ -29,41 +29,32 @@ def get_user_catalog():
         return jsonify({"error": error}), 403
 
     try:
+        response_data = {
+            "can_create": user_privilege.can_create,
+            "can_edit": user_privilege.can_edit,
+            "can_view": user_privilege.can_view,
+            "can_delete": user_privilege.can_delete,
+        }
+
         if modulo == 'Materias':
-            materias = db.session.query(Materia).filter_by(id_usuario=user.id).all()
-            return jsonify({
-                "modulo": "Materias",
-                "can_create": user_privilege.can_create,
-                "can_edit": user_privilege.can_edit,
-                "can_view": user_privilege.can_view,
-                "can_delete": user_privilege.can_delete,
-                "materias": [{"id": materia.id, "nombre": materia.nombre, "descripcion": materia.descripcion} for materia in materias]
-    })
-
+            response_data["materias"] = [
+                {"id": materia.id, "nombre": materia.nombre, "descripcion": materia.descripcion}
+                for materia in db.session.query(Materia).filter_by(id_usuario=user.id).all()
+            ]
         elif modulo == 'Proyectos':
-            proyectos = db.session.query(Proyectos).filter_by(id_usuario=user.id).all()
-            return jsonify({
-                "modulo": "Proyectos",
-                "can_create": user_privilege.can_create,
-                "can_edit": user_privilege.can_edit,
-                "can_view": user_privilege.can_view,
-                "can_delete": user_privilege.can_delete,
-                "proyectos": [{"id": proyecto.id,"nombre": proyecto.nombre, "descripcion": proyecto.descripcion} for proyecto in proyectos]
-            })
-
+            response_data["proyectos"] = [
+                {"id": proyecto.id, "nombre": proyecto.nombre, "descripcion": proyecto.descripcion}
+                for proyecto in db.session.query(Proyectos).filter_by(id_usuario=user.id).all()
+            ]
         elif modulo == 'Juegos':
-            juegos = db.session.query(Juegos).filter_by(id_usuario=user.id).all()
-            return jsonify({
-                "modulo": "Juegos",
-                "can_create": user_privilege.can_create,
-                "can_edit": user_privilege.can_edit,
-                "can_view": user_privilege.can_view,
-                "can_delete": user_privilege.can_delete,
-                "juegos": [{"id": juego.id,"nombre": juego.nombre, "descripcion": juego.descripcion} for juego in juegos]
-            })
-
+            response_data["juegos"] = [
+                {"id": juego.id, "nombre": juego.nombre, "descripcion": juego.descripcion}
+                for juego in db.session.query(Juegos).filter_by(id_usuario=user.id).all()
+            ]
         else:
             return jsonify({"error": "Módulo no válido."}), 400
+
+        return jsonify(response_data)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

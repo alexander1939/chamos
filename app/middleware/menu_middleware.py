@@ -10,16 +10,16 @@ from sqlalchemy.orm import joinedload
 def get_current_user():
     """Obtiene el usuario autenticado a partir del token."""
     token = request.cookies.get("token")
-
+    
     if not token or token not in active_tokens:
         return None, jsonify({"error": "Token inválido o no proporcionado"}), 401
-
+    
     user_id = active_tokens[token]["user_id"]
     user = db.session.query(User).filter_by(id=user_id).first()
-
+    
     if not user:
         return None, jsonify({"error": "Usuario no encontrado"}), 404
-
+    
     return user, None, None
 
 def menu_required(f):
@@ -46,13 +46,13 @@ def menu_required(f):
         }
 
         return f(user, privileges, *args, **kwargs)
-
+    
     return decorated_function
 
 def get_privilege_content(user, privileges):
     """Genera el contenido basado en los privilegios del usuario."""
-    data = {}
-
+    menu_items = []
+    
     for privilege_name, permission in privileges.items():
         contenido = []
 
@@ -75,10 +75,11 @@ def get_privilege_content(user, privileges):
             proyectos = Proyectos.query.filter_by(id_usuario=user.id).all()
             contenido = [{"id": p.id, "nombre": p.nombre, "descripcion": p.descripcion} for p in proyectos]
 
-        data[privilege_name] = {
-            "items": contenido,
+        menu_items.append({
+            "nombre": privilege_name,
+            "contenido": contenido,
             "can_create": permission["can_create"],
             "can_view": permission["can_view"]
-        }
-
-    return data
+        })
+    
+    return menu_items

@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const userNameSpan = document.getElementById("user-name");
 
     try {
-        // Obtener el usuario autenticado
         const authResponse = await fetch("/api/auth/user", {
             method: "GET",
             credentials: "include",
@@ -14,8 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const user = await authResponse.json();
             if (user && user.name) {
                 userNameSpan.textContent = `${user.name} ${user.surnames}`;
-                
-                // Opcional: resaltar si es admin
+
                 if (user.role === "admin") {
                     userNameSpan.classList.add("text-danger", "fw-bold");
                 }
@@ -24,7 +22,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.error(`Error al obtener usuario autenticado: ${authResponse.statusText}`);
         }
 
-        // Obtener la lista de usuarios
         const response = await fetch("/api/users/", {
             method: "GET",
             credentials: "include",

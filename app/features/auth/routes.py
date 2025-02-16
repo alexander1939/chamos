@@ -26,6 +26,7 @@ auth_bp = Blueprint('auth', __name__)
 def index(user):  # Acepta el argumento `user`
     """Ruta protegida que muestra la página de inicio solo si el usuario está autenticado"""
     return render_template("index.jinja", user=user)
+    
 
 @auth_bp.get('/register/')
 @guest_only

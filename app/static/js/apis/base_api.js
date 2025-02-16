@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         menuList.dataset.loaded = "true"; // Marca los datos como cargados.
     }
 
-    activarNavegacion(); // Activa la navegación después de cargar los datos.
 });
 
 /*

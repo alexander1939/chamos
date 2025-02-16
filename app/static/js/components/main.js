@@ -54,14 +54,22 @@ async function loadContent(url) {
         const html = await response.text();
         const newDoc = new DOMParser().parseFromString(html, "text/html");
 
+        // Reemplaza el contenido del <main>
         document.querySelector("main").innerHTML = newDoc.querySelector("main").innerHTML;
 
+        // Ejecuta los scripts dinámicos
         ejecutarScriptsDinamicos(newDoc);
+
+        // Si la URL pertenece al catálogo, inicia el catálogo
+        if (url.startsWith("/catalogo/")) {
+            iniciarCatalogo();
+        }
 
     } catch (error) {
         console.error("Error al cargar el contenido:", error);
     }
 }
+
 
 /*
     La función ejecutarScriptsDinamicos se encarga de ejecutar los scripts que forman parte del contenido HTML cargado.

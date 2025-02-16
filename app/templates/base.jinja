@@ -66,10 +66,8 @@
                     <div class="dropdown">
                         <a data-bs-toggle="dropdown" class="dropdown-toggle d-flex align-items-center hidden-arrow"
                             href="#" id="navbarDropdownMenuAvatar" role="button" aria-expanded="false">
-                            <!-- Imagen del usuario (puedes cambiarla dinámicamente si el backend la provee) -->
                             <img src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp" class="rounded-circle"
                                 height="35" alt="User Avatar" loading="lazy" id="user-avatar" />
-                            <!-- Aquí se actualizará el nombre del usuario autenticado -->
                             <span id="user-name" class="ms-2" style="text-decoration: none;"></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
@@ -81,8 +79,6 @@
                         </ul>
                     </div>
                 </div>
-
-
             </div>
         </nav>
 
@@ -128,7 +124,6 @@
                 {% endfor %}
             </ol>
         </nav>
-
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         <div>
@@ -142,12 +137,9 @@
         {% endif %}
         {% endwith %}
 
-
         {% block content %}
         {% endblock %}
     </main>
-
-    </div>
 
     <footer>
         <div class="footer-container">
@@ -158,7 +150,6 @@
             </p>
         </div>
     </footer>
-
 </body>
 
 </html>

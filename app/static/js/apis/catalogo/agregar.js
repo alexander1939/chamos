@@ -1,13 +1,29 @@
 document.addEventListener("DOMContentLoaded", () => {
+    if (!estaEnAgregar()) return;  // Verifica si estamos en la página correcta
+
+    iniciarAgregar();  // Llama a la función para mostrar el formulario
+});
+
+function iniciarAgregar() {
     const modulo = obtenerModulo();
     if (!modulo) return;
 
     mostrarFormularioAgregar(modulo);
-});
+}
+
+function estaEnAgregar() {
+    const path = window.location.pathname.replace(/\/$/, ""); // Elimina la barra final si existe
+    const pathSegments = path.split("/");
+    const esAgregar = pathSegments.length === 3 && pathSegments[1] === "catalogo" && pathSegments[2] !== "" && pathSegments[2] !== "agregar";
+
+    console.log("Verificando página agregar: ", window.location.pathname, "Resultado:", esAgregar);
+    return esAgregar;
+}
+
 
 function obtenerModulo() {
     const pathSegments = window.location.pathname.split("/");
-    return pathSegments[2] || null;
+    return pathSegments[2] || null;  // Extrae el módulo desde la URL
 }
 
 function mostrarFormularioAgregar(modulo) {
@@ -32,7 +48,7 @@ function mostrarFormularioAgregar(modulo) {
     const nombreGroup = document.createElement("div");
     nombreGroup.className = "form-group";
     nombreGroup.innerHTML = `
-        <label for="nombre">Nombre</label>
+        <label for="nombre">Nombre de ${modulo}</label>
         <input type="text" class="form-control" id="nombre" name="nombre" required>
     `;
 
@@ -40,14 +56,14 @@ function mostrarFormularioAgregar(modulo) {
     const descripcionGroup = document.createElement("div");
     descripcionGroup.className = "form-group";
     descripcionGroup.innerHTML = `
-        <label for="descripcion">Descripción</label>
+        <label for="descripcion">Descripción de ${modulo}</label>
         <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
     `;
 
     // Botón de enviar
     const submitButton = document.createElement("button");
     submitButton.type = "submit";
-    submitButton.className = "btn btn-primary";
+    submitButton.className = "btn btn-primary mt-3";
     submitButton.textContent = `Agregar ${modulo}`;
 
     // Agregar elementos al formulario
@@ -60,8 +76,8 @@ function mostrarFormularioAgregar(modulo) {
     contentContainer.appendChild(descripcion);
     contentContainer.appendChild(form);
 
-    // Manejar el envío del formulario
-    form.addEventListener("submit", async (e) => {
+    // Manejar el envío del formulario (solo muestra mensaje, sin enviar datos)
+    form.addEventListener("submit", (e) => {
         e.preventDefault();
 
         const nombre = document.getElementById("nombre").value;
@@ -72,41 +88,23 @@ function mostrarFormularioAgregar(modulo) {
             return;
         }
 
-        try {
-            const response = await agregarContenido(modulo, nombre, descripcion);
-            if (response.ok) {
-                window.location.href = `/catalogo/${modulo}`; // Redirigir al catálogo después de agregar
-            } else {
-                const error = await response.json();
-                mostrarError(error.error || "Error al agregar el contenido.");
-            }
-        } catch (error) {
-            mostrarError("Error en la solicitud.");
-        }
+        alert(`Formulario enviado (pero no se hace ninguna petición aún).\n\nNombre: ${nombre}\nDescripción: ${descripcion}`);
     });
-}
-
-async function agregarContenido(modulo, nombre, descripcion) {
-    const data = { nombre, descripcion };
-    const response = await fetch(`/catalogo/${modulo}/agregar/`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"  // Asegúrate de incluir este encabezado
-        },
-        body: JSON.stringify(data)  // Convierte los datos a JSON
-    });
-    return response;
 }
 
 function mostrarError(error) {
     const contentContainer = document.getElementById("content-container");
-    if (!contentContainer) {
-        console.error("Error: No se encontró el elemento #content-container en el DOM.");
-        return;
+
+    // Remover mensajes de error previos
+    const errorPrevio = document.getElementById("error-message");
+    if (errorPrevio) {
+        errorPrevio.remove();
     }
 
     const errorMessage = document.createElement("p");
+    errorMessage.id = "error-message";
     errorMessage.style.color = "red";
+    errorMessage.style.textAlign = "center";
     errorMessage.textContent = error;
 
     contentContainer.appendChild(errorMessage);

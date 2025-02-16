@@ -38,25 +38,10 @@ def mostrar_detalle(user, modulo, item_id):  # <-- Asegúrate de incluir 'user'
 
 
 
-@catalo_bp.route('/catalogo/<modulo>/agregar/', methods=['GET', 'POST'])
+@catalo_bp.route('/catalogo/<modulo>/agregar/', methods=['GET'])
 @auth_required
 def agregar_contenido(user, modulo):
-    if request.method == 'POST':
-        # Lógica para manejar el POST
-        data = request.json  # O request.form si es un formulario HTML
-        # Aquí llamarías a la API de agregar o procesarías los datos directamente
-        return jsonify({"message": "Contenido agregado correctamente"}), 201
-    else:
-        # Lógica para renderizar el template (GET)
-        context = {
-            'form_title': f'Agregar Nuevo {modulo}',
-            'action_url': url_for('catalo.agregar_contenido', modulo=modulo),
-            'input_title': f'Nombre de {modulo}',
-            'desc_title': f'Descripción de {modulo}',
-            'button_text': f'Agregar {modulo}',
-            'modulo': modulo
-        }
-        return render_template("index.jinja", **context)
+    return render_template("index.jinja", modulo=modulo)
 
 
 @catalo_bp.route('/catalogo/<modulo>/editar/<int:item_id>/', methods=['GET'])

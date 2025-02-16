@@ -119,7 +119,7 @@ function createDropdown(nombre, contenido, canCreate, canView) {
     `;
 
     if (canCreate) {
-        dropdown += `<li><a href="/catalogo/${nombre}/agregar/"class="nav-link" ><i class="fas fa-plus-circle"></i> Agregar</a></li>`;
+        dropdown += `<li><a href="/catalogo/${nombre}/agregar/ ><i class="fas fa-plus-circle"></i> Agregar</a></li>`;
     }
 
     if (canView) {

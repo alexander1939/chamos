@@ -1,17 +1,16 @@
-.search-dropdown {
-    position: absolute;
-    background: white;
-    border: 1px solid #ddd;
-    max-height: 300px;
-    overflow-y: auto;
-    display: none;
+
+/* Estilos para cada tarjeta */
+.card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
 }
 
-.search-dropdown div {
-    padding: 10px;
-    cursor: pointer;
-}
-
-.search-dropdown div:hover {
-    background: #f0f0f0;
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }

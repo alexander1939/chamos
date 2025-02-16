@@ -167,8 +167,13 @@ function actualizarSelect(menu, privilegios) {
     const selectElement = document.getElementById("category-select");
     if (!selectElement) return;
 
-    selectElement.innerHTML = '<option value="" disabled selected>Selecciona una categoría...</option>';
+    // Limpia el select y agrega la opción inicial y la opción "Todos".
+    selectElement.innerHTML = `
+        <option value="" disabled selected>Selecciona una categoría...</option>
+        <option value="todos">Todos</option>
+    `;
 
+    // Recorre el menú y agrega las opciones según los privilegios.
     menu.forEach(modulo => {
         if (privilegios.includes(modulo.nombre)) {
             const option = document.createElement("option");

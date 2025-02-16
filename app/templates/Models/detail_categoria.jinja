@@ -5,8 +5,9 @@
 {% block content %}
 <section class="section-detalle py-5">
     <div class="container">
-        <h2 class="display-4 text-primary">{{ detalle.nombre }}</h2>
-        <p class="lead text-muted">{{ detalle.descripcion }}</p>
+        <h2 id="detalle-nombre" class="display-4 text-primary"></h2>
+        <p id="detalle-descripcion" class="lead text-muted"></p>
+
         <a href="{{ url_for('catalo.mostrar_contenido', modulo=modulo) }}" class="btn btn-secondary btn-lg mt-4">
             Volver a la lista de {{ modulo.lower() }}
         </a>

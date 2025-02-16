@@ -122,7 +122,7 @@ function mostrarDatos(data, modulo) {
     // Mostrar el botón de agregar si hay permisos
     if (data.can_create) {
         const addButton = document.createElement("a");
-        addButton.href = `/catalogo/agregar/${modulo}`;
+        addButton.href = `/catalogo/${modulo}/agregar/`;
         addButton.className = "btn btn-success btn-lg";
         addButton.textContent = `Agregar Nuevo ${modulo.slice(0, -1)}`;
 

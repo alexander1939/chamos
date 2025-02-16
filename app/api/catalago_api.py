@@ -71,15 +71,17 @@ def get_catalogo_detalle():
     if not user:
         return jsonify({"error": "Usuario no encontrado."}), 404
 
+    # Obtener 'modulo' e 'id' de los parámetros de la URL (query parameters)
     modulo = request.args.get('modulo')
+    item_id = request.args.get('id')
+
     if not modulo:
         return jsonify({"error": "Debe especificar un módulo."}), 400
+    if not item_id:
+        return jsonify({"error": "Debe especificar un ID."}), 400
 
-    data = request.get_json()
-    if not data or "id" not in data:
-        return jsonify({"error": "Debe proporcionar un ID en el cuerpo de la solicitud."}), 400
-
-    item_id = data["id"]
+    # Convertir item_id a entero (si es necesario)
+    item_id = int(item_id)
 
     user_privilege, error = has_access_to_module(user, modulo)
     if error:
@@ -129,13 +131,10 @@ def get_catalogo_detalle():
             })
 
         elif modulo == 'Gestionar Privilegios':
-    # Obtener usuario con el ID proporcionado y sus privilegios
             user_priv = db.session.query(UserPrivilege).join(User).filter(User.id == item_id).first()
-
             if not user_priv:
                 return jsonify({"error": "Usuario no encontrado o sin privilegios."}), 404
 
-    # Asegurar que las variables siempre tengan un valor
             can_create = user_priv.can_create if user_priv else False
             can_edit = user_priv.can_edit if user_priv else False
             can_view = user_priv.can_view if user_priv else False
@@ -153,16 +152,15 @@ def get_catalogo_detalle():
                     "puede_editar": can_edit,
                     "puede_ver": can_view,
                     "puede_eliminar": can_delete
-            }
-        })
-
-
+                }
+            })
 
         else:
             return jsonify({"error": "Módulo no válido."}), 400
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 
 

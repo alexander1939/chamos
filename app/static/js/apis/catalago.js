@@ -26,10 +26,24 @@ function iniciarCatalogo() {
     const modulo = obtenerModulo();
     if (!modulo) return;
 
+    const moduloActual = sessionStorage.getItem("modulo_actual");
+    const datosAlmacenados = sessionStorage.getItem("datos_modulo");
+
+    if (moduloActual === modulo && datosAlmacenados) {
+        console.log(`Los datos de ${modulo} ya están cargados. Mostrando desde cache.`);
+        mostrarDatos(JSON.parse(datosAlmacenados), modulo); // Usa los datos almacenados
+        return;
+    }
+
     obtenerDatos(modulo)
-        .then(data => mostrarDatos(data, modulo))
+        .then(data => {
+            mostrarDatos(data, modulo);
+            sessionStorage.setItem("modulo_actual", modulo);
+            sessionStorage.setItem("datos_modulo", JSON.stringify(data)); // Guarda los datos en cache
+        })
         .catch(error => mostrarError(error));
 }
+
 /*
     La función obtenerModulo() se encarga de extraer el módulo actual desde la URL de la página.
     Esto es útil para identificar en qué sección o categoría se encuentra el usuario, como "materias", "proyectos", "juegos", etc.

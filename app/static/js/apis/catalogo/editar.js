@@ -123,3 +123,4 @@ async function enviarEdicion(modulo, itemId) {
         Swal.fire("Error", "No se pudo editar el contenido.", "error");
     }
 }
+

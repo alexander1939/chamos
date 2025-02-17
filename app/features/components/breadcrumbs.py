@@ -1,8 +1,5 @@
 from flask import request
-from flask_login import current_user
-
-
-
+import requests
 
 BREADCRUMB_NAMES = {
     "/error-404": "Página no encontrada"
@@ -10,14 +7,8 @@ BREADCRUMB_NAMES = {
 
 def generate_breadcrumbs():
     """
-    Genera breadcrumbs dinámicos para rutas que incluyen "detalle" o "editar".
+    Genera breadcrumbs dinámicos para rutas que incluyen "detalle" o "editar" usando la API.
     """
-    MODELS_MAP = {
-        # "materias": Materia,
-        # "juegos":Juegos,
-        # "proyectos": Proyectos
-    }
-
     path_segments = [seg for seg in request.path.strip("/").split("/") if seg]
     breadcrumbs = []
     accumulated_path = ""
@@ -25,29 +16,35 @@ def generate_breadcrumbs():
     for i, segment in enumerate(path_segments):
         accumulated_path += f"/{segment}"
 
-        if segment in ["detalles", "editar"] and i + 1 < len(path_segments):
-            parent_segment = path_segments[i - 1] if i > 0 else None
-            item_id = path_segments[i + 1]  
+        # Evitar que "catalogo" aparezca en la visualización, pero mantener su estructura en la URL
+        if segment.lower() == "catalogo":
+            continue
 
-            model = MODELS_MAP.get(parent_segment)
-            if model:
-                item = model.query.get(item_id)
-                if item:
-                    if current_user.is_authenticated and current_user.role == "Admin":
-                        user = User.query.get(item.id_usuario)  
-                        if user:
-                            # Insertamos el breadcrumb del usuario en la posición 1 (después de "Home")
-                            breadcrumbs.insert(0, {
-                                "name": user.name,  
-                                "url": None  
-                            })
-                    
-                    if segment == "detalles":
-                        name = f"Detalle de {item.nombre}"
-                    elif segment == "editar":
-                        name = f"Editar {item.nombre}"
+        if segment in ["detalle", "editar"] and i + 1 < len(path_segments):
+            parent_segment = path_segments[i - 1] if i > 0 else None
+            item_id = path_segments[i + 1]  # Tomamos el item_id de la URL
+
+            if parent_segment:
+                # Llamada a la API para obtener el detalle del ítem, similar a la lógica de mostrar_detalle
+                api_url = f"http://localhost:5000/api/catalogo/detalle/?modulo={parent_segment}"
+                response = requests.get(api_url, json={'id': item_id}, cookies=request.cookies)
+
+                if response.status_code == 200:
+                    response_json = response.json()
+                    can_view = response_json.get("can_view", False)
+                    if can_view:
+                        item = response_json.get("detalle", {})
+                        if item:
+                            # Mostrar el nombre del item en el breadcrumb
+                            name = f"Detalles {item.get('nombre')}" if segment == "detalle" else f"Editar {item.get('nombre')}"
+                        else:
+                            name = f"{segment.capitalize()} no encontrado"
+                    else:
+                        name = f"No tienes acceso para ver este {parent_segment.capitalize()}"
                 else:
+                    # Si la API devuelve un error, se muestra el mensaje adecuado
                     name = f"{segment.capitalize()} no encontrado"
+
             else:
                 name = f"{segment.capitalize()} no definido"
 
@@ -61,15 +58,9 @@ def generate_breadcrumbs():
             name = BREADCRUMB_NAMES.get(accumulated_path, segment.capitalize())
             url = accumulated_path if i != len(path_segments) - 1 else None
 
-            if current_user.is_authenticated and current_user.role == "Admin":
-                breadcrumbs.append({
-                    "name": name,
-                    "url": url  
-                })
-            else:
-                breadcrumbs.append({
-                    "name": name,
-                    "url": url  
-                })
+            breadcrumbs.append({
+                "name": name,
+                "url": url  
+            })
 
     return breadcrumbs

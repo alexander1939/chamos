@@ -1,35 +1,45 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("Página cargada, verificando el módulo y el ID...");
-    
+    inicializarEditar();
+    actualizarBreadcrumbs();
+
     const modulo = obtenerModulo();
     const itemId = obtenerItemId();
-    
-    if (!modulo || !itemId) {
-        console.error("Módulo o ID no detectados.");
-        mostrarError("Error al detectar el módulo o ID.");
-        return;
-    }
+    const esEdicion = window.location.pathname.includes("editar");
 
-    try {
-        const data = await obtenerDetalleParaEditar(modulo, itemId);
-        mostrarFormularioEditar(data, modulo, itemId);
-    } catch (error) {
-        mostrarError("No se pudo obtener los detalles para la edición.");
+    if (modulo && itemId && esEdicion) {
+        try {
+            const data = await obtenerDetalleParaEditar(modulo, itemId);
+            mostrarFormularioEditar(data, modulo, itemId);
+            actualizarBreadcrumbs();
+        } catch (error) {
+            Swal.fire("Error", "No se pudo obtener los detalles para la edición.", "error");
+        }
     }
 });
 
-function obtenerModulo() {
-    const pathSegments = window.location.pathname.split("/");
-    return pathSegments[2] || null;
+function inicializarEditar() {
+    document.body.addEventListener("click", async (e) => {
+        const botonEditar = e.target.closest(".btn-editar");
+        if (botonEditar) {
+            e.preventDefault();
+            const modulo = botonEditar.getAttribute("data-modulo");
+            const itemId = botonEditar.getAttribute("data-id");
+
+            if (modulo && itemId) {
+                history.pushState({}, '', `/catalogo/${modulo}/editar/${itemId}/`);
+                await cargarFormularioEditar(modulo, itemId);
+            }
+        }
+    });
 }
 
-function obtenerItemId() {
-    const pathSegments = window.location.pathname.split("/");
-    return pathSegments[4] || null;
-}
+async function cargarFormularioEditar(modulo, itemId) {
+    const contentContainer = document.getElementById("content-container");
+    if (!contentContainer) return;
 
-async function obtenerDetalleParaEditar(modulo, itemId) {
     try {
+        contentContainer.innerHTML = `<p>Cargando formulario de edición...</p>`;
+
         const response = await fetch(`/api/catalogo/detalle/?modulo=${modulo}&id=${itemId}`, {
             method: "GET",
             credentials: "include",
@@ -37,77 +47,55 @@ async function obtenerDetalleParaEditar(modulo, itemId) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `Error ${response.status}`);
+            throw new Error("Error al obtener los detalles del ítem.");
         }
 
-        return await response.json();
-    } catch (error) {
-        console.error("Error obteniendo detalle:", error);
-        throw error;
-    }
-}
+        const data = await response.json();
+        const item = data.detalle;
 
-
-
-function mostrarFormularioEditar(data, modulo, itemId) {
-    console.log("Datos recibidos para edición:", data);
-
-    if (!data || data.error) {
-        mostrarError(data.error || "No se encontró información del detalle.");
-        return;
-    }
-
-    const detalle = data.detalle;
-    const contentContainer = document.getElementById("content-container");
-
-    if (!contentContainer) {
-        console.error("Error: No se encontró el elemento #content-container en el DOM.");
-        return;
-    }
-
-    contentContainer.innerHTML = `
-        <h2 class="display-4 text-primary text-center">Editar ${modulo}</h2>
-        <form id="form-editar" class="mt-4">
-            <div class="form-group">
-                <label for="nombre">Nombre</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" value="${detalle.nombre}" required>
-            </div>
-            <div class="form-group">
-                <label for="descripcion">Descripción</label>
-                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required>${detalle.descripcion}</textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Guardar cambios</button>
-            <div id="loading" style="display: none; color: green;">Guardando cambios...</div>
-        </form>
-    `;
-
-    document.getElementById("form-editar").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        
-        const nombre = document.getElementById("nombre").value.trim();
-        const descripcion = document.getElementById("descripcion").value.trim();
-
-        if (!nombre || !descripcion) {
-            mostrarError("Debe proporcionar nombre y descripción.");
+        if (!item) {
+            contentContainer.innerHTML = `<p style="color: red;">Error: No se encontraron los detalles.</p>`;
             return;
         }
 
-        document.getElementById("loading").style.display = "block";
+        contentContainer.innerHTML = `
+            <h2 class="display-4 text-primary text-center">Editar ${modulo}</h2>
+            <form id="form-editar" class="mt-4">
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" value="${item.nombre}" required>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required>${item.descripcion}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <div id="loading" style="display: none; color: green;">Guardando cambios...</div>
+            </form>
+        `;
 
-        try {
-            await editarContenido(modulo, itemId, nombre, descripcion);
-            alert("Edición exitosa");
-            window.location.href = `/catalogo/${modulo}`;
-        } catch (error) {
-            mostrarError("Error al editar el contenido.");
-        } finally {
-            document.getElementById("loading").style.display = "none";
-        }
-    });
+        document.getElementById("form-editar").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            await enviarEdicion(modulo, itemId);
+        });
+
+        actualizarBreadcrumbs();
+
+    } catch (error) {
+        contentContainer.innerHTML = `<p style="color: red;">Error al cargar el formulario.</p>`;
+        console.error("Error al obtener los detalles del ítem:", error);
+    }
 }
 
-async function editarContenido(modulo, itemId, nombre, descripcion) {
+async function enviarEdicion(modulo, itemId) {
+    const nombre = document.getElementById("nombre").value.trim();
+    const descripcion = document.getElementById("descripcion").value.trim();
+
+    if (!nombre || !descripcion) {
+        Swal.fire("Error", "Debe proporcionar nombre y descripción.", "error");
+        return;
+    }
+
     try {
         const response = await fetch(`/api/catalogo/editar/?modulo=${modulo}`, {
             method: "PUT",
@@ -117,26 +105,22 @@ async function editarContenido(modulo, itemId, nombre, descripcion) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error al editar el contenido.");
+            throw new Error("Error al editar el contenido.");
         }
+
+        Swal.fire({
+            icon: "success",
+            title: "¡Éxito!",
+            text: "El contenido se ha editado correctamente.",
+            confirmButtonText: "Aceptar"
+        }).then(() => {
+            history.pushState({}, '', `/catalogo/${modulo}/`);
+            cargarCatalogo(modulo); // 🔄 Actualizar solo el main sin recargar la página
+        });
+
     } catch (error) {
         console.error("Error editando contenido:", error);
-        throw error;
+        Swal.fire("Error", "No se pudo editar el contenido.", "error");
     }
 }
 
-function mostrarError(error) {
-    const contentContainer = document.getElementById("content-container");
-    if (!contentContainer) return;
-
-    let errorMessage = document.getElementById("error-message");
-    if (!errorMessage) {
-        errorMessage = document.createElement("p");
-        errorMessage.id = "error-message";
-        errorMessage.style.color = "red";
-        contentContainer.appendChild(errorMessage);
-    }
-
-    errorMessage.textContent = error;
-}

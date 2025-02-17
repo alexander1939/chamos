@@ -1,46 +1,45 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // Verifica si estamos en la sección de usuarios
-    if (estaEnUsuarios()) {
-        obtenerUsuarios()
-            .then(data => mostrarUsuarios(data))
-            .catch(error => mostrarError(error));
-    } else {
-        // Si no estamos en la sección de usuarios, intenta obtener el detalle de un ítem
-        const modulo = obtenerModulo();
-        const itemId = obtenerItemId();
-        if (!modulo || !itemId) return;
 
-        obtenerDetalle(modulo, itemId)
-            .then(data => mostrarDetalle(data, modulo))
-            .catch(error => mostrarError(error));
+document.addEventListener("DOMContentLoaded", () => {
+    inicializarDetalles();
+
+
+    const modulo = obtenerModulo();
+    const itemId = obtenerItemId();
+    const esModoEdicion = window.location.pathname.includes("editar");
+
+    if (modulo && itemId && !esModoEdicion) {
+        console.log(`Cargando detalles desde URL: modulo=${modulo}, itemId=${itemId}`);
+        cargarDetalle(modulo, itemId);
+        actualizarBreadcrumbs();
+
     }
 });
 
-/*
-   Verifica si el DOM ya ha sido cargado; si es así, ejecuta la función `iniciarUsuarios`.
-   Si aún no está cargado, espera a que lo esté y luego ejecuta `iniciarUsuarios`.
-*/
 
-/*
-   Esta función realiza el mismo proceso que el bloque anterior, 
-   pero puede ser llamada en otros contextos si es necesario.
-*/
-function iniciarUsuarios() {
-    if (!estaEnUsuarios()) return;  /* Verifica si estamos en la sección de usuarios */
+function inicializarDetalles() {
+    document.body.addEventListener("click", async (e) => {
+        const link = e.target.closest(".deta-link");
+        if (link) {
+            e.preventDefault();
 
-    obtenerUsuarios()  /* Llama a la función para obtener usuarios */
-        .then(data => mostrarUsuarios(data))  /* Muestra los usuarios obtenidos */
-        .catch(error => mostrarError(error));  /* Muestra un error si ocurre */
+            const href = link.getAttribute("href");
+            const partesURL = href.split("/");
+
+            const modulo = partesURL[2];
+            const itemId = partesURL[4];
+
+            console.log(`Clic en detalle: modulo=${modulo}, itemId=${itemId}`);
+
+            if (modulo && itemId) {
+                window.history.pushState({}, '', `/catalogo/${modulo}/detalle/${itemId}/`);
+                await cargarDetalle(modulo, itemId);
+                actualizarBreadcrumbs();
+            }
+        }
+    });
 }
 
-/* 
-   Esta función verifica si la página actual corresponde a la sección de usuarios 
-   (ya sea en la ruta principal o en una ruta que comience con "/home").
-*/
-function estaEnUsuarios() {
-    return window.location.pathname === "/" || window.location.pathname.startsWith("/home");
-}
-
+// 🔹 Función para obtener el módulo desde la URL
 function obtenerModulo() {
     const pathSegments = window.location.pathname.split("/");
     return pathSegments[2] || null;
@@ -51,84 +50,50 @@ function obtenerItemId() {
     return pathSegments[4] || null;
 }
 
-async function obtenerUsuarios() {
-    const response = await fetch("/api/usuarios", {
-        method: "GET",
-        credentials: "include", // Para enviar cookies si es necesario
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
-
-    if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-    }
-
-    return response.json();
-}
-
 async function obtenerDetalle(modulo, itemId) {
-    const response = await fetch(`/api/catalogo/detalle/?modulo=${modulo}&id=${itemId}`, {
-        method: "GET",
-        credentials: "include", // Para enviar cookies si es necesario
-        headers: {
-            "Content-Type": "application/json"
+    try {
+        console.log(`Obteniendo detalle del backend: modulo=${modulo}, itemId=${itemId}`);
+
+        const response = await fetch(`/api/catalogo/detalle/?modulo=${modulo}&id=${itemId}`, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
         }
-    });
 
-    if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener el detalle:", error);
+        return { error: "Error al conectar con el servidor." };
     }
-
-    return response.json();
 }
 
-function mostrarUsuarios(data) {
-    const contentContainer = document.getElementById("content-container");
-    contentContainer.innerHTML = "";
-
-    if (!data || data.error) {
-        mostrarError(data.error || "No se encontró información de usuarios.");
+async function cargarDetalle(modulo, itemId) {
+    if (!modulo || !itemId) {
+        console.error("Falta el módulo o itemId");
         return;
     }
 
-    const usuarios = data.usuarios;
+    const contentContainer = document.getElementById("content-container");
+    if (!contentContainer) {
+        console.error("Error: No se encontró el #content-container en el DOM.");
+        return;
+    }
 
-    // Crear el título y la descripción del módulo dinámicamente
-    const titulo = document.createElement("h2");
-    titulo.className = "display-4 text-primary text-center";
-    titulo.textContent = "Usuarios";
+    try {
+        contentContainer.innerHTML = `<p>Cargando detalle...</p>`;
 
-    const descripcion = document.createElement("p");
-    descripcion.className = "lead text-muted text-center";
-    descripcion.textContent = "Aquí puedes ver la lista de usuarios.";
-
-    // Crear un contenedor para las tarjetas de usuarios
-    const cardContainer = document.createElement("div");
-    cardContainer.className = "row row-cols-1 row-cols-md-3 g-4";
-    contentContainer.appendChild(cardContainer);
-
-    // Crear una tarjeta por cada usuario
-    usuarios.forEach(usuario => {
-        const col = document.createElement("div");
-        col.className = "col content-item";
-        col.innerHTML = `
-            <div class="card shadow-sm border-light rounded">
-                <div class="card-body">
-                    <h5 class="card-title">${usuario.nombre}</h5>
-                    <p class="card-text">${usuario.descripcion}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <a href="/usuarios/${usuario.id}" class="btn btn-primary btn-sm">Ver Detalle</a>
-                    </div>
-                </div>
-            </div>
-        `;
-        cardContainer.appendChild(col);
-    });
-
-    // Agregar el título y la descripción al contenedor
-    contentContainer.appendChild(titulo);
-    contentContainer.appendChild(descripcion);
+        const data = await obtenerDetalle(modulo, itemId);
+        if (data.error) {
+            mostrarError(data.error);
+        } else {
+            mostrarDetalle(data, modulo);
+        }
+    } catch (error) {
+        mostrarError("Error al cargar los detalles.");
+    }
 }
 
 function mostrarDetalle(data, modulo) {
@@ -136,27 +101,28 @@ function mostrarDetalle(data, modulo) {
     contentContainer.innerHTML = "";
 
     if (!data || data.error) {
-        mostrarError(data.error || "No se encontró información del detalle.");
+        mostrarError("No se encontraron detalles.");
         return;
     }
 
     const detalle = data.detalle;
 
-    // Crear el título y la descripción del módulo dinámicamente
+    console.log("Mostrando detalle en el DOM:", detalle);
+
+    contentContainer.dataset.cargado = "true";
+
     const titulo = document.createElement("h2");
     titulo.className = "display-4 text-primary text-center";
-    titulo.textContent = `${modulo} - Detalle`;
+    titulo.textContent = `Detalle de ${detalle.nombre}`;
 
     const descripcion = document.createElement("p");
     descripcion.className = "lead text-muted text-center";
-    descripcion.textContent = `Aquí puedes ver los detalles del ${modulo.toLowerCase()}.`;
+    descripcion.textContent = `Aquí puedes ver los detalles de ${detalle.nombre}.`;
 
-    // Crear un contenedor para la tarjeta de detalles
     const cardContainer = document.createElement("div");
     cardContainer.className = "row row-cols-1 row-cols-md-3 g-4";
     contentContainer.appendChild(cardContainer);
 
-    // Crear la tarjeta de detalles
     const col = document.createElement("div");
     col.className = "col content-item";
     col.innerHTML = `
@@ -165,13 +131,12 @@ function mostrarDetalle(data, modulo) {
                 <h5 class="card-title">${detalle.nombre}</h5>
                 <p class="card-text">${detalle.descripcion}</p>
                 <div class="d-flex justify-content-between align-items-center">
-                    <a href="/catalogo/${modulo}" class="btn btn-primary btn-sm">Volver al Catálogo</a>
+                    <a href="/catalogo/${modulo}/" class="btn btn-primary btn-sm">Volver al Catálogo</a>
                 </div>
             </div>
         </div>
     `;
 
-    // Agregar el título, la descripción y la tarjeta al contenedor
     contentContainer.appendChild(titulo);
     contentContainer.appendChild(descripcion);
     cardContainer.appendChild(col);

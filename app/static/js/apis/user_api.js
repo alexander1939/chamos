@@ -1,14 +1,12 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    await esperarCargaMenu(); // Espera a que el menú se cargue completamente
-
-    // Verifica si la ruta actual es "/"
+    await esperarCargaMenu();
     if (window.location.pathname === "/") {
-        await cargarUsuarios(); // Carga los usuarios si la ruta es "/"
+        await cargarUsuarios();
+
     }
 
-    inicializarUsuarios(); // Inicializa el evento de clic en el enlace de inicio
+    inicializarUsuarios();
 
-    // Maneja el botón "Atrás" del navegador sin recargar la página
     window.addEventListener("popstate", () => {
         if (window.location.pathname === "/") {
             cargarUsuarios();
@@ -16,23 +14,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 });
 
-// 🔹 Función para cargar los usuarios
 async function cargarUsuarios() {
-    const usuarios = await obtenerUsuarios(); // Obtiene los usuarios del backend.
+    const usuarios = await obtenerUsuarios();
     if (usuarios.error) {
         mostrarMensaje(usuarios.error);
     } else {
-        mostrarUsuarios(usuarios); // Muestra los usuarios en el contenedor.
+        mostrarUsuarios(usuarios);
+        actualizarBreadcrumbs();
     }
 }
 
-// 🔹 Función para esperar a que el menú se cargue dinámicamente
 async function esperarCargaMenu() {
     return new Promise((resolve) => {
         const observer = new MutationObserver(() => {
             const homeLink = document.querySelector(".home-link");
             if (homeLink) {
-                observer.disconnect(); // Detener la observación cuando se encuentra el elemento
+                observer.disconnect();
                 resolve();
             }
         });
@@ -41,9 +38,8 @@ async function esperarCargaMenu() {
     });
 }
 
-// 🔹 Función para inicializar los eventos en "Inicio"
 function inicializarUsuarios() {
-    const homeLink = document.querySelector(".home-link"); // Buscar el enlace de inicio
+    const homeLink = document.querySelector(".home-link");
     const contentContainer = document.getElementById("content-container");
 
     if (!homeLink || !contentContainer) {
@@ -51,15 +47,13 @@ function inicializarUsuarios() {
         return;
     }
 
-    // Evento para manejar el clic en el enlace de inicio.
     homeLink.addEventListener("click", async (e) => {
-        e.preventDefault(); // Evita la recarga de la página
-        window.history.pushState({}, '', '/'); // 🔹 Actualiza la URL sin recargar
-        await cargarUsuarios(); // Carga los usuarios
+        e.preventDefault();
+        window.history.pushState({}, '', '/');
+        await cargarUsuarios();
     });
 }
 
-// 🔹 Función para obtener los usuarios desde el backend.
 async function obtenerUsuarios() {
     try {
         const response = await fetch("/api/users/", {
@@ -79,7 +73,6 @@ async function obtenerUsuarios() {
     }
 }
 
-// 🔹 Función para mostrar los usuarios en el DOM.
 function mostrarUsuarios(users) {
     const contentContainer = document.getElementById("content-container");
 
@@ -118,7 +111,6 @@ function mostrarUsuarios(users) {
     contentContainer.appendChild(userContainer);
 }
 
-// 🔹 Función para mostrar mensajes de error o información en el contenedor.
 function mostrarMensaje(mensaje) {
     const contentContainer = document.getElementById("content-container");
     contentContainer.innerHTML = `<p>${mensaje}</p>`;

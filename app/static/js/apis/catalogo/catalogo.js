@@ -1,51 +1,72 @@
-// catalogo.js
 
+/*
+Inicializa la funcionalidad de agregar elementos:
+1. Escucha clics en botones con clase "btn-agregar".
+2. Obtiene el módulo y actualiza la URL.
+3. Muestra el formulario para agregar un nuevo elemento.
+*/
 document.addEventListener("DOMContentLoaded", () => {
-    // Verifica si estamos en una página de detalle
     const itemId = obtenerItemId();
     if (itemId) {
-        return; // No inicializa el catálogo si estamos en una página de detalle
+        return;
     }
 
-    inicializarCatalogo(); // Inicializa los eventos de clic en los enlaces "Listar"
+    inicializarCatalogo();
 
     const modulo = obtenerModulo();
     if (modulo) {
-        cargarCatalogo(modulo); // Cargar catálogo si la URL ya es /catalogo/<modulo>/
+        cargarCatalogo(modulo);
     }
 
-    // Manejar el evento de retroceso del navegador (para que no recargue todo)
     window.addEventListener("popstate", () => {
         const modulo = obtenerModulo();
         if (modulo) {
             cargarCatalogo(modulo);
         }
     });
+
 });
 
-// 🔹 Función para inicializar los eventos en los enlaces "Listar"
+/*
+Función que inicializa el catálogo:
+1. Escucha los clics en los enlaces con clase "list-link".
+2. Evita el comportamiento por defecto (navegar a un enlace).
+3. Actualiza la URL con el módulo seleccionado.
+4. Carga el catálogo del módulo seleccionado.
+*/
 function inicializarCatalogo() {
     document.body.addEventListener("click", async (e) => {
         const link = e.target.closest(".list-link");
         if (link) {
-            e.preventDefault(); // Evita la recarga completa de la página
+            e.preventDefault();
 
             const modulo = link.getAttribute("data-modulo");
             if (modulo) {
-                window.history.pushState({}, '', `/catalogo/${modulo}/`); // Actualiza la URL sin recargar
-                await cargarCatalogo(modulo); // Cargar el contenido dinámicamente
+                window.history.pushState({}, '', `/catalogo/${modulo}/`);
+                await cargarCatalogo(modulo);
             }
         }
     });
 }
 
-// 🔹 Función para obtener el módulo desde la URL
+
+/*
+Obtiene el módulo actual desde la URL:
+1. Divide la ruta de la URL en segmentos.
+2. Devuelve el segundo segmento (el módulo).
+3. Si no existe, retorna null.
+*/
 function obtenerModulo() {
     const pathSegments = window.location.pathname.split("/");
-    return pathSegments[2] || null; // Obtiene el módulo de la URL (materias, proyectos, juegos)
+    return pathSegments[2] || null;
 }
 
-// 🔹 Función para obtener datos del catálogo desde el backend
+/*
+Obtiene los datos del catálogo para un módulo específico:
+1. Realiza una petición GET a la API con el módulo.
+2. Si la respuesta es exitosa, devuelve los datos en formato JSON.
+3. Si ocurre un error, lo maneja y muestra un mensaje de error.
+*/
 async function obtenerDatos(modulo) {
     try {
         const response = await fetch(`/api/catalogo/?modulo=${modulo}`, {
@@ -64,35 +85,47 @@ async function obtenerDatos(modulo) {
     }
 }
 
-// 🔹 Función para cargar el catálogo en el contenedor
+/*
+Carga el catálogo para un módulo específico:
+1. Obtiene el contenedor donde se mostrará el catálogo.
+2. Muestra un mensaje de "Cargando..." mientras se obtienen los datos.
+3. Si los datos son correctos, los muestra.
+4. Si ocurre un error, muestra un mensaje de error.
+*/
 async function cargarCatalogo(modulo) {
-    if (!modulo) return;
-
-    const contentContainer = document.getElementById("content-container");
-    if (!contentContainer) {
-        console.error("Error: No se encontró el #content-container en el DOM.");
-        return;
-    }
+    if (!modulo || window.location.pathname.includes("agregar")) return;
 
     try {
-        contentContainer.innerHTML = `<p>Cargando ${modulo}...</p>`; // Mensaje de carga
+        const contentContainer = document.getElementById("content-container");
+        if (!contentContainer) {
+            console.error("Error: No se encontró el #content-container en el DOM.");
+            return;
+        }
 
+        contentContainer.innerHTML = `<p>Cargando ${modulo}...</p>`;
         const data = await obtenerDatos(modulo);
         if (data.error) {
             mostrarError(data.error);
         } else {
             mostrarDatos(data, modulo);
+            actualizarBreadcrumbs();
+
         }
     } catch (error) {
         mostrarError("Error al cargar el catálogo.");
     }
 }
 
-// 🔹 Función para mostrar los datos en el DOM
+
+/*
+Muestra los datos del catálogo en el contenedor correspondiente:
+1. Crea el título y la descripción dinámicamente.
+2. Crea las tarjetas para cada elemento del catálogo.
+3. Si se puede agregar un nuevo elemento, muestra el botón para agregar.
+*/
 function mostrarDatos(data, modulo) {
     const contentContainer = document.getElementById("content-container");
-    contentContainer.innerHTML = ""; // Limpia el contenido previo
-
+    contentContainer.innerHTML = "";
     if (!data || data.error || (!data.materias && !data.proyectos && !data.juegos)) {
         mostrarError("No se encontraron datos.");
         return;
@@ -116,22 +149,21 @@ function mostrarDatos(data, modulo) {
     contentContainer.appendChild(titulo);
     contentContainer.appendChild(descripcion);
 
-    // Contenedor de tarjetas
     const cardContainer = document.createElement("div");
     cardContainer.className = "row row-cols-1 row-cols-md-3 g-4";
     contentContainer.appendChild(cardContainer);
 
-    // Renderizar las tarjetas
     items.forEach(item => {
         cardContainer.appendChild(crearTarjeta(item, modulo, data));
     });
 
-    // Botón de agregar si hay permisos
     if (data.can_create) {
         const addButton = document.createElement("a");
-        addButton.href = `/catalogo/${modulo}/agregar/`;
+        addButton.href = `/catalogo/agregar/${modulo}/`;
         addButton.className = "btn btn-success btn-lg btn-agregar";
         addButton.textContent = `Agregar Nuevo ${modulo.slice(0, -1)}`;
+
+        addButton.setAttribute("data-modulo", modulo);
 
         const addButtonContainer = document.createElement("div");
         addButtonContainer.className = "text-center mt-4";
@@ -139,9 +171,10 @@ function mostrarDatos(data, modulo) {
 
         contentContainer.appendChild(addButtonContainer);
     }
+
 }
 
-// 🔹 Función para crear una tarjeta de catálogo
+
 function crearTarjeta(item, modulo, data) {
     const col = document.createElement("div");
     col.className = "col content-item";
@@ -154,7 +187,8 @@ function crearTarjeta(item, modulo, data) {
                     <a href="/catalogo/${modulo}/detalle/${item.id}" class="deta-link btn btn-primary btn-sm">Ver Detalles</a>
                     <div class="d-flex">
                         ${data.can_edit ? `
-                        <a href="/catalogo/${modulo}/editar/${item.id}" class="btn btn-warning btn-sm me-2">
+                        <a href="#" class="btn-editar btn btn-warning btn-sm me-2"
+                            data-modulo="${modulo}" data-id="${item.id}">
                             <img src="/static/images/edit.png" alt="Editar" width="20" height="20">
                         </a>` : ""}
                         ${data.can_delete ? `
@@ -170,7 +204,6 @@ function crearTarjeta(item, modulo, data) {
     return col;
 }
 
-// 🔹 Función para mostrar errores
 function mostrarError(error) {
     const contentContainer = document.getElementById("content-container");
     if (!contentContainer) {

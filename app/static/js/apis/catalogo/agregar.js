@@ -1,30 +1,30 @@
 document.addEventListener("DOMContentLoaded", () => {
     inicializarAgregar();
+    actualizarBreadcrumbs();
 });
 
-// 🔹 Capturar clic en el botón de agregar
 function inicializarAgregar() {
-    document.body.addEventListener("click", (e) => {
-        const botonAgregar = e.target.closest(".btn-agregar");
-        if (botonAgregar) {
-            e.preventDefault(); // Evita la navegación o recarga de la página
+    document.body.addEventListener("click", async (e) => {
+        const addButton = e.target.closest(".btn-agregar");
+        if (addButton) {
+            e.preventDefault();
+            const modulo = addButton.getAttribute("data-modulo") || addButton.href.split("/").pop();
 
-            const modulo = botonAgregar.getAttribute("data-modulo");
             if (modulo) {
+                history.pushState({}, '', `/catalogo/agregar/${modulo}/`);
                 mostrarFormularioAgregar(modulo);
+                actualizarBreadcrumbs();
             }
         }
     });
 }
 
-// 🔹 Función para mostrar el formulario en el contenedor sin recargar
 function mostrarFormularioAgregar(modulo) {
     const contentContainer = document.getElementById("content-container");
     if (!contentContainer) return;
 
-    contentContainer.innerHTML = ""; // Limpia el contenido actual
+    contentContainer.innerHTML = "";
 
-    // Crear título y descripción
     const titulo = document.createElement("h2");
     titulo.className = "display-4 text-primary text-center";
     titulo.textContent = `Agregar Nuevo ${modulo}`;
@@ -33,7 +33,6 @@ function mostrarFormularioAgregar(modulo) {
     descripcion.className = "lead text-muted text-center";
     descripcion.textContent = `Aquí puedes agregar un nuevo ${modulo.toLowerCase()}.`;
 
-    // Crear formulario
     const form = document.createElement("form");
     form.id = "form-agregar";
     form.className = "mt-4";
@@ -50,25 +49,27 @@ function mostrarFormularioAgregar(modulo) {
         <button type="submit" class="btn btn-primary mt-3">Agregar ${modulo}</button>
     `;
 
-    // Agregar elementos al contenedor
     contentContainer.appendChild(titulo);
     contentContainer.appendChild(descripcion);
     contentContainer.appendChild(form);
 
-    // 🔹 Manejar el envío del formulario
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         await enviarFormularioAgregar(modulo);
     });
 }
 
-// 🔹 Función para enviar datos a la API sin recargar
 async function enviarFormularioAgregar(modulo) {
-    const nombre = document.getElementById("nombre").value;
-    const descripcion = document.getElementById("descripcion").value;
+    const nombre = document.getElementById("nombre").value.trim();
+    const descripcion = document.getElementById("descripcion").value.trim();
 
     if (!nombre || !descripcion) {
-        mostrarError("Debe proporcionar nombre y descripción.");
+        Swal.fire({
+            icon: "error",
+            title: "Campos incompletos",
+            text: "Debe proporcionar nombre y descripción.",
+            confirmButtonText: "Entendido"
+        });
         return;
     }
 
@@ -86,32 +87,23 @@ async function enviarFormularioAgregar(modulo) {
             throw new Error(data.error || "Error desconocido al agregar.");
         }
 
-        alert(`${modulo.slice(0, -1)} agregado con éxito.`);
-
-        // 🔹 Opcional: Recargar solo la lista del catálogo sin recargar toda la página
-        cargarCatalogo(modulo);
+        Swal.fire({
+            icon: "success",
+            title: "¡Éxito!",
+            text: `${modulo.slice(0, -1)} agregado con éxito.`,
+            confirmButtonText: "Aceptar"
+        }).then(() => {
+            history.pushState({}, '', `/catalogo/${modulo}/`);
+            cargarCatalogo(modulo);
+        });
 
     } catch (error) {
         console.error("Error al agregar:", error);
-        mostrarError(error.message);
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: error.message || "No se pudo agregar el elemento.",
+            confirmButtonText: "Cerrar"
+        });
     }
-}
-
-// 🔹 Mostrar error en pantalla
-function mostrarError(error) {
-    const contentContainer = document.getElementById("content-container");
-
-    // Remover errores previos
-    const errorPrevio = document.getElementById("error-message");
-    if (errorPrevio) {
-        errorPrevio.remove();
-    }
-
-    const errorMessage = document.createElement("p");
-    errorMessage.id = "error-message";
-    errorMessage.style.color = "red";
-    errorMessage.style.textAlign = "center";
-    errorMessage.textContent = error;
-
-    contentContainer.appendChild(errorMessage);
 }

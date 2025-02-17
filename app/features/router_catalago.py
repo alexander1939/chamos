@@ -32,14 +32,13 @@ def mostrar_detalle(user, modulo, item_id):  # <-- Asegúrate de incluir 'user'
 
 
 
-
-@catalo_bp.route('/catalogo/<modulo>/agregar/', methods=['GET'])
-@auth_required
-def agregar_contenido(user, modulo):
-    return render_template("index.jinja", modulo=modulo)
-
+@catalo_bp.route('/catalogo/agregar/<modulo>/')
+def agregar_item(modulo):
+    return render_template("index.jinja", modulo=modulo, agregar=True)
 
 @catalo_bp.route('/catalogo/<modulo>/editar/<int:item_id>/', methods=['GET'])
 @auth_required
 def editar_contenido(user, modulo, item_id):
     return render_template("index.jinja", modulo=modulo, item_id=item_id)
+
+

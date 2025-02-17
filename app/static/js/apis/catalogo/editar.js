@@ -1,243 +1,125 @@
-document.addEventListener("DOMContentLoaded", () => {
-    if (estaEnUsuarios()) {
-        obtenerUsuarios()
-            .then(data => mostrarUsuarios(data))
-            .catch(error => mostrarError(error));
-    } else {
-        const modulo = obtenerModulo();
-        const itemId = obtenerItemId();
-        if (!modulo || !itemId) return;
+document.addEventListener("DOMContentLoaded", async () => {
+    inicializarEditar();
+    actualizarBreadcrumbs();
 
-        obtenerDetalleParaEditar(modulo, itemId)
-            .then(data => mostrarFormularioEditar(data, modulo, itemId))
-            .catch(error => mostrarError(error));
+    const modulo = obtenerModulo();
+    const itemId = obtenerItemId();
+    const esEdicion = window.location.pathname.includes("editar");
+
+    if (modulo && itemId && esEdicion) {
+        try {
+            const data = await obtenerDetalleParaEditar(modulo, itemId);
+            mostrarFormularioEditar(data, modulo, itemId);
+            actualizarBreadcrumbs();
+        } catch (error) {
+            Swal.fire("Error", "No se pudo obtener los detalles para la edición.", "error");
+        }
     }
 });
 
-/*
-   Verifica si el DOM ya ha sido cargado; si es así, ejecuta la función `iniciarUsuarios`.
-   Si aún no está cargado, espera a que lo esté y luego ejecuta `iniciarUsuarios`.
-*/
-/*
-   Esta función realiza el mismo proceso que el bloque anterior, 
-   pero puede ser llamada en otros contextos si es necesario.
-*/
-function iniciarUsuarios() {
-    if (!estaEnUsuarios()) return;  /* Verifica si estamos en la sección de usuarios */
+function inicializarEditar() {
+    document.body.addEventListener("click", async (e) => {
+        const botonEditar = e.target.closest(".btn-editar");
+        if (botonEditar) {
+            e.preventDefault();
+            const modulo = botonEditar.getAttribute("data-modulo");
+            const itemId = botonEditar.getAttribute("data-id");
 
-    obtenerUsuarios()  /* Llama a la función para obtener usuarios */
-        .then(data => mostrarUsuarios(data))  /* Muestra los usuarios obtenidos */
-        .catch(error => mostrarError(error));  /* Muestra un error si ocurre */
-}
-
-/* 
-   Esta función verifica si la página actual corresponde a la sección de usuarios 
-   (ya sea en la ruta principal o en una ruta que comience con "/home").
-*/
-function estaEnUsuarios() {
-    return window.location.pathname === "/" || window.location.pathname.startsWith("/home");
-}
-
-function obtenerModulo() {
-    const pathSegments = window.location.pathname.split("/");
-    return pathSegments[2] || null;
-}
-
-function obtenerItemId() {
-    const pathSegments = window.location.pathname.split("/");
-    return pathSegments[4] || null;
-}
-
-async function obtenerUsuarios() {
-    const response = await fetch("/api/usuarios", {
-        method: "GET",
-        credentials: "include", // Para enviar cookies si es necesario
-        headers: {
-            "Content-Type": "application/json"
+            if (modulo && itemId) {
+                history.pushState({}, '', `/catalogo/${modulo}/editar/${itemId}/`);
+                await cargarFormularioEditar(modulo, itemId);
+            }
         }
     });
-
-    if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-    }
-
-    return response.json();
 }
 
-async function obtenerDetalleParaEditar(modulo, itemId) {
-    const response = await fetch(`/catalogo/${modulo}/editar/${itemId}/`, {
-        method: "GET",
-        credentials: "include", // Para enviar cookies si es necesario
-        headers: {
-            "Content-Type": "application/json"
+async function cargarFormularioEditar(modulo, itemId) {
+    const contentContainer = document.getElementById("content-container");
+    if (!contentContainer) return;
+
+    try {
+        contentContainer.innerHTML = `<p>Cargando formulario de edición...</p>`;
+
+        const response = await fetch(`/api/catalogo/detalle/?modulo=${modulo}&id=${itemId}`, {
+            method: "GET",
+            credentials: "include",
+            headers: { "Accept": "application/json" }
+        });
+
+        if (!response.ok) {
+            throw new Error("Error al obtener los detalles del ítem.");
         }
-    });
 
-    if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-    }
+        const data = await response.json();
+        const item = data.detalle;
 
-    return response.json();
-}
-
-function mostrarUsuarios(data) {
-    const contentContainer = document.getElementById("content-container");
-    contentContainer.innerHTML = "";
-
-    if (!data || data.error) {
-        mostrarError(data.error || "No se encontró información de usuarios.");
-        return;
-    }
-
-    const usuarios = data.usuarios;
-
-    // Crear el título y la descripción del módulo dinámicamente
-    const titulo = document.createElement("h2");
-    titulo.className = "display-4 text-primary text-center";
-    titulo.textContent = "Usuarios";
-
-    const descripcion = document.createElement("p");
-    descripcion.className = "lead text-muted text-center";
-    descripcion.textContent = "Aquí puedes ver la lista de usuarios.";
-
-    // Crear un contenedor para las tarjetas de usuarios
-    const cardContainer = document.createElement("div");
-    cardContainer.className = "row row-cols-1 row-cols-md-3 g-4";
-    contentContainer.appendChild(cardContainer);
-
-    // Crear una tarjeta por cada usuario
-    usuarios.forEach(usuario => {
-        const col = document.createElement("div");
-        col.className = "col content-item";
-        col.innerHTML = `
-            <div class="card shadow-sm border-light rounded">
-                <div class="card-body">
-                    <h5 class="card-title">${usuario.nombre}</h5>
-                    <p class="card-text">${usuario.descripcion}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <a href="/usuarios/${usuario.id}" class="btn btn-primary btn-sm">Ver Detalle</a>
-                    </div>
-                </div>
-            </div>
-        `;
-        cardContainer.appendChild(col);
-    });
-
-    // Agregar el título y la descripción al contenedor
-    contentContainer.appendChild(titulo);
-    contentContainer.appendChild(descripcion);
-}
-
-function mostrarFormularioEditar(data, modulo, itemId) {
-    const contentContainer = document.getElementById("content-container");
-    contentContainer.innerHTML = "";
-
-    if (!modulo) {
-        mostrarError("No se pudo determinar el módulo.");
-        return;
-    }
-
-    if (!data || data.error) {
-        mostrarError(data.error || "No se encontró información del detalle.");
-        return;
-    }
-
-    const detalle = data.detalle;
-
-    // Crear el título y la descripción del módulo dinámicamente
-    const titulo = document.createElement("h2");
-    titulo.className = "display-4 text-primary text-center";
-    titulo.textContent = `Editar ${modulo}`;
-
-    const descripcion = document.createElement("p");
-    descripcion.className = "lead text-muted text-center";
-    descripcion.textContent = `Aquí puedes editar el ${modulo.toLowerCase()}.`;
-
-    // Crear el formulario
-    const form = document.createElement("form");
-    form.id = "form-editar";
-    form.className = "mt-4";
-
-    // Campo para el nombre
-    const nombreGroup = document.createElement("div");
-    nombreGroup.className = "form-group";
-    nombreGroup.innerHTML = `
-        <label for="nombre">Nombre</label>
-        <input type="text" class="form-control" id="nombre" name="nombre" value="${detalle.nombre}" required>
-    `;
-
-    // Campo para la descripción
-    const descripcionGroup = document.createElement("div");
-    descripcionGroup.className = "form-group";
-    descripcionGroup.innerHTML = `
-        <label for="descripcion">Descripción</label>
-        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required>${detalle.descripcion}</textarea>
-    `;
-
-    // Botón de enviar
-    const submitButton = document.createElement("button");
-    submitButton.type = "submit";
-    submitButton.className = "btn btn-primary";
-    submitButton.textContent = `Editar ${modulo}`;
-
-    // Agregar elementos al formulario
-    form.appendChild(nombreGroup);
-    form.appendChild(descripcionGroup);
-    form.appendChild(submitButton);
-
-    // Agregar el título, la descripción y el formulario al contenedor
-    contentContainer.appendChild(titulo);
-    contentContainer.appendChild(descripcion);
-    contentContainer.appendChild(form);
-
-    // Manejar el envío del formulario
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const nombre = document.getElementById("nombre").value;
-        const descripcion = document.getElementById("descripcion").value;
-
-        if (!nombre || !descripcion) {
-            mostrarError("Debe proporcionar nombre y descripción.");
+        if (!item) {
+            contentContainer.innerHTML = `<p style="color: red;">Error: No se encontraron los detalles.</p>`;
             return;
         }
 
-        try {
-            const response = await editarContenido(modulo, itemId, nombre, descripcion);
-            if (response.ok) {
-                window.location.href = `/catalogo/${modulo}`; // Redirigir al catálogo después de editar
-            } else {
-                const error = await response.json();
-                mostrarError(error.error || "Error al editar el contenido.");
-            }
-        } catch (error) {
-            mostrarError("Error en la solicitud.");
-        }
-    });
+        contentContainer.innerHTML = `
+            <h2 class="display-4 text-primary text-center">Editar ${modulo}</h2>
+            <form id="form-editar" class="mt-4">
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" value="${item.nombre}" required>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required>${item.descripcion}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <div id="loading" style="display: none; color: green;">Guardando cambios...</div>
+            </form>
+        `;
+
+        document.getElementById("form-editar").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            await enviarEdicion(modulo, itemId);
+        });
+
+        actualizarBreadcrumbs();
+
+    } catch (error) {
+        contentContainer.innerHTML = `<p style="color: red;">Error al cargar el formulario.</p>`;
+        console.error("Error al obtener los detalles del ítem:", error);
+    }
 }
 
-async function editarContenido(modulo, itemId, nombre, descripcion) {
-    const data = { id: itemId, nombre, descripcion };
-    return await fetch(`/catalogo/${modulo}/editar/${itemId}/`, {
-        method: "PUT",
-        credentials: "include", // Para enviar cookies si es necesario
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    });
-}
+async function enviarEdicion(modulo, itemId) {
+    const nombre = document.getElementById("nombre").value.trim();
+    const descripcion = document.getElementById("descripcion").value.trim();
 
-function mostrarError(error) {
-    const contentContainer = document.getElementById("content-container");
-    if (!contentContainer) {
-        console.error("Error: No se encontró el elemento #content-container en el DOM.");
+    if (!nombre || !descripcion) {
+        Swal.fire("Error", "Debe proporcionar nombre y descripción.", "error");
         return;
     }
 
-    const errorMessage = document.createElement("p");
-    errorMessage.style.color = "red";
-    errorMessage.textContent = error;
+    try {
+        const response = await fetch(`/api/catalogo/editar/?modulo=${modulo}`, {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: itemId, nombre, descripcion })
+        });
 
-    contentContainer.appendChild(errorMessage);
+        if (!response.ok) {
+            throw new Error("Error al editar el contenido.");
+        }
+
+        Swal.fire({
+            icon: "success",
+            title: "¡Éxito!",
+            text: "El contenido se ha editado correctamente.",
+            confirmButtonText: "Aceptar"
+        }).then(() => {
+            history.pushState({}, '', `/catalogo/${modulo}/`);
+            cargarCatalogo(modulo); // 🔄 Actualizar solo el main sin recargar la página
+        });
+
+    } catch (error) {
+        console.error("Error editando contenido:", error);
+        Swal.fire("Error", "No se pudo editar el contenido.", "error");
+    }
 }

@@ -30,7 +30,14 @@
     <script src="{{ url_for('static', filename='js/apis/base_api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/logout_api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/select_api.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/components/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/apis/user_api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/apis/catalogo/catalogo.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/apis/catalogo/detalle.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/apis/catalogo/eliminar.js') }}"></script>
+
+
+
+
 
 
 
@@ -61,7 +68,7 @@
                 </form>
                 <!-- Contenedor para mostrar los resultados de la búsqueda -->
                 <div id="search-results"></div>
-                
+
                 <div class="d-lg-flex align-items-center">
                     <div class="dropdown">
                         <a data-bs-toggle="dropdown" class="dropdown-toggle d-flex align-items-center hidden-arrow"

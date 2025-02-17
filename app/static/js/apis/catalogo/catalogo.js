@@ -1,91 +1,99 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const modulo = obtenerModulo();
-    if (!modulo) return;
+// catalogo.js
 
-    obtenerDatos(modulo)
-        .then(data => mostrarDatos(data, modulo))
-        .catch(error => mostrarError(error));
+document.addEventListener("DOMContentLoaded", () => {
+    // Verifica si estamos en una página de detalle
+    const itemId = obtenerItemId();
+    if (itemId) {
+        return; // No inicializa el catálogo si estamos en una página de detalle
+    }
+
+    inicializarCatalogo(); // Inicializa los eventos de clic en los enlaces "Listar"
+
+    const modulo = obtenerModulo();
+    if (modulo) {
+        cargarCatalogo(modulo); // Cargar catálogo si la URL ya es /catalogo/<modulo>/
+    }
+
+    // Manejar el evento de retroceso del navegador (para que no recargue todo)
+    window.addEventListener("popstate", () => {
+        const modulo = obtenerModulo();
+        if (modulo) {
+            cargarCatalogo(modulo);
+        }
+    });
 });
 
-/*
-    La función iniciarCatalogo() realiza la misma lógica que el bloque anterior, 
-    pero en lugar de depender del evento DOMContentLoaded, la función se puede ejecutar en cualquier momento.
-    Esto permite reutilizar la lógica para iniciar el catálogo desde otros lugares en el código si es necesario.
-    Similar a lo que ocurre en el bloque anterior, la función obtiene el módulo desde la URL 
-    y luego hace una solicitud al servidor para obtener los datos asociados a ese módulo.
-*/
-function iniciarCatalogo() {
-    const modulo = obtenerModulo();
-    if (!modulo) return;
+// 🔹 Función para inicializar los eventos en los enlaces "Listar"
+function inicializarCatalogo() {
+    document.body.addEventListener("click", async (e) => {
+        const link = e.target.closest(".list-link");
+        if (link) {
+            e.preventDefault(); // Evita la recarga completa de la página
 
-    obtenerDatos(modulo)
-        .then(data => mostrarDatos(data, modulo))
-        .catch(error => mostrarError(error));
+            const modulo = link.getAttribute("data-modulo");
+            if (modulo) {
+                window.history.pushState({}, '', `/catalogo/${modulo}/`); // Actualiza la URL sin recargar
+                await cargarCatalogo(modulo); // Cargar el contenido dinámicamente
+            }
+        }
+    });
 }
-/*
-    La función obtenerModulo() se encarga de extraer el módulo actual desde la URL de la página.
-    Esto es útil para identificar en qué sección o categoría se encuentra el usuario, como "materias", "proyectos", "juegos", etc.
-*/
 
+// 🔹 Función para obtener el módulo desde la URL
 function obtenerModulo() {
     const pathSegments = window.location.pathname.split("/");
     return pathSegments[2] || null; // Obtiene el módulo de la URL (materias, proyectos, juegos)
 }
 
-/*
-    Este bloque verifica si el documento ya está completamente cargado utilizando `document.readyState`.
-    Si el documento ya está en estado "loading", entonces la función `iniciarCatalogo()` se ejecutará inmediatamente.
-    Si no, se agrega un listener para ejecutar la función cuando el DOM esté listo, 
-    asegurando que el catálogo se inicie correctamente solo después de que el contenido de la página esté disponible.
-*/
-if (document.readyState !== "loading") {
-    iniciarCatalogo();
-} else {
-    document.addEventListener("DOMContentLoaded", iniciarCatalogo);
-}
-
-/*
-    La función obtenerModulo() toma la URL del navegador, la divide en segmentos utilizando `/` como delimitador, 
-    y retorna el tercer segmento, que corresponde al "módulo". 
-    Si el segmento no existe, devuelve `null`. Esta función es útil para obtener dinámicamente el módulo 
-    actual basado en la ruta de la URL.
-*/
-function obtenerModulo() {
-    const pathSegments = window.location.pathname.split("/");
-    return pathSegments[2] || null;
-}
-
-/*
-    La función obtenerDatos es asíncrona y se encarga de hacer una solicitud HTTP GET al servidor
-    para obtener los datos asociados al módulo especificado. 
-    Utiliza `fetch` para realizar la solicitud y espera la respuesta. 
-    Si la respuesta es correcta (status 200), convierte la respuesta a formato JSON y la retorna. 
-    Si la respuesta es un error, se lanza una excepción con el mensaje de error correspondiente.
-*/
+// 🔹 Función para obtener datos del catálogo desde el backend
 async function obtenerDatos(modulo) {
-    const response = await fetch(`/api/catalogo/?modulo=${modulo}`, {
-        method: "GET",
-        credentials: "include"
-    });
+    try {
+        const response = await fetch(`/api/catalogo/?modulo=${modulo}`, {
+            method: "GET",
+            credentials: "include"
+        });
 
-    if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener el catálogo:", error);
+        return { error: "Error al conectar con el servidor." };
+    }
+}
+
+// 🔹 Función para cargar el catálogo en el contenedor
+async function cargarCatalogo(modulo) {
+    if (!modulo) return;
+
+    const contentContainer = document.getElementById("content-container");
+    if (!contentContainer) {
+        console.error("Error: No se encontró el #content-container en el DOM.");
+        return;
     }
 
-    return response.json();
+    try {
+        contentContainer.innerHTML = `<p>Cargando ${modulo}...</p>`; // Mensaje de carga
+
+        const data = await obtenerDatos(modulo);
+        if (data.error) {
+            mostrarError(data.error);
+        } else {
+            mostrarDatos(data, modulo);
+        }
+    } catch (error) {
+        mostrarError("Error al cargar el catálogo.");
+    }
 }
 
-/*
-    La función mostrarDatos es responsable de renderizar los datos recibidos en la interfaz de usuario. 
-    Limpia el contenedor de contenido antes de mostrar los nuevos datos. 
-    Si los datos no contienen la información esperada (materias, proyectos o juegos), o si no hay datos disponibles, 
-    muestra un mensaje de error. Si los datos son válidos, crea y muestra tarjetas para cada elemento.
-*/
+// 🔹 Función para mostrar los datos en el DOM
 function mostrarDatos(data, modulo) {
     const contentContainer = document.getElementById("content-container");
-    contentContainer.innerHTML = ""; // Limpia el contenedor
+    contentContainer.innerHTML = ""; // Limpia el contenido previo
 
-    if (!data || data.error || !data.materias && !data.proyectos && !data.juegos) {
+    if (!data || data.error || (!data.materias && !data.proyectos && !data.juegos)) {
         mostrarError("No se encontraron datos.");
         return;
     }
@@ -96,7 +104,7 @@ function mostrarDatos(data, modulo) {
         return;
     }
 
-    // Crear el título y la descripción del módulo dinámicamente
+    // Título y descripción dinámicos
     const titulo = document.createElement("h2");
     titulo.className = "display-4 text-primary text-center";
     titulo.textContent = `${modulo} Registrados`;
@@ -105,11 +113,10 @@ function mostrarDatos(data, modulo) {
     descripcion.className = "lead text-muted text-center";
     descripcion.textContent = `Aquí puedes ver todos los ${modulo.toLowerCase()} registrados.`;
 
-    // Agregar el título y la descripción al contenedor
     contentContainer.appendChild(titulo);
     contentContainer.appendChild(descripcion);
 
-    // Crear un contenedor para las tarjetas
+    // Contenedor de tarjetas
     const cardContainer = document.createElement("div");
     cardContainer.className = "row row-cols-1 row-cols-md-3 g-4";
     contentContainer.appendChild(cardContainer);
@@ -119,7 +126,7 @@ function mostrarDatos(data, modulo) {
         cardContainer.appendChild(crearTarjeta(item, modulo, data));
     });
 
-    // Mostrar el botón de agregar si hay permisos
+    // Botón de agregar si hay permisos
     if (data.can_create) {
         const addButton = document.createElement("a");
         addButton.href = `/catalogo/${modulo}/agregar/`;
@@ -134,12 +141,7 @@ function mostrarDatos(data, modulo) {
     }
 }
 
-/*
-    La función crearTarjeta crea un elemento de tarjeta en HTML para cada item (materia, proyecto o juego),
-    llenando sus detalles como nombre y descripción. 
-    Si los datos contienen permisos para editar o eliminar (can_edit, can_delete), se incluyen los botones correspondientes.
-    Los botones de "Ver Detalles", "Editar" y "Eliminar" están condicionados según los permisos disponibles.
-*/
+// 🔹 Función para crear una tarjeta de catálogo
 function crearTarjeta(item, modulo, data) {
     const col = document.createElement("div");
     col.className = "col content-item";
@@ -149,18 +151,17 @@ function crearTarjeta(item, modulo, data) {
                 <h5 class="card-title">${item.nombre}</h5>
                 <p class="card-text">${item.descripcion}</p>
                 <div class="d-flex justify-content-between align-items-center">
-                    <a href="/catalogo/${modulo}/detalle/${item.id}" class="btn btn-primary btn-sm">Ver Detalles</a>
+                    <a href="/catalogo/${modulo}/detalle/${item.id}" class="deta-link btn btn-primary btn-sm">Ver Detalles</a>
                     <div class="d-flex">
                         ${data.can_edit ? `
                         <a href="/catalogo/${modulo}/editar/${item.id}" class="btn btn-warning btn-sm me-2">
                             <img src="/static/images/edit.png" alt="Editar" width="20" height="20">
                         </a>` : ""}
                         ${data.can_delete ? `
-                        <form action="/catalogo/${modulo}/eliminar/${item.id}" method="POST" style="display:inline-block;">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <img src="/static/images/delete.png" alt="Eliminar" width="20" height="20">
-                            </button>
-                        </form>` : ""}
+ <button class="btn btn-danger btn-sm btn-eliminar" data-modulo="${modulo}" data-id="${item.id}">
+    <img src="/static/images/delete.png" alt="Eliminar" width="20" height="20">
+</button>
+` : ""}
                     </div>
                 </div>
             </div>
@@ -169,11 +170,7 @@ function crearTarjeta(item, modulo, data) {
     return col;
 }
 
-/*
-    La función mostrarError es responsable de mostrar un mensaje de error en el contenedor de contenido.
-    Si no se encuentra el contenedor, se registra un error en la consola. Si se encuentra, se muestra el mensaje de error 
-    en color rojo. Esto se utiliza para informar al usuario cuando no hay datos disponibles o cuando ocurre algún error.
-*/
+// 🔹 Función para mostrar errores
 function mostrarError(error) {
     const contentContainer = document.getElementById("content-container");
     if (!contentContainer) {

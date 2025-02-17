@@ -23,14 +23,14 @@ function inicializarBuscador() {
         e.preventDefault(); // Evita que el formulario recargue la página.
         const query = searchInput.value.trim();
         const category = categorySelect.value; // Obtiene la categoría seleccionada.
-    
+
         if (query) {
             // Valida la categoría antes de realizar la búsqueda.
             if (!category || category === "") {
                 mostrarMensaje("Por favor, selecciona una categoría válida.");
                 return;
             }
-    
+
             // Realiza la búsqueda si hay un término válido.
             const resultados = await buscarEnBackend(query, category);
             if (resultados.error) {
@@ -90,8 +90,8 @@ function mostrarResultados(resultados, categoriaSeleccionada) {
 
     // Generar el HTML para las tarjetas.
     resultados.forEach(item => {
-        const categoriaInfo = categoriaSeleccionada === "todos" 
-            ? `<p class="card-category"><strong>Categoría:</strong> ${item.categoria}</p>` 
+        const categoriaInfo = categoriaSeleccionada === "todos"
+            ? `<p class="card-category"><strong>Categoría:</strong> ${item.categoria}</p>`
             : "";
 
         const col = document.createElement("div");
@@ -107,7 +107,7 @@ function mostrarResultados(resultados, categoriaSeleccionada) {
                 ${categoriaInfo}
             </div>
             <div class="card-footer text-center">
-                <a href="${item.detalles_url}" class="btn btn-primary">Ver Detalles</a>
+            <a href="/catalogo/${item.categoria}/detalle/${item.id}/" class="deta-link btn btn-primary">Ver Detalles</a>
             </div>
         `;
 

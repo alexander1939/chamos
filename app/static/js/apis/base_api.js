@@ -1,10 +1,4 @@
-/*
-    Este bloque de código se ejecuta cuando el contenido del DOM ha sido completamente cargado. 
-    Primero, se obtiene el elemento del menú mediante `getElementById` y se verifica si los datos ya fueron cargados mediante el atributo `data-loaded`.
-    Si los datos aún no han sido cargados, se llama a la función `cargarDatos()` de manera asincrónica. 
-    Después de que los datos son cargados, se marca el atributo `data-loaded` como "true".
-    Finalmente, se activa la navegación con la función `activarNavegacion()`, que permite el comportamiento dinámico de la navegación.
-*/
+
 document.addEventListener("DOMContentLoaded", async () => {
     const menuList = document.getElementById("menu-list");
 
@@ -15,13 +9,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 });
 
-/*
-    La función `cargarDatos` obtiene información del servidor sobre el menú, los privilegios y el usuario. 
-    Utiliza `fetch` para hacer una solicitud HTTP GET al endpoint "/api/menu". 
-    Si la respuesta es exitosa, se procesa la información y se actualizan las secciones correspondientes de la página, 
-    como el nombre del usuario, el menú y el selector de categorías.
-    Si la respuesta no es exitosa, se maneja el error según el código de estado (401 si la sesión ha expirado, u otros códigos de error de la API).
-*/
 async function cargarDatos() {
     try {
         const response = await fetch("/api/menu", {
@@ -72,19 +59,11 @@ function actualizarNombreUsuario(usuario) {
     }
 }
 
-/*
-    La función `cargarMenu` es responsable de cargar el menú de navegación. 
-    Primero, se limpia el contenido actual del menú y se añade un enlace de inicio.
-    Luego, verifica que el menú recibido sea válido y lo recorre. 
-    Para cada módulo en el menú, comprueba si el usuario tiene los privilegios necesarios para verlo, 
-    y si es así, se agrega un ítem de menú con las opciones correspondientes.
-    Si no se tienen privilegios para un módulo, se omite.
-*/
 function cargarMenu(menu, privilegios) {
     const menuList = document.getElementById("menu-list");
     if (!menuList) return;
 
-    menuList.innerHTML = `<li><a href="/"class="nav-link"><i class="fas fa-home"></i> Inicio</a></li>`; // Agrega el ítem de inicio al menú.
+    menuList.innerHTML = `<li><a href="/"class="home-link"><i class="fas fa-home"></i> Inicio</a></li>`; // Agrega el ítem de inicio al menú.
 
     if (!Array.isArray(menu) || menu.length === 0) {
         console.warn("No hay módulos en el menú.");
@@ -101,12 +80,6 @@ function cargarMenu(menu, privilegios) {
     activarDropdowns(); // Activa el comportamiento de los dropdowns.
 }
 
-/*
-    La función `createDropdown` genera el HTML para un dropdown de navegación, basado en las opciones del menú.
-    Para cada módulo, se verifica si el usuario tiene permisos para crear o ver contenido y se añaden las opciones correspondientes al dropdown.
-    Si el módulo tiene subcontenido (como elementos de catálogo), se añaden enlaces a estos elementos. 
-    Si no hay contenido disponible, se muestra un mensaje indicando que no hay elementos.
-*/
 function createDropdown(nombre, contenido, canCreate, canView) {
     let dropdown = `
         <li>
@@ -119,16 +92,16 @@ function createDropdown(nombre, contenido, canCreate, canView) {
     `;
 
     if (canCreate) {
-        dropdown += `<li><a href="/catalogo/${nombre}/agregar/ ><i class="fas fa-plus-circle"></i> Agregar</a></li>`;
+        dropdown += `<li><a href="/catalogo/${nombre}/agregar/" ><i class="fas fa-plus-circle"></i> Agregar</a></li>`;
     }
 
     if (canView) {
-        dropdown += `<li><a href="/catalogo/${nombre}/"class="nav-link"><i class="fas fa-list"></i> Listar</a></li>`;
+        dropdown += `<li><a href="/catalogo/${nombre}/" class="list-link" data-modulo="${nombre}"><i class="fas fa-list"></i> Listar</a></li>`;
     }
 
     if (Array.isArray(contenido) && contenido.length > 0) {
         contenido.forEach(item => {
-            dropdown += `<li><a href="/catalogo/${nombre}/detalle/${item.id}">
+            dropdown += `<li><a href="/catalogo/${nombre}/detalle/${item.id}/" class="deta-link" >
                             <i class="fas fa-file-alt"></i> ${item.nombre}
                          </a></li>`;
         });
@@ -140,10 +113,7 @@ function createDropdown(nombre, contenido, canCreate, canView) {
     return dropdown;
 }
 
-/*
-    La función `activarDropdowns` permite la funcionalidad de mostrar u ocultar las opciones de cada dropdown cuando se hace clic en el encabezado del dropdown.
-    Al hacer clic, si el submenu está oculto, se muestra; si está visible, se oculta.
-*/
+
 function activarDropdowns() {
     document.querySelectorAll(".dropdown-btn").forEach(btn => {
         btn.addEventListener("click", function (e) {
@@ -158,10 +128,6 @@ function activarDropdowns() {
     });
 }
 
-/*
-    La función `actualizarSelect` llena un elemento `<select>` con las categorías disponibles en el menú, basándose en los privilegios del usuario.
-    Para cada módulo del menú que el usuario puede ver, se crea una opción en el select con el nombre del módulo.
-*/
 function actualizarSelect(menu, privilegios) {
     const selectElement = document.getElementById("category-select");
     if (!selectElement) return;

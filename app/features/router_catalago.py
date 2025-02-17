@@ -27,11 +27,6 @@ def mostrar_contenido(modulo):
 @catalo_bp.get('/catalogo/<modulo>/detalle/<int:item_id>/') 
 @auth_required
 def mostrar_detalle(user, modulo, item_id):  # <-- Asegúrate de incluir 'user'
-    user_privilege, error = has_access_to_module(user, modulo)  # <-- Pasar user aquí
-    if error:
-        flash(error, "warning")
-        return redirect(url_for('auth.index'))
-
     return render_template("index.jinja", modulo=modulo, item_id=item_id)
 
 

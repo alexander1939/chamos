@@ -65,7 +65,7 @@ def mostrar_detalle(modulo, item_id):
 
 
 
-@catalo_bp.route('/catalogo/<modulo>/agregar/', methods=['GET', 'POST'])
+@catalo_bp.route('/catalogo/<modulo>/agregar/', methods=['GET'])
 def agregar_contenido(modulo):
     token = request.cookies.get("token")
     
@@ -83,44 +83,18 @@ def agregar_contenido(modulo):
         flash(error, "warning")
         return redirect(url_for('auth.index'))
 
-    if request.method == 'POST':
-        can_create = user_privilege.can_create
-        if not can_create:
-            flash(f"No tienes permiso para agregar {modulo.lower()}.", "warning")
-            return redirect(url_for('catalo.mostrar_contenido', modulo=modulo))
-
-        nombre = request.form.get('nombre')
-        descripcion = request.form.get('descripcion')
-
-        if not nombre or not descripcion:
-            flash("Debe proporcionar nombre y descripción.", "warning")
-            return redirect(url_for('catalo.agregar_contenido', modulo=modulo))
-
-        data = {'nombre': nombre, 'descripcion': descripcion}
-        api_url = f"http://localhost:5000/api/catalogo/agregar/?modulo={modulo}"
-
-        response = requests.post(api_url, json=data, cookies=request.cookies)
-
-        if response.status_code == 201:
-            flash(f"{modulo} agregado correctamente.", "success")
-            return redirect(url_for('catalo.mostrar_contenido', modulo=modulo))
-        else:
-            error_message = response.json().get('error', 'Error desconocido')
-            flash(f"Error al agregar {modulo}: {error_message}", "danger")
-            return redirect(url_for('catalo.agregar_contenido', modulo=modulo))
-
+    # Solo renderizamos la vista sin procesar datos POST
     context = {
+        'modulo': modulo,
         'form_title': f'Agregar Nuevo {modulo}',
         'action_url': url_for('catalo.agregar_contenido', modulo=modulo),
         'input_title': f'Nombre de {modulo}',
         'desc_title': f'Descripción de {modulo}',
         'button_text': f'Agregar {modulo}',
-        'item_name': '',
-        'item_description': '',
-        'modulo': modulo 
     }
 
-    return render_template("models/add_categoria.jinja", **context)
+    return render_template("index.jinja", **context)
+
 
 
 @catalo_bp.route('/catalogo/<modulo>/editar/<int:item_id>/', methods=['GET', 'POST'])

@@ -27,12 +27,25 @@ function inicializarEliminacion() {
             const modulo = botonEliminar.getAttribute("data-modulo");
             const itemId = botonEliminar.getAttribute("data-id");
 
-            if (confirm("¿Estás seguro de que deseas eliminar este elemento?")) {
-                await eliminarElemento(modulo, itemId);
-            }
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "No podrás revertir esta acción",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar"
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    await eliminarElemento(modulo, itemId);
+                    Swal.fire("¡Eliminado!", "El elemento ha sido eliminado.", "success");
+                }
+            });
         }
     });
 }
+
 
 // 🔹 Función para eliminar un elemento sin recargar la página
 async function eliminarElemento(modulo, itemId) {
@@ -57,3 +70,4 @@ async function eliminarElemento(modulo, itemId) {
         alert("No se pudo eliminar el elemento.");
     }
 }
+

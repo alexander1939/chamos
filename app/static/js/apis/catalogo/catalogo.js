@@ -130,7 +130,7 @@ function mostrarDatos(data, modulo) {
     if (data.can_create) {
         const addButton = document.createElement("a");
         addButton.href = `/catalogo/${modulo}/agregar/`;
-        addButton.className = "btn btn-success btn-lg";
+        addButton.className = "btn btn-success btn-lg btn-agregar";
         addButton.textContent = `Agregar Nuevo ${modulo.slice(0, -1)}`;
 
         const addButtonContainer = document.createElement("div");

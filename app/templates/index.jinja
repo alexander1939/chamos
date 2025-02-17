@@ -10,10 +10,13 @@
         onclick="cancelSearch()">Cancelar</button>
 </div>
 
-<!-- Contenedor donde `catalogo.js` insertará el contenido dinámicamente -->
+<!-- Contenedor donde el formulario será insertado dinámicamente -->
 <div id="content-container">
-    <h2 class="text-center">Cargando contenido...</h2>
+
 </div>
 
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/libs/sweetalert2.min.css') }}">
+<script src="{{ url_for('static', filename='js/libs/sweetalert2.min.js') }}"></script>
 
 {% endblock %}

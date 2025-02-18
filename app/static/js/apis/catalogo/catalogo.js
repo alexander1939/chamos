@@ -103,6 +103,8 @@ async function cargarCatalogo(modulo) {
         }
 
         contentContainer.innerHTML = `<p>Cargando ${modulo}...</p>`;
+
+
         const data = await obtenerDatos(modulo);
         if (data.error) {
             mostrarError(data.error);
@@ -110,10 +112,34 @@ async function cargarCatalogo(modulo) {
             mostrarDatos(data, modulo);
             actualizarBreadcrumbs();
 
+
         }
     } catch (error) {
         mostrarError("Error al cargar el catálogo.");
     }
+}
+
+
+function agregarBarraBusqueda() {
+    let searchContainer = document.getElementById("search-container");
+    if (!searchContainer) {
+        const contentContainer = document.getElementById("content-container");
+        if (!contentContainer) return;
+
+        searchContainer = document.createElement("div");
+        searchContainer.id = "search-container";
+        searchContainer.className = "mb-3";
+        searchContainer.innerHTML = `
+            <div class="input-group">
+                <input type="text" id="search-input" class="form-control" placeholder="Buscar en este módulo...">
+                <button id="search-button" class="btn btn-primary">Buscar</button>
+                <button id="cancel-search" class="btn btn-secondary" style="display: none;">Cancelar</button>
+            </div>
+        `;
+
+        contentContainer.prepend(searchContainer);
+    }
+    filtroBusqueda();
 }
 
 
@@ -123,21 +149,31 @@ Muestra los datos del catálogo en el contenedor correspondiente:
 2. Crea las tarjetas para cada elemento del catálogo.
 3. Si se puede agregar un nuevo elemento, muestra el botón para agregar.
 */
-function mostrarDatos(data, modulo) {
+function mostrarDatos(data, modulo, isSearch = false) {
     const contentContainer = document.getElementById("content-container");
     contentContainer.innerHTML = "";
-    if (!data || data.error || (!data.materias && !data.proyectos && !data.juegos)) {
-        mostrarError("No se encontraron datos.");
+
+    let items;
+    let canEdit = false;
+    let canDelete = false;
+    let canCreate = false;
+
+    if (isSearch) {
+        items = data;
+    } else {
+        items = data.materias || data.proyectos || data.juegos;
+        canEdit = data.can_edit;
+        canDelete = data.can_delete;
+        canCreate = data.can_create;
+    }
+
+    agregarBarraBusqueda();
+
+    if (!items || items.length === 0) {
+        mostrarMensajeError("No se encontraron datos.");
         return;
     }
 
-    const items = data.materias || data.proyectos || data.juegos;
-    if (items.length === 0) {
-        mostrarError("No hay registros disponibles.");
-        return;
-    }
-
-    // Título y descripción dinámicos
     const titulo = document.createElement("h2");
     titulo.className = "display-4 text-primary text-center";
     titulo.textContent = `${modulo} Registrados`;
@@ -154,10 +190,10 @@ function mostrarDatos(data, modulo) {
     contentContainer.appendChild(cardContainer);
 
     items.forEach(item => {
-        cardContainer.appendChild(crearTarjeta(item, modulo, data));
+        cardContainer.appendChild(crearTarjeta(item, modulo, canEdit, canDelete, isSearch));
     });
 
-    if (data.can_create) {
+    if (!isSearch && canCreate) {
         const addButton = document.createElement("a");
         addButton.href = `/catalogo/agregar/${modulo}/`;
         addButton.className = "btn btn-success btn-lg btn-agregar";
@@ -171,11 +207,15 @@ function mostrarDatos(data, modulo) {
 
         contentContainer.appendChild(addButtonContainer);
     }
-
 }
 
 
-function crearTarjeta(item, modulo, data) {
+
+
+function crearTarjeta(item, modulo, canEdit, canDelete, isSearch) {
+    const editPermission = isSearch ? item.can_edit : canEdit;
+    const deletePermission = isSearch ? item.can_delete : canDelete;
+
     const col = document.createElement("div");
     col.className = "col content-item";
     col.innerHTML = `
@@ -186,12 +226,12 @@ function crearTarjeta(item, modulo, data) {
                 <div class="d-flex justify-content-between align-items-center">
                     <a href="/catalogo/${modulo}/detalle/${item.id}" class="deta-link btn btn-primary btn-sm">Ver Detalles</a>
                     <div class="d-flex">
-                        ${data.can_edit ? `
+                        ${editPermission ? `
                         <a href="#" class="btn-editar btn btn-warning btn-sm me-2"
                             data-modulo="${modulo}" data-id="${item.id}">
                             <img src="/static/images/edit.png" alt="Editar" width="20" height="20">
                         </a>` : ""}
-                        ${data.can_delete ? `
+                        ${deletePermission ? `
  <button class="btn btn-danger btn-sm btn-eliminar" data-modulo="${modulo}" data-id="${item.id}">
     <img src="/static/images/delete.png" alt="Eliminar" width="20" height="20">
 </button>

@@ -87,7 +87,7 @@ async function cargarResultados() {
         }
 
         const resultados = await response.json();
-        
+
         if (resultados.length < limit) {
             hayMasResultados = false; // Si se recibieron menos resultados que el límite, no hay más para cargar
         }

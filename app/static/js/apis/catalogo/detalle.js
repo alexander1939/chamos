@@ -39,7 +39,6 @@ function inicializarDetalles() {
     });
 }
 
-// 🔹 Función para obtener el módulo desde la URL
 function obtenerModulo() {
     const pathSegments = window.location.pathname.split("/");
     return pathSegments[2] || null;
@@ -52,6 +51,8 @@ function obtenerItemId() {
 
 async function obtenerDetalle(modulo, itemId) {
     try {
+        modulo = modulo.charAt(0).toUpperCase() + modulo.slice(1);
+
         console.log(`Obteniendo detalle del backend: modulo=${modulo}, itemId=${itemId}`);
 
         const response = await fetch(`/api/catalogo/detalle/?modulo=${modulo}&id=${itemId}`, {

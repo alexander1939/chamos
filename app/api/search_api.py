@@ -106,3 +106,73 @@ def advanced_search():
                         })
 
     return jsonify(results_list)
+
+
+
+# @searchApi.route('/api/buscar/<modulo>/', methods=['GET'])
+# def buscar_categoria():
+#     token = request.cookies.get("token")
+#     if not token:
+#         flash("Debes iniciar sesión para acceder a la búsqueda.", "danger")
+#         return redirect(url_for('auth.login'))
+
+#     user = get_user_from_token(token)
+#     if not user:
+#         flash("Usuario no encontrado.", "danger")
+#         return redirect(url_for('auth.login'))
+
+#     query = request.args.get('query', '').strip()
+#     category = category.lower()
+
+#     model_map = {
+#         'materias': Materia,
+#         'juegos': Juegos,
+#         'proyectos': Proyectos
+#     }
+
+#     if category == "privilegios":
+#         if query:
+#             results = db.session.query(User).join(UserPrivilege).join(Privilege).filter(
+#                 User.name.ilike(f"%{query}%") | User.surnames.ilike(f"%{query}%")
+#             ).all()
+#         else:
+#             results = db.session.query(User).join(UserPrivilege).join(Privilege).all()
+#     elif category in model_map:
+#         model = model_map[category]
+#         if query:
+#             results = db.session.query(model).filter(
+#                 model.nombre.ilike(f'%{query}%') | model.descripcion.ilike(f'%{query}%')
+#             ).all()
+#         else:
+#             results = db.session.query(model).all()
+#     else:
+#         return jsonify([])
+
+#     if category == "privilegios":
+#         resultado_json = [{
+#             "id": user.id,
+#             "name": user.name,
+#             "surnames": user.surnames,
+#             "privileges": [{
+#                 "name": priv.privilege.name,
+#                 "can_create": priv.can_create,
+#                 "can_edit": priv.can_edit,
+#                 "can_delete": priv.can_delete,
+#                 "can_view": priv.can_view
+#             } for priv in user.user_privileges],
+#             "detalles_url": url_for('auth.priv')
+#         } for user in results]
+#     else:
+#         resultado_json = [{
+#             'nombre': r.nombre,
+#             'descripcion': r.descripcion,
+#             'detalles_url': url_for('catalo.mostrar_detalle', modulo=category, item_id=r.id),
+#             'edit_url': url_for('catalo.editar_contenido', modulo=category, item_id=r.id),
+#             'delete_url': url_for('catalo.eliminar_contenido', modulo=category, item_id=r.id),
+#             'can_edit': True,
+#             'can_delete': True,
+#             'edit_image_url': url_for('static', filename='images/edit.png'),
+#             'delete_image_url': url_for('static', filename='images/delete.png')
+#         } for r in results]
+
+#     return jsonify(resultado_json)

@@ -1,24 +1,40 @@
-document.addEventListener('DOMContentLoaded', function () {
-    function adjustBreadcrumbs() {
-        const breadcrumbs = document.querySelectorAll('.breadcrumbsx-item .breadcrumbsx-text');
-        const isMobile = window.innerWidth <= 768;
+let breadcrumbsCargado = false; // Control para evitar múltiples peticiones simultáneas
 
-        breadcrumbs.forEach((crumb, index) => {
-            if (!crumb.dataset.originalText) {
-                crumb.dataset.originalText = crumb.textContent;
-            }
+async function actualizarBreadcrumbs() {
+    if (breadcrumbsCargado) return; // Si ya se está ejecutando, no lo vuelve a hacer
+    breadcrumbsCargado = true; // Marca que se está ejecutando
 
-            if (isMobile) {
-                if (index < breadcrumbs.length - 1) {
-                    crumb.textContent = crumb.dataset.originalText.substring(0, 1) + "...";
-                }
-            } else {
-                crumb.textContent = crumb.dataset.originalText;
-            }
+    try {
+        const breadcrumbsContainer = document.querySelector(".breadcrumbsx");
+        if (!breadcrumbsContainer) return;
+
+        const currentPath = window.location.pathname;
+        const response = await fetch(`/api/breadcrumbs?path=${encodeURIComponent(currentPath)}`, {
+            method: "GET",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" }
         });
+
+        if (!response.ok) {
+            throw new Error("Error al obtener los breadcrumbs.");
+        }
+
+        const data = await response.json();
+        breadcrumbsContainer.innerHTML = `
+            <li class="breadcrumbsx-item">
+                <a href="/">Home</a>
+            </li>
+        `;
+
+        data.breadcrumbs.forEach(crumb => {
+            breadcrumbsContainer.innerHTML += crumb.url
+                ? `<li class="breadcrumbsx-item"><a href="${crumb.url}">${crumb.name}</a></li>`
+                : `<li class="breadcrumbsx-item active">${crumb.name}</li>`;
+        });
+
+    } catch (error) {
+        console.error("Error al actualizar breadcrumbs:", error);
+    } finally {
+        breadcrumbsCargado = false; // Permite que se pueda ejecutar nuevamente cuando cambie la ruta
     }
-
-    adjustBreadcrumbs();
-
-    window.addEventListener('resize', adjustBreadcrumbs);
-});
+}

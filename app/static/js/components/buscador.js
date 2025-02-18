@@ -53,16 +53,18 @@ function inicializarBuscador() {
 
     // Evento de scroll para cargar más resultados dinámicamente
     window.addEventListener("scroll", async () => {
-        if (isLoading || !hayMasResultados) return;
-
+        // Verificar que haya una búsqueda activa antes de intentar cargar más resultados
+        if (!queryActual || !categoryActual || isLoading || !hayMasResultados) return;
+    
         const scrollPos = window.innerHeight + window.scrollY;
         const pageHeight = document.documentElement.scrollHeight;
-
-        if (scrollPos >= pageHeight - 50) { // Si el usuario está cerca del final de la página
-            currentPage++; // Avanza a la siguiente página
+    
+        if (scrollPos >= pageHeight - 50) {
+            currentPage++;
             await cargarResultados();
         }
     });
+    
 }
 
 /**

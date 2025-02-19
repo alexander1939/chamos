@@ -1,67 +1,137 @@
 document.addEventListener("DOMContentLoaded", async () => {
     if (window.location.pathname === "/") {
-        mostrarCarrusel("Galería"); // Muestra el carrusel en la raíz
+        mostrarCarrusel();
     }
 
     inicializarUsuarios();
 
     window.addEventListener("popstate", () => {
         if (window.location.pathname === "/") {
-            mostrarCarrusel("Galería");
+            mostrarCarrusel();
         }
     });
 });
 
-function mostrarCarrusel(modulo) {
+function mostrarCarrusel() {
     const contentContainer = document.getElementById("content-container");
     if (!contentContainer) return;
 
-    contentContainer.innerHTML = "";
+    contentContainer.innerHTML = ""; // Limpiar el contenido antes de insertar el carrusel
 
-    const titulo = document.createElement("h2");
-    titulo.className = "display-4 text-primary text-center";
-    titulo.textContent = `Galería de ${modulo}`;
+    const carouselContainer = document.createElement("div");
+    carouselContainer.className = "carousel-container";
 
-    const descripcion = document.createElement("p");
-    descripcion.className = "lead text-muted text-center";
-    descripcion.textContent = `Explora las imágenes de ${modulo.toLowerCase()}.`;
-
-    // Carrusel de Bootstrap
     const carousel = document.createElement("div");
     carousel.id = "carouselExample";
-    carousel.className = "carousel slide";
+    carousel.className = "carousel slide carousel-fade";
     carousel.setAttribute("data-bs-ride", "carousel");
 
     carousel.innerHTML = `
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <a href="/catalogo/Materias/">
-                <img src="https://i.pinimg.com/736x/03/8c/0a/038c0a700b714ba6514b1e4acfdc9b62.jpg" class="d-block w-100" alt="Imagen 1">
-            </a>
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="2"></button>
         </div>
-        <div class="carousel-item">
-            <a href="/catalogo/Juegos/">
-                <img src="https://flowgpt.com/_next/image?url=https%3A%2F%2Fimage-cdn.flowgpt.com%2Fprompt%2FDBucU6uoe9KBnXkwDRLmx%2F1694840467243&w=1920&q=75" class="d-block w-100" alt="Imagen 2">
-            </a>
-        </div>
-        <div class="carousel-item">
-            <a href="/catalogo/Proyectos/">
-                <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/43ed4d38-6d57-4862-88d8-f3b46e7b4397/dckcyft-8582c814-c860-4d6f-80f5-0d06c46ddbdf.jpg/v1/fill/w_1024,h_751,q_75,strp/goku_black_redo_by_midgetman352_dckcyft-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NzUxIiwicGF0aCI6IlwvZlwvNDNlZDRkMzgtNmQ1Ny00ODYyLTg4ZDgtZjNiNDZlN2I0Mzk3XC9kY2tjeWZ0LTg1ODJjODE0LWM4NjAtNGQ2Zi04MGY1LTBkMDZjNDZkZGJkZi5qcGciLCJ3aWR0aCI6Ijw9MTAyNCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.cfptxf7nKEhWwHw8IEIQhdAATrigg87DfKV3_B6zgl4" class="d-block w-100" alt="Imagen 3">
-            </a>
-        </div>
-    </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Anterior</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Siguiente</span>
-    </button>
-`;
 
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <a href="/catalogo/Materias/" class="list-link" data-modulo="Materias">
+                    <img src="/static/images/carrusel/materias1.jpg" class="d-block carousel-img" alt="Materias">
+                </a>
+            </div>
+            <div class="carousel-item">
+                <a href="/catalogo/Juegos/" class="list-link" data-modulo="Juegos">
+                    <img src="/static/images/carrusel/juegos.jpg" class="d-block carousel-img" alt="Juegos">
+                </a>
+            </div>
+            <div class="carousel-item">
+                <a href="/catalogo/Proyectos/" class="list-link" data-modulo="Proyectos">
+                    <img src="/static/images/carrusel/proyectos.jpg" class="d-block carousel-img" alt="Proyectos">
+                </a>
+            </div>
+        </div>
 
-    contentContainer.appendChild(titulo);
-    contentContainer.appendChild(descripcion);
-    contentContainer.appendChild(carousel);
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
+    `;
+
+    carouselContainer.appendChild(carousel);
+    contentContainer.appendChild(carouselContainer);
 }
+
+// ✅ **CSS con diseño mejorado**
+const style = document.createElement("style");
+style.innerHTML = `
+    .carousel-container {
+        width: 80%;
+        max-width: 1200px; /* Máximo tamaño */
+        height: 600px; /* Altura adaptable */
+        margin: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 20px;
+        padding: 10px;
+        position: relative;
+        background: linear-gradient(135deg, rgba(110, 142, 251, 0.5), rgba(167, 119, 227, 0.5));
+        border: 4px solid transparent;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+        animation: glow 1.5s infinite alternate;
+    }
+
+    /* Efecto de borde brillante */
+    @keyframes glow {
+        0% {
+            border-color: rgba(110, 142, 251, 0.8);
+            box-shadow: 0px 0px 20px rgba(110, 142, 251, 0.4);
+        }
+        100% {
+            border-color: rgba(167, 119, 227, 0.8);
+            box-shadow: 0px 0px 25px rgba(167, 119, 227, 0.5);
+        }
+    }
+
+    .carousel {
+        width: 100%;
+        height: 100%;
+    }
+
+    .carousel-inner {
+        width: 100%;
+        height: 100%;
+    }
+
+    .carousel-item {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .carousel-item a {
+        width: 100%;
+        height: 100%;
+        display: flex;
+    }
+
+    .carousel-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Ajusta sin distorsionar */
+        border-radius: 15px;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    /* Efecto de zoom al pasar el mouse sobre la imagen */
+    .carousel-item a:hover .carousel-img {
+        transform: scale(1.05);
+    }
+`;
+document.head.appendChild(style);

@@ -17,6 +17,7 @@ from app.features.contra.recovery import recovery_bp
 from app.features.router_catalago import catalo_bp
 from app.api.search_api import searchApi
 from app.features.router_search import search_bp
+from app.api.breadcrumbs_api import breadcrumbs_bp
 
 mail = Mail()
 def create_app():
@@ -55,12 +56,10 @@ def create_app():
     app.register_blueprint(catalo_bp)
     app.register_blueprint(searchApi)
     app.register_blueprint(search_bp)
+    app.register_blueprint(breadcrumbs_bp)
     app.register_blueprint(recovery_bp, url_prefix='/contra')    
 
 
-    @app.context_processor
-    def inject_breadcrumbs():
-        return {"breadcrumbs": generate_breadcrumbs()}
     
     @app.errorhandler(410)
     def gone(error):

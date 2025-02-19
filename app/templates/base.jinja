@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/seccion_option-lista.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/sidebar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/breadcrumb.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/filtro_g.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/flitro_g.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
@@ -23,13 +23,23 @@
 
     {# SCRIPTS JS #}
     <script src="{{ url_for('static', filename='js/components/sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/buscador.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/filtro_ad.js') }}"></script>
     <script src="{{ url_for('static', filename='js/components/breadcrumb.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/components/filtro_global.js') }}"></script>
     <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/base_api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/logout_api.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/apis/select_api.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/components/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/apis/user_api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/apis/catalogo/agregar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/apis/catalogo/catalogo.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/apis/catalogo/detalle.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/apis/catalogo/editar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/apis/catalogo/eliminar.js') }}"></script>
+
+
+
+
+
 
 
 
@@ -51,24 +61,22 @@
                     <img src="https://mdbcdn.b-cdn.net/img/logo/mdb-transaprent-noshadows.webp" height="15"
                         alt="MDB Logo" loading="lazy" />
                 </a>
-                <form class="d-flex me-3" role="search" action="{{ url_for('search_bp.buscar') }}" method="GET">
-                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Buscar"
-                        name="query" required>
-
+                <form class="d-flex me-3" id="search-form-avanzado">
+                    <input class="form-control me-2" type="text" id="search-input-avanzado" placeholder="Buscar..." />
                     <select class="form-select me-2" name="category" id="category-select">
                         <option value="" disabled selected>Cargando categorías...</option>
                     </select>
-
-                    <button class="btn btn-outline-success" type="submit">🔍</button>
+                    <button class="btn btn-outline-success" type="submit">Buscar</button>
                 </form>
+                <!-- Contenedor para mostrar los resultados de la búsqueda -->
+                <div id="search-results"></div>
+
                 <div class="d-lg-flex align-items-center">
                     <div class="dropdown">
                         <a data-bs-toggle="dropdown" class="dropdown-toggle d-flex align-items-center hidden-arrow"
                             href="#" id="navbarDropdownMenuAvatar" role="button" aria-expanded="false">
-                            <!-- Imagen del usuario (puedes cambiarla dinámicamente si el backend la provee) -->
                             <img src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp" class="rounded-circle"
                                 height="35" alt="User Avatar" loading="lazy" id="user-avatar" />
-                            <!-- Aquí se actualizará el nombre del usuario autenticado -->
                             <span id="user-name" class="ms-2" style="text-decoration: none;"></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
@@ -80,9 +88,12 @@
                         </ul>
                     </div>
                 </div>
-
-
             </div>
+        </nav>
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumbsx">
+            </ol>
         </nav>
 
 
@@ -107,27 +118,6 @@
 
 
     <main id="main" class="main">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumbsx">
-                <li class="breadcrumbsx-item">
-                    <a href="{{ url_for('auth.index') }}">Home</a>
-                </li>
-                {% for crumb in breadcrumbs %}
-                {% if crumb.url %}
-                <li class="breadcrumbsx-item">
-                    <a href="{{ crumb.url }}" class="breadcrumbsx-link">
-                        <span class="breadcrumbsx-text">{{ crumb.name }}</span>
-                    </a>
-                </li>
-                {% else %}
-                <li class="breadcrumbsx-item active" aria-current="page">
-                    <span class="breadcrumbsx-text">{{ crumb.name }}</span>
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ol>
-        </nav>
-
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         <div>
@@ -141,12 +131,9 @@
         {% endif %}
         {% endwith %}
 
-
         {% block content %}
         {% endblock %}
     </main>
-
-    </div>
 
     <footer>
         <div class="footer-container">
@@ -157,7 +144,6 @@
             </p>
         </div>
     </footer>
-
 </body>
 
 </html>

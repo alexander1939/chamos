@@ -24,7 +24,6 @@ def advanced_search():
     page = request.args.get('page', 1, type=int)
     limit = request.args.get('limit', 6, type=int)
 
-    # Definir los privilegios por categoría
     category_privileges = {
         "juegos": "Juegos",
         "materias": "Materias",
@@ -36,7 +35,6 @@ def advanced_search():
     if category not in category_privileges:
         return jsonify({"error": "Categoría no válida"}), 400
 
-    # Obtener los privilegios del usuario
     user_privileges = db.session.query(UserPrivilege).join(Privilege).filter(
         UserPrivilege.user_id == user.id,
         UserPrivilege.can_view == True
@@ -46,7 +44,7 @@ def advanced_search():
         return jsonify({"error": "No tienes permisos en ningún módulo"}), 403
 
     results_list = []
-    offset = (page - 1) * limit  # Calcular el offset para la paginación
+    offset = (page - 1) * limit
 
     model_map = {
         "juegos": Juegos,
@@ -61,7 +59,6 @@ def advanced_search():
         if not has_privilege:
             return jsonify({"error": "No tienes permisos para ver esta categoría"}), 403
 
-        # Consulta con paginación
         results = db.session.query(model_map[category]).filter(
             (model_map[category].nombre.ilike(f'%{query}%')) |
             (model_map[category].descripcion.ilike(f'%{query}%')),
@@ -84,19 +81,18 @@ def advanced_search():
             })
 
     elif category == "todos":
+        temp_results = []
         for up in user_privileges:
             module_name = up.privilege.name.lower()
-
             for key, model in model_map.items():
                 if module_name == category_privileges[key].lower():
                     results = db.session.query(model).filter(
                         (model.nombre.ilike(f'%{query}%')) |
                         (model.descripcion.ilike(f'%{query}%')),
                         model.id_usuario == user.id
-                    ).offset(offset).limit(limit).all()
-
+                    ).all()
                     for r in results:
-                        results_list.append({
+                        temp_results.append({
                             "id": r.id,
                             "nombre": r.nombre,
                             "descripcion": getattr(r, 'descripcion', None),
@@ -104,6 +100,9 @@ def advanced_search():
                             "can_edit": up.can_edit,
                             "can_delete": up.can_delete
                         })
+        
+        # Aplicar paginación a los resultados combinados
+        results_list = temp_results[offset:offset + limit]
 
     return jsonify(results_list)
 

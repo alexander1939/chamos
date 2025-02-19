@@ -26,6 +26,7 @@
     <script src="{{ url_for('static', filename='js/components/buscador.js') }}"></script>
     <script src="{{ url_for('static', filename='js/components/filtro_ad.js') }}"></script>
     <script src="{{ url_for('static', filename='js/components/carusel.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/breadcrumb.js') }}"></script>
     <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/base_api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apis/logout_api.js') }}"></script>
@@ -91,6 +92,11 @@
             </div>
         </nav>
 
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumbsx">
+            </ol>
+        </nav>
+
 
     </header>
 
@@ -113,10 +119,6 @@
 
 
     <main id="main" class="main">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumbsx">
-            </ol>
-        </nav>
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         <div>

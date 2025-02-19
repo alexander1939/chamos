@@ -12,8 +12,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         await cargarDatos();
         menuList.dataset.loaded = "true";
     }
-
 });
+
 
 
 /*
@@ -184,13 +184,6 @@ function actualizarSelect(menu, privilegios) {
 async function actualizarBreadcrumbs() {
     try {
         const currentPath = window.location.pathname;
-        const storedBreadcrumbs = sessionStorage.getItem(`breadcrumbs_${currentPath}`);
-
-        if (storedBreadcrumbs) {
-            document.querySelector(".breadcrumbsx").innerHTML = storedBreadcrumbs;
-            return;
-        }
-
         const response = await fetch(`/api/breadcrumbs?path=${encodeURIComponent(currentPath)}`, {
             method: "GET",
             credentials: "include",
@@ -206,8 +199,8 @@ async function actualizarBreadcrumbs() {
 
         if (!breadcrumbsContainer) return;
 
-        // Construir el breadcrumb
-        let breadcrumbHTML = `
+        // Limpiar el breadcrumb actual
+        breadcrumbsContainer.innerHTML = `
             <li class="breadcrumbsx-item">
                 <a href="/">Home</a>
             </li>
@@ -215,7 +208,7 @@ async function actualizarBreadcrumbs() {
 
         data.breadcrumbs.forEach(crumb => {
             if (crumb.url) {
-                breadcrumbHTML += `
+                breadcrumbsContainer.innerHTML += `
                     <li class="breadcrumbsx-item">
                         <a href="${crumb.url}" class="breadcrumbsx-link">
                             <span class="breadcrumbsx-text">${crumb.name}</span>
@@ -223,16 +216,13 @@ async function actualizarBreadcrumbs() {
                     </li>
                 `;
             } else {
-                breadcrumbHTML += `
+                breadcrumbsContainer.innerHTML += `
                     <li class="breadcrumbsx-item active" aria-current="page">
                         <span class="breadcrumbsx-text">${crumb.name}</span>
                     </li>
                 `;
             }
         });
-
-        breadcrumbsContainer.innerHTML = breadcrumbHTML;
-        sessionStorage.setItem(`breadcrumbs_${currentPath}`, breadcrumbHTML);
 
     } catch (error) {
         console.error("Error al actualizar breadcrumbs:", error);

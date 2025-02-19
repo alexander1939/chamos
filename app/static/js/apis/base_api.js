@@ -179,3 +179,52 @@ function actualizarSelect(menu, privilegios) {
         }
     });
 }
+
+
+async function actualizarBreadcrumbs() {
+    try {
+        const currentPath = window.location.pathname;
+        const response = await fetch(`/api/breadcrumbs?path=${encodeURIComponent(currentPath)}`, {
+            method: "GET",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        if (!response.ok) {
+            throw new Error("Error al obtener los breadcrumbs.");
+        }
+
+        const data = await response.json();
+        const breadcrumbsContainer = document.querySelector(".breadcrumbsx");
+
+        if (!breadcrumbsContainer) return;
+
+        // Limpiar el breadcrumb actual
+        breadcrumbsContainer.innerHTML = `
+            <li class="breadcrumbsx-item">
+                <a href="/">Home</a>
+            </li>
+        `;
+
+        data.breadcrumbs.forEach(crumb => {
+            if (crumb.url) {
+                breadcrumbsContainer.innerHTML += `
+                    <li class="breadcrumbsx-item">
+                        <a href="${crumb.url}" class="breadcrumbsx-link">
+                            <span class="breadcrumbsx-text">${crumb.name}</span>
+                        </a>
+                    </li>
+                `;
+            } else {
+                breadcrumbsContainer.innerHTML += `
+                    <li class="breadcrumbsx-item active" aria-current="page">
+                        <span class="breadcrumbsx-text">${crumb.name}</span>
+                    </li>
+                `;
+            }
+        });
+
+    } catch (error) {
+        console.error("Error al actualizar breadcrumbs:", error);
+    }
+}

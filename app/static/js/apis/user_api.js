@@ -1,9 +1,10 @@
 document.addEventListener("DOMContentLoaded", async () => {
     await esperarCargaMenu();
-    if (window.location.pathname === "/") {
-        await cargarUsuarios();
-
-    }
+    
+    // Eliminamos la carga automática de usuarios en la raíz
+    // if (window.location.pathname === "/") {
+    //     await cargarUsuarios();
+    // }
 
     inicializarUsuarios();
 

@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const tableBody = document.querySelector("tbody");
-    const saveChangesBtn = document.getElementById("saveChangesBtn");
-
+    
     let usersData = [];
 
     try {
@@ -28,11 +27,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             let row = `<tr data-user-id="${user.id}">
                 <td>${user.name} ${user.surnames}</td>
                 ${generatePrivilegesCells(user)}
-                <td><button class="update-user-btn">Actualizar</button></td>
             </tr>`;
             tableBody.innerHTML += row;
         });
-
     } catch (error) {
         console.error("Error al conectar con la API:", error);
     }
@@ -51,11 +48,11 @@ function generatePrivilegesCells(user) {
                 <label>
                     <input type="checkbox" class="privilege-toggle" data-privilege="${privName}" ${hasPrivilege ? "checked" : ""}> ${privName}
                 </label>
-                <div class="privilege-options" style="display: ${hasPrivilege ? "block" : "none"};">
-                    <label><input type="checkbox" class="can-create" ${privilege?.can_create ? "checked" : ""}> Crear</label>
-                    <label><input type="checkbox" class="can-edit" ${privilege?.can_edit ? "checked" : ""}> Editar</label>
-                    <label><input type="checkbox" class="can-delete" ${privilege?.can_delete ? "checked" : ""}> Eliminar</label>
-                    <label><input type="checkbox" class="can-view" ${privilege?.can_view ? "checked" : ""}> Consultar</label>
+                <div class="privilege-options">
+                    <label><input type="checkbox" class="can-create" ${privilege?.can_create ? "checked" : ""} ${hasPrivilege ? "" : "disabled"}> Crear</label>
+                    <label><input type="checkbox" class="can-edit" ${privilege?.can_edit ? "checked" : ""} ${hasPrivilege ? "" : "disabled"}> Editar</label>
+                    <label><input type="checkbox" class="can-delete" ${privilege?.can_delete ? "checked" : ""} ${hasPrivilege ? "" : "disabled"}> Eliminar</label>
+                    <label><input type="checkbox" class="can-view" ${privilege?.can_view ? "checked" : ""} ${hasPrivilege ? "" : "disabled"}> Consultar</label>
                 </div>
             </td>
         `;
@@ -64,25 +61,23 @@ function generatePrivilegesCells(user) {
     return cells;
 }
 
-document.addEventListener("change", (event) => {
+document.addEventListener("change", async (event) => {
     if (event.target.classList.contains("privilege-toggle")) {
         const privilegeContainer = event.target.closest("td").querySelector(".privilege-options");
-        privilegeContainer.style.display = event.target.checked ? "block" : "none";
+        const checkboxes = privilegeContainer.querySelectorAll("input[type='checkbox']");
+        checkboxes.forEach(cb => cb.disabled = !event.target.checked);
     }
-});
-
-document.addEventListener("click", async (event) => {
-    if (event.target.classList.contains("update-user-btn")) {
+    
+    if (event.target.classList.contains("privilege-toggle") || event.target.classList.contains("can-create") || event.target.classList.contains("can-edit") || event.target.classList.contains("can-delete") || event.target.classList.contains("can-view")) {
         const row = event.target.closest("tr");
         const userId = row.getAttribute("data-user-id");
-
         const updatedPrivileges = [];
 
         row.querySelectorAll(".privilege-toggle").forEach(privilegeCheckbox => {
-            if (privilegeCheckbox.checked) {
-                const privilegeName = privilegeCheckbox.getAttribute("data-privilege");
-                const privilegeOptions = privilegeCheckbox.closest("td").querySelector(".privilege-options");
+            const privilegeName = privilegeCheckbox.getAttribute("data-privilege");
+            const privilegeOptions = privilegeCheckbox.closest("td").querySelector(".privilege-options");
 
+            if (privilegeCheckbox.checked) {
                 updatedPrivileges.push({
                     id: getPrivilegeIdByName(privilegeName),
                     can_create: privilegeOptions.querySelector(".can-create").checked,
@@ -118,13 +113,28 @@ async function updateUserPrivileges(userId, privileges) {
         const result = await response.json();
 
         if (response.ok) {
-            alert(result.message);
+            Swal.fire({
+                icon: "success",
+                title: "Éxito",
+                text: result.message,
+                confirmButtonText: "Aceptar"
+            });
         } else {
             console.error("Error al actualizar:", result.error);
-            alert("Error al actualizar privilegios.");
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Error al actualizar privilegios.",
+                confirmButtonText: "Aceptar"
+            });
         }
     } catch (error) {
         console.error("Error al conectar con la API:", error);
-        alert("No se pudo actualizar los privilegios.");
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "No se pudo actualizar los privilegios.",
+            confirmButtonText: "Aceptar"
+        });
     }
 }

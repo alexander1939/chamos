@@ -26,6 +26,7 @@ async function esperarCargaMenu() {
 }
 
 function mostrarCarrusel() {
+async function mostrarCarrusel() {
     const contentContainer = document.getElementById("content-container");
 
     if (!contentContainer) {
@@ -72,16 +73,46 @@ function crearCarrusel() {
             ${crearItemCarrusel("Materias", "/catalogo/Materias/", "/static/images/carrusel/materias1.jpg")}
             ${crearItemCarrusel("Juegos", "/catalogo/Juegos/", "/static/images/carrusel/juegos.jpg")}
             ${crearItemCarrusel("Proyectos", "/catalogo/Proyectos/", "/static/images/carrusel/proyectos.jpg")}
-        </div>
+    const response = await fetch("/api/catalogo/carrusel/", {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + localStorage.getItem("token") // O cualquier método que uses para manejar tokens
+        }
+    });
 
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Anterior</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Siguiente</span>
-        </button>
+    const data = await response.json();
+    if (data.error) {
+        contentContainer.innerHTML = `<p>${data.error}</p>`;  // Corregido para mostrar el error
+        return;
+    }
+
+    const carouselHTML = `
+        <div class="carousel-container">
+            <div id="carouselExample" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    ${data.carrusel.length > 1 ? `<button type="button" data-bs-target="#carouselExample" data-bs-slide-to="0" class="active"></button>` : ''}
+                    ${data.carrusel.length > 1 ? `<button type="button" data-bs-target="#carouselExample" data-bs-slide-to="1"></button>` : ''}
+                    ${data.carrusel.length > 2 ? `<button type="button" data-bs-target="#carouselExample" data-bs-slide-to="2"></button>` : ''}
+                </div>
+                <div class="carousel-inner">
+                    ${data.carrusel.map((module, index) => `
+                        <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                            <a href="/catalogo/${module.module}/" class="list-link" data-modulo="${module.module}">
+                                <img src="${module.image}" class="d-block carousel-img" alt="${module.module}">
+                            </a>
+                        </div>
+                    `).join('')}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Anterior</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Siguiente</span>
+                </button>
+            </div>
+        </div>
     `;
 
     carouselContainer.appendChild(carousel);
@@ -98,6 +129,11 @@ function crearItemCarrusel(titulo, enlace, imagen) {
     `;
 }
 
+    contentContainer.innerHTML = carouselHTML;
+}
+
+
+// ✅ *CSS con diseño mejorado*
 const style = document.createElement("style");
 style.innerHTML = `
     .carousel-container {

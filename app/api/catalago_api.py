@@ -406,3 +406,36 @@ def delete_content():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@catalogo_api.get('/api/catalogo/carrusel/')
+def get_carrusel():
+    token = request.cookies.get("token")
+    if not token:
+        return jsonify({"error": "Token no proporcionado."}), 400
+
+    user = get_user_from_token(token)
+    if not user:
+        return jsonify({"error": "Usuario no encontrado."}), 404
+
+    # Módulos posibles
+    modules = {
+        "Materias": "/static/images/carrusel/materias1.jpg",
+        "Juegos": "/static/images/carrusel/juegos.jpg",
+        "Proyectos": "/static/images/carrusel/proyectos.jpg"
+    }
+    
+    allowed_modules = []
+
+    # Verifica los privilegios del usuario para cada módulo
+    for module, image_url in modules.items():
+        user_privilege, error = has_access_to_module(user, module)
+        if user_privilege and error is None:
+            allowed_modules.append({"module": module, "image": image_url})
+
+    # Si el usuario no tiene acceso a ningún módulo, devuelve un error
+    if not allowed_modules:
+        return jsonify({"error": "No tienes acceso a ningún módulo."}), 403
+
+    return jsonify({
+        "carrusel": allowed_modules  # Devuelve los módulos permitidos y sus respectivas imágenes
+    })

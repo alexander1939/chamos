@@ -1,4 +1,16 @@
+function iniciarRotacionCarrusel() {
+    const carouselElement = document.getElementById("carouselExample");
+    if (!carouselElement) return;
+
+    const carousel = new bootstrap.Carousel(carouselElement, {
+        interval: 3000, // Cambia de imagen cada 3 segundos
+        ride: "carousel",
+        pause: false
+    });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+    setTimeout(iniciarRotacionCarrusel, 500);// Pequeño retraso para asegurar que el carrusel está en el DOM
     await esperarCargaMenu();
     if (window.location.pathname === "/") {
         mostrarCarrusel();

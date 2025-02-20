@@ -21,7 +21,8 @@ from flask import current_app
 catalo_bp = Blueprint('catalo', __name__)
 
 @catalo_bp.route('/catalogo/<modulo>/')
-def mostrar_contenido(modulo):
+@auth_required
+def mostrar_contenido(user,modulo):
     return render_template("index.jinja",modulo=modulo)
 
 
@@ -35,7 +36,8 @@ def mostrar_detalle(user, modulo, item_id):  # <-- Asegúrate de incluir 'user'
 
 
 @catalo_bp.route('/catalogo/agregar/<modulo>/')
-def agregar_item(modulo):
+@auth_required
+def agregar_item(user,modulo):
     return render_template("index.jinja", modulo=modulo, agregar=True)
 
 @catalo_bp.route('/catalogo/<modulo>/editar/<int:item_id>/', methods=['GET'])

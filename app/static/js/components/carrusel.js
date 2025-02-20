@@ -1,9 +1,8 @@
 document.addEventListener("DOMContentLoaded", async () => {
+    await esperarCargaMenu();
     if (window.location.pathname === "/") {
         mostrarCarrusel();
     }
-
-    inicializarUsuarios();
 
     window.addEventListener("popstate", () => {
         if (window.location.pathname === "/") {
@@ -12,12 +11,48 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 });
 
+async function esperarCargaMenu() {
+    return new Promise((resolve) => {
+        const observer = new MutationObserver(() => {
+            const homeLink = document.querySelector(".home-link");
+            if (homeLink) {
+                observer.disconnect();
+                resolve();
+            }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+}
+
 function mostrarCarrusel() {
     const contentContainer = document.getElementById("content-container");
-    if (!contentContainer) return;
 
-    contentContainer.innerHTML = ""; // Limpiar el contenido antes de insertar el carrusel
+    if (!contentContainer) {
+        console.error("Elemento content-container no encontrado.");
+        return;
+    }
 
+    // Limpiar el contenido antes de insertar el carrusel
+    contentContainer.innerHTML = "";
+
+    // Crear y agregar el carrusel
+    const carouselContainer = crearCarrusel();
+    contentContainer.appendChild(carouselContainer);
+
+    // Agregar evento al enlace de home solo una vez
+    const homeLink = document.querySelector(".home-link");
+    if (homeLink && !homeLink.dataset.eventAdded) {
+        homeLink.addEventListener("click", async (e) => {
+            e.preventDefault();
+            window.history.pushState({}, '', '/');
+            mostrarCarrusel();
+        });
+        homeLink.dataset.eventAdded = "true"; // Evitar múltiples eventos
+    }
+}
+
+function crearCarrusel() {
     const carouselContainer = document.createElement("div");
     carouselContainer.className = "carousel-container";
 
@@ -34,21 +69,9 @@ function mostrarCarrusel() {
         </div>
 
         <div class="carousel-inner">
-            <div class="carousel-item active">
-                <a href="/catalogo/Materias/" class="list-link" data-modulo="Materias">
-                    <img src="/static/images/carrusel/materias1.jpg" class="d-block carousel-img" alt="Materias">
-                </a>
-            </div>
-            <div class="carousel-item">
-                <a href="/catalogo/Juegos/" class="list-link" data-modulo="Juegos">
-                    <img src="/static/images/carrusel/juegos.jpg" class="d-block carousel-img" alt="Juegos">
-                </a>
-            </div>
-            <div class="carousel-item">
-                <a href="/catalogo/Proyectos/" class="list-link" data-modulo="Proyectos">
-                    <img src="/static/images/carrusel/proyectos.jpg" class="d-block carousel-img" alt="Proyectos">
-                </a>
-            </div>
+            ${crearItemCarrusel("Materias", "/catalogo/Materias/", "/static/images/carrusel/materias1.jpg")}
+            ${crearItemCarrusel("Juegos", "/catalogo/Juegos/", "/static/images/carrusel/juegos.jpg")}
+            ${crearItemCarrusel("Proyectos", "/catalogo/Proyectos/", "/static/images/carrusel/proyectos.jpg")}
         </div>
 
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
@@ -62,76 +85,85 @@ function mostrarCarrusel() {
     `;
 
     carouselContainer.appendChild(carousel);
-    contentContainer.appendChild(carouselContainer);
+    return carouselContainer;
 }
 
-// ✅ **CSS con diseño mejorado**
+function crearItemCarrusel(titulo, enlace, imagen) {
+    return `
+        <div class="carousel-item ${titulo === "Materias" ? "active" : ""}">
+            <a href="${enlace}" class="list-link" data-modulo="${titulo}">
+                <img src="${imagen}" class="d-block carousel-img" alt="${titulo}">
+            </a>
+        </div>
+    `;
+}
+
 const style = document.createElement("style");
 style.innerHTML = `
     .carousel-container {
-        width: 80%;
-        max-width: 1200px; /* Máximo tamaño */
-        height: 600px; /* Altura adaptable */
-        margin: auto;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 20px;
-        padding: 10px;
-        position: relative;
-        background: linear-gradient(135deg, rgba(110, 142, 251, 0.5), rgba(167, 119, 227, 0.5));
-        border: 4px solid transparent;
-        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-        animation: glow 1.5s infinite alternate;
-    }
+    width: 60%;
+    max-width: 900px;
+    height: 400px;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    padding: 5px;
+    position: relative;
+    background: linear-gradient(135deg, rgba(110, 142, 251, 0.5), rgba(167, 119, 227, 0.5));
+    border: 3px solid transparent;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    animation: glow 1.5s infinite alternate;
+}
 
-    /* Efecto de borde brillante */
-    @keyframes glow {
-        0% {
-            border-color: rgba(110, 142, 251, 0.8);
-            box-shadow: 0px 0px 20px rgba(110, 142, 251, 0.4);
-        }
-        100% {
-            border-color: rgba(167, 119, 227, 0.8);
-            box-shadow: 0px 0px 25px rgba(167, 119, 227, 0.5);
-        }
-    }
+.carousel {
+    width: 100%;
+    height: 100%;
+}
 
-    .carousel {
-        width: 100%;
-        height: 100%;
-    }
+.carousel-inner {
+    width: 100%;
+    height: 100%;
+}
 
-    .carousel-inner {
-        width: 100%;
-        height: 100%;
-    }
+.carousel-item {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    .carousel-item {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+.carousel-item a {
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
 
-    .carousel-item a {
-        width: 100%;
-        height: 100%;
-        display: flex;
-    }
+.carousel-img {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+}
 
-    .carousel-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover; /* Ajusta sin distorsionar */
-        border-radius: 15px;
-        transition: transform 0.3s ease-in-out;
-    }
+.carousel-item a:hover .carousel-img {
+    transform: scale(1.03);
+}
 
-    /* Efecto de zoom al pasar el mouse sobre la imagen */
-    .carousel-item a:hover .carousel-img {
-        transform: scale(1.05);
+@keyframes glow {
+    0% {
+        border-color: rgba(110, 142, 251, 0.8);
+        box-shadow: 0px 0px 15px rgba(110, 142, 251, 0.3);
     }
+    100% {
+        border-color: rgba(167, 119, 227, 0.8);
+        box-shadow: 0px 0px 20px rgba(167, 119, 227, 0.4);
+    }
+}
+
 `;
 document.head.appendChild(style);

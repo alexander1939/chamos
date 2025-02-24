@@ -38,13 +38,20 @@ def register():
 @guest_only
 @check_existing_user
 def register_post():
+    print(request.form)
     form_data = {
         "name": request.form.get('name', '').strip(),
         "surnames": request.form.get('surnames', '').strip(),
         "phone": request.form.get('phone', '').strip(),
         "email": request.form.get('email', '').strip(),
         "password": request.form.get('password', '').strip(),
+        "pregunta1": request.form.get('pregunta1', '').strip(),
+        "respuesta1": request.form.get('respuesta1', '').strip(),
+        "pregunta2": request.form.get('pregunta2', '').strip(),
+        "respuesta2": request.form.get('respuesta2', '').strip(),
     }
+
+    print("Datos recibidos:", form_data)
 
     validation_error = validate_user_data(form_data)
     if validation_error:

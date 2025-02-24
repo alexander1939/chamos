@@ -25,7 +25,11 @@ def register_user():
         name=data["name"],
         surnames=data["surnames"],
         phone=data["phone"],
-        role_id=2
+        role_id=2,
+        pregunta1=data.get("pregunta1"),
+        respuesta1=data.get("respuesta1"),
+        pregunta2=data.get("pregunta2"),
+        respuesta2=data.get("respuesta2"),
     )
 
     db.session.add(new_user)

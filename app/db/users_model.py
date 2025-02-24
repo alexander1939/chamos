@@ -15,5 +15,11 @@ class User(BaseModel, UserMixin):
     role_id = Column(Integer, ForeignKey('roles.id'), nullable=False)
     role = relationship('Role')
 
+
+    pregunta1 = Column(String(255), nullable=True)
+    respuesta1 = Column(String(255), nullable=True)
+    pregunta2 = Column(String(255), nullable=True)
+    respuesta2 = Column(String(255), nullable=True)
+
     def __repr__(self):
         return f'<User {self.email} - Role: {self.role.name}>'

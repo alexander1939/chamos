@@ -72,3 +72,8 @@ def restablecer_contrasena(token):
             flash('No se ha encontrado un usuario con este correo.', 'danger')
 
     return render_template('contra/restablecer_contraseña.jinja', form=form)
+
+
+@recovery_bp.route('/op_recuperacion')
+def op_recuperacion():
+    return render_template('contra/opcion_recuperacion.jinja')

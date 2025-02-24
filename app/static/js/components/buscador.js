@@ -34,13 +34,24 @@ function inicializarBuscador() {
         e.preventDefault(); // Evita el envío por defecto del formulario
         queryActual = searchInput.value.trim();
         categoryActual = categorySelect.value;
-
+    
+        // Normalizar la categoría antes de enviarla a la API
+        const categoryMap = {
+            "Gestionar Privilegios": "privilegios",
+            "Juegos": "juegos",
+            "Materias": "materias",
+            "Proyectos": "proyectos",
+            "Todos": "todos"
+        };
+    
+        categoryActual = categoryMap[categoryActual] || categoryActual.toLowerCase();
+    
         if (queryActual) {
             if (!categoryActual || categoryActual === "") {
                 mostrarMensaje("Por favor, selecciona una categoría válida.");
                 return;
             }
-
+    
             // Reinicia los parámetros de paginación y limpia los resultados previos
             currentPage = 1;
             hayMasResultados = true;
@@ -50,6 +61,7 @@ function inicializarBuscador() {
             mostrarMensaje("Por favor, ingresa un término de búsqueda.");
         }
     });
+    
 
     // Evento de scroll para cargar más resultados dinámicamente
     window.addEventListener("scroll", async () => {
@@ -110,13 +122,11 @@ async function cargarResultados() {
 function mostrarResultados(resultados, categoriaSeleccionada) {
     const contentContainer = document.getElementById("content-container");
 
-    // Si no hay resultados y es la primera página, muestra un mensaje
     if (resultados.length === 0 && currentPage === 1) {
         contentContainer.innerHTML = "<p>No se encontraron resultados.</p>";
         return;
     }
 
-    // Crea el contenedor de tarjetas si aún no existe
     let cardsContainer = document.getElementById("cards-container");
     if (!cardsContainer) {
         cardsContainer = document.createElement("div");
@@ -125,33 +135,57 @@ function mostrarResultados(resultados, categoriaSeleccionada) {
         contentContainer.appendChild(cardsContainer);
     }
 
-    // Itera sobre los resultados y genera tarjetas dinámicamente
     resultados.forEach(item => {
-        const categoriaInfo = categoriaSeleccionada === "todos"
-            ? `<p class="card-category"><strong>Categoría:</strong> ${item.categoria}</p>`
-            : "";
-
         const col = document.createElement("div");
-        col.classList.add("col-12", "col-sm-6", "col-md-4", "col-lg-4"); // 3 tarjetas por fila
+        col.classList.add("col-12", "col-sm-6", "col-md-4", "col-lg-4");
 
         const card = document.createElement("div");
-        card.classList.add("card", "h-100", "shadow-sm");
+        card.classList.add("card", "h-100", "shadow-sm", "clickable-card");
 
-        card.innerHTML = `
-            <div class="card-body">
-                <h5 class="card-title">${item.nombre}</h5>
-                <p class="card-text">${item.descripcion}</p>
-                ${categoriaInfo}
-            </div>
-            <div class="card-footer text-center">
-                <a href="/catalogo/${item.categoria}/detalle/${item.id}/" class="deta-link btn btn-primary">Ver Detalles</a>
-            </div>
-        `;
+        if (categoriaSeleccionada === "privilegios") {
+            // Renderizar usuarios
+            card.innerHTML = `
+                <div class="card-header">
+                    <h5>${item.name} ${item.surnames}</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Correo:</strong> ${item.email}</p>
+                    <p><strong>Teléfono:</strong> ${item.phone || "No disponible"}</p>
+                    <p><strong>Privilegios:</strong></p>
+                    <ul>
+                        ${item.privileges.map(priv => `<li>${priv.name}</li>`).join("")}
+                    </ul>
+                </div>
+            `;
+
+            // Redirigir al usuario al hacer clic en la tarjeta
+            // card.addEventListener("click", () => {
+            //     window.location.href = `/catalogo/detalle/${item.id}/`;
+            // });
+
+        } else {
+            // Renderizar módulos
+            const categoriaInfo = categoriaSeleccionada === "todos"
+                ? `<p class="card-category"><strong>Categoría:</strong> ${item.categoria}</p>`
+                : "";
+
+            card.innerHTML = `
+                <div class="card-body">
+                    <h5 class="card-title">${item.nombre}</h5>
+                    <p class="card-text">${item.descripcion}</p>
+                    ${categoriaInfo}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="/catalogo/${item.categoria}/detalle/${item.id}/" class="deta-link btn btn-primary">Ver Detalles</a>
+                </div>
+            `;
+        }
 
         col.appendChild(card);
         cardsContainer.appendChild(col);
     });
 }
+
 
 /**
  * Muestra un mensaje en el contenedor de contenido.

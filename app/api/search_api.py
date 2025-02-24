@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from app.db.users_model import User
 from app.middleware.catalogo_middleware import get_user_from_token
 from app.db.Materias_model import Materia
 from app.db.proyectos_model import Proyectos
@@ -52,6 +53,7 @@ def advanced_search():
         "proyectos": Proyectos
     }
 
+    # Buscar en Juegos, Materias o Proyectos
     if category in model_map:
         privilege_name = category_privileges[category]
         has_privilege = any(up.privilege.name == privilege_name for up in user_privileges)
@@ -80,6 +82,35 @@ def advanced_search():
                 "can_delete": user_privilege.can_delete if user_privilege else False
             })
 
+    # Buscar en la categoría "privilegios" (Usuarios)
+    elif category == "privilegios":
+        privilege_name = category_privileges[category]
+        has_privilege = any(up.privilege.name == privilege_name for up in user_privileges)
+
+        if not has_privilege:
+            return jsonify({"error": "No tienes permisos para ver esta categoría"}), 403
+
+        users = db.session.query(User).filter(
+            (User.name.ilike(f"%{query}%")) |
+            (User.surnames.ilike(f"%{query}%")) |
+            (User.email.ilike(f"%{query}%"))
+        ).offset(offset).limit(limit).all()
+
+        for u in users:
+            privileges = db.session.query(Privilege).join(UserPrivilege).filter(
+                UserPrivilege.user_id == u.id
+            ).all()
+
+            results_list.append({
+                "id": u.id,
+                "name": u.name,
+                "surnames": u.surnames,
+                "email": u.email,
+                "phone": u.phone,
+                "privileges": [{"name": p.name} for p in privileges]
+            })
+
+    # Buscar en "todos"
     elif category == "todos":
         temp_results = []
         for up in user_privileges:
@@ -105,6 +136,7 @@ def advanced_search():
         results_list = temp_results[offset:offset + limit]
 
     return jsonify(results_list)
+
 
 
 

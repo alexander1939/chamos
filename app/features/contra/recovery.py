@@ -77,3 +77,54 @@ def restablecer_contrasena(token):
 @recovery_bp.route('/op_recuperacion')
 def op_recuperacion():
     return render_template('contra/opcion_recuperacion.jinja')
+
+@recovery_bp.route('/op_preguntas')
+def op_preguntas():
+    return render_template('contra/correo.jinja')
+
+@recovery_bp.route('/recuperacion-preguntas', methods=['POST'])
+def recuperacion_preguntas():
+    email = request.form.get("email")
+
+    if not email:
+        flash("Correo electrónico requerido.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))  # Redirige a la vista del correo
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        flash("El correo no está registrado.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))  # Redirige si no existe
+
+    return redirect(url_for('recovery.preguntas_seguridad', email=email))
+
+
+PREGUNTAS_SEGURIDAD = {
+    "1": "¿Cuál es el nombre de tu primera mascota?",
+    "2": "¿En qué ciudad naciste?",
+    "3": "¿Cuál es tu comida favorita?",
+    "4": "¿Cuál es el nombre de tu mejor amigo de la infancia?"
+}
+
+@recovery_bp.route('/preguntas-seguridad')
+def preguntas_seguridad():
+    email = request.args.get("email")
+
+    if not email:
+        flash("Correo electrónico no proporcionado.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        flash("El correo no está registrado.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))
+
+    # Convertir el número en la pregunta correspondiente
+    pregunta1_texto = PREGUNTAS_SEGURIDAD.get(str(user.pregunta1), "Pregunta desconocida")
+    pregunta2_texto = PREGUNTAS_SEGURIDAD.get(str(user.pregunta2), "Pregunta desconocida")
+
+    return render_template('contra/preguntas.jinja', email=email, pregunta1=pregunta1_texto, pregunta2=pregunta2_texto)
+
+
+

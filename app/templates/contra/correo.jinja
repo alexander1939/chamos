@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperación por Preguntas de Seguridad</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Recuperación por Preguntas de Seguridad</h2>
+        <div class="row mt-4">
+            <div class="col-md-6 offset-md-3">
+                <div class="card p-4">
+                    <h4 class="text-center">Ingrese su correo electrónico</h4>
+                    <form action="{{ url_for('recovery.recuperacion_preguntas') }}" method="post">
+    <input type="email" name="email" class="form-control mb-3" placeholder="Correo electrónico" required>
+    <button type="submit" class="btn btn-primary w-100">Continuar</button>
+</form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

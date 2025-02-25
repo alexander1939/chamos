@@ -16,7 +16,7 @@ from app.api.menu_api import get_user_menu
 from app.api.auth_api import register_user,login_user
 from app.middleware.auth_middleware import validate_user_data, check_existing_user,guest_only,TOKEN_EXPIRATION_TIME
 from app.middleware.menu_middleware import menu_required, get_privilege_content
-
+from app.db.preguntas_model import Question
 
 
 auth_bp = Blueprint('auth', __name__)
@@ -31,7 +31,10 @@ def index(user):  # Acepta el argumento `user`
 @auth_bp.get('/register/')
 @guest_only
 def register():
-    return render_template("auth/register.jinja")
+    questions = Question.query.all()  # Obtener todas las preguntas
+    preguntas_1 = questions[:3]  # Primeras 3 preguntas
+    preguntas_2 = questions[3:]  # Otras 3 preguntas
+    return render_template("auth/register.jinja", preguntas_1=preguntas_1, preguntas_2=preguntas_2)
 
 
 @auth_bp.post('/register/')

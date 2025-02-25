@@ -55,47 +55,46 @@
                     <div class="error-message" id="emailError"></div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <select name="pregunta1" id="pregunta1" class="form-input">
-                                <option value="">Seleccione una pregunta</option>
-                                <option value="1">¿Cuál es el nombre de tu primera mascota?</option>
-                                <option value="2">¿En qué ciudad naciste?</option>
-                                <option value="3">¿Cuál es tu comida favorita?</option>
-                                <option value="4">¿Cuál es el nombre de tu mejor amigo de la infancia?</option>
-                            </select>
-                            <div class="error-message" id="pregunta1Error"></div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <input type="text" name="respuesta1" id="respuesta1" class="form-input" placeholder="Respuesta 1">
-                            <div class="error-message" id="respuesta1Error"></div>
-                        </div>
-                    </div>
-                </div>
+               <div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <select name="pregunta1" id="pregunta1" class="form-input">
+                <option value="">Seleccione una pregunta</option>
+                {% for question in preguntas_1 %}
+                <option value="{{ question.id }}">{{ question.text }}</option>
+                {% endfor %}
+            </select>
+            <div class="error-message" id="pregunta1Error"></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <input type="text" name="respuesta1" id="respuesta1" class="form-input" placeholder="Respuesta 1">
+            <div class="error-message" id="respuesta1Error"></div>
+        </div>
+    </div>
+</div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <select name="pregunta2" id="pregunta2" class="form-input">
-                                <option value="">Seleccione una pregunta</option>
-                                <option value="1">¿Cuál es el nombre de tu primera mascota?</option>
-                                <option value="2">¿En qué ciudad naciste?</option>
-                                <option value="3">¿Cuál es tu comida favorita?</option>
-                                <option value="4">¿Cuál es el nombre de tu mejor amigo de la infancia?</option>
-                            </select>
-                            <div class="error-message" id="pregunta2Error"></div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <input type="text" name="respuesta2" id="respuesta2" class="form-input" placeholder="Respuesta 2">
-                            <div class="error-message" id="respuesta2Error"></div>
-                        </div>
-                    </div>
-                </div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <select name="pregunta2" id="pregunta2" class="form-input">
+                <option value="">Seleccione una pregunta</option>
+                {% for question in preguntas_2 %}
+                <option value="{{ question.id }}">{{ question.text }}</option>
+                {% endfor %}
+            </select>
+            <div class="error-message" id="pregunta2Error"></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <input type="text" name="respuesta2" id="respuesta2" class="form-input" placeholder="Respuesta 2">
+            <div class="error-message" id="respuesta2Error"></div>
+        </div>
+    </div>
+</div>
+
 
                 <div class="form-group">
                     <input type="password" name="password" id="password" class="form-input" placeholder="Contraseña">

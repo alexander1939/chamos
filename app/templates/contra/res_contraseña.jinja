@@ -1,45 +1,11 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restablecer Contraseña</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container mt-5">
-        <h2 class="text-center">Restablecer Contraseña</h2>
-        <div class="row mt-4">
-            <div class="col-md-6 offset-md-3">
-                <div class="card p-4">
-                    <h4 class="text-center">Ingresa tu nueva contraseña</h4>
+<form action="{{ url_for('recovery.restablecer_contra', token=token) }}" method="POST">
+    <input type="hidden" name="token" value="{{ token }}">
+    
+    <label for="new_password">Nueva Contraseña:</label>
+    <input type="password" id="new_password" name="new_password" required>
 
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }}" role="alert">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
+    <label for="confirm_password">Confirmar Contraseña:</label>
+    <input type="password" id="confirm_password" name="confirm_password" required>
 
-                    <form action="{{ url_for('authApi.restablecer_contrasena', token=token) }}" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">Nueva Contraseña</label>
-                            <input type="password" name="new_password" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Confirmar Contraseña</label>
-                            <input type="password" name="confirm_password" class="form-control" required>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">Restablecer Contraseña</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+    <button type="submit">Restablecer Contraseña</button>
+</form>

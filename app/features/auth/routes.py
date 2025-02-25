@@ -33,9 +33,8 @@ def index(user):  # Acepta el argumento `user`
 def register():
     questions = Question.query.all()  # Obtener todas las preguntas
     preguntas_1 = questions[:3]  # Primeras 3 preguntas
-    preguntas_2 = questions[3:]  # Otras 3 preguntas
+    preguntas_2 = questions[3:6]  # Otras 3 preguntas
     return render_template("auth/register.jinja", preguntas_1=preguntas_1, preguntas_2=preguntas_2)
-
 
 @auth_bp.post('/register/')
 @guest_only

@@ -14,37 +14,43 @@
                 <div class="card p-4">
                     <h4 class="text-center">Ingresa las respuestas para recuperar tu contraseña</h4>
 
-                    <!-- Mostrar mensaje de error en rojo -->
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                {% if category == 'danger' %}
-                                    <div class="alert alert-danger" role="alert">
-                                        {{ message }}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert"  id="flash-message">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
 
-                    <form action="/api/verificar-respuestas" method="post">
-                        <input type="hidden" name="email" value="{{ email }}">
+                    <form action="{{ url_for('recovery.verificar_respuestas') }}" method="POST">
+    <input type="hidden" name="email" value="{{ email }}">
+    <input type="hidden" name="token" value="{{ token }}">
 
-                        <div class="mb-3">
-                            <label class="form-label">{{ pregunta1 }}</label>
-                            <input type="text" name="respuesta1" class="form-control" required>
-                        </div>
+    {% for id, text in preguntas %}
+        <div class="mb-3">
+            <label class="form-label">{{ text }}</label>
+            <input type="text" name="{{ id }}" class="form-control" required>
+        </div>
+    {% endfor %}
 
-                        <div class="mb-3">
-                            <label class="form-label">{{ pregunta2 }}</label>
-                            <input type="text" name="respuesta2" class="form-control" required>
-                        </div>
+    <button type="submit" class="btn btn-primary w-100">Verificar</button>
+</form>
 
-                        <button type="submit" class="btn btn-primary w-100">Verificar</button>
-                    </form>
                 </div>
             </div>
         </div>
     </div>
+     <script>
+        window.onload = function() {
+            const flashMessage = document.getElementById('flash-message');
+            if (flashMessage) {
+                setTimeout(function() {
+                    flashMessage.style.display = 'none';
+                }, 5000);  // 5000 milisegundos = 5 segundos
+            }
+        };
+    </script>
 </body>
 </html>

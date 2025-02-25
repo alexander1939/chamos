@@ -1,95 +1,139 @@
-import sqlite3
-from twilio.rest import Client
+from flask import Blueprint, flash, redirect, render_template, request, jsonify, url_for, current_app
+from itsdangerous import URLSafeTimedSerializer
+import requests
+from app.db import db
+from app.db.users_model import User
+from app.db.pass_codes import PasswordResetCode
 import random
+import datetime
+import os
+from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash
 
-# Configuración de Twilio
-account_sid = 'your_account_sid'  # Reemplaza con tu Account SID de Twilio
-auth_token = 'your_auth_token'    # Reemplaza con tu Auth Token de Twilio
-twilio_phone_number = '+1234567890'  # Reemplaza con tu número de Twilio
+# RUTA PARA REDIRIGIR A FORMULARIO ENVIAR CODIGO
+# href="{{ url_for('sms_recover.request_password_reset') }}">SMS Restablecimiento</a></p>
 
-# Inicializar el cliente de Twilio
-client = Client(account_sid, auth_token)
+# Cargar variables de entorno
+load_dotenv()
 
-# Función para generar un código aleatorio
-def generate_verification_code():
-    return random.randint(1000, 9999)  # Código de 4 dígitos
+# Inicializa el Blueprint
+sms_recover_bp = Blueprint('sms_recover', __name__)
 
-# Función para enviar el código por SMS
-def send_verification_code(phone_number, code):
-    message = client.messages.create(
-        body=f"Tu código de verificación es: {code}",
-        from_=twilio_phone_number,
-        to=phone_number
-    )
-    return message.sid
+# Función para generar un código aleatorio de 6 dígitos
+def generar_codigo():
+    return str(random.randint(100000, 999999))
 
-# Función para recuperar contraseña
-def recover_password(email):
-    # Conectar a la base de datos
-    conn = sqlite3.connect('your_database.db')
-    cursor = conn.cursor()
+@sms_recover_bp.route("/send-reset-code", methods=["POST"])
+def send_reset_code():
+    data = request.get_json()
+    phone = data.get("phone")  # Recibe el número de teléfono
 
-    # Buscar el usuario por email
-    cursor.execute("SELECT id, phone FROM users WHERE email = ?", (email,))
-    user = cursor.fetchone()
+    user = User.query.filter_by(phone=phone).first()  # Busca por teléfono
+    if not user:
+        return jsonify({"error": "Número de teléfono no registrado"}), 400
 
-    if user:
-        user_id, phone_number = user
-        verification_code = generate_verification_code()
+    # Generar código
+    codigo = generar_codigo()
 
-        # Guardar el código en la base de datos (en una tabla de códigos de verificación)
-        cursor.execute("INSERT INTO verification_codes (user_id, code) VALUES (?, ?)", (user_id, verification_code))
-        conn.commit()
+    # Guardar el código en la base de datos
+    reset_code = PasswordResetCode(user_id=user.id, code=codigo)
+    db.session.add(reset_code)
+    db.session.commit()
 
-        # Enviar el código por SMS
-        message_sid = send_verification_code(phone_number, verification_code)
-        print(f"Código de verificación enviado a {phone_number}. Message SID: {message_sid}")
-    else:
-        print("No se encontró un usuario con ese email.")
+    # Enviar el SMS utilizando ClickSend
+    try:
+        url = "https://rest.clicksend.com/v3/sms/send"
+        username = os.getenv("CLICKSEND_USERNAME")  # Tu usuario de ClickSend
+        api_key = os.getenv("CLICKSEND_API_KEY")  # Tu API key de ClickSend
+        
+        payload = {
+            "messages": [
+                {
+                    "source": "python",
+                    "to": f"+52{phone}",  # Asegúrate de agregar el código de país
+                    "body": f'Tu código de recuperación es {codigo}'
+                }
+            ]
+        }
 
-    # Cerrar la conexión a la base de datos
-    conn.close()
+        response = requests.post(url, auth=(username, api_key), json=payload)
 
-# Función para validar el código y restablecer la contraseña
-def reset_password(email, code, new_password):
-    # Conectar a la base de datos
-    conn = sqlite3.connect('your_database.db')
-    cursor = conn.cursor()
+        if response.status_code != 200:
+            return jsonify({"error": "Error al enviar el SMS", "details": response.json()}), 500
+        
+        print(f'Mensaje enviado a {phone}: {response.json()}')
+    except Exception as e:
+        return jsonify({"error": "Error al enviar el SMS", "details": str(e)}), 500
 
-    # Buscar el usuario por email
-    cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
-    user = cursor.fetchone()
+    return jsonify({"message": "Código enviado", "redirect_url": url_for('sms_recover.verify_code')}), 200
 
-    if user:
-        user_id = user[0]
 
-        # Buscar el código de verificación en la base de datos
-        cursor.execute("SELECT code FROM verification_codes WHERE user_id = ? AND code = ?", (user_id, code))
-        saved_code = cursor.fetchone()
 
-        if saved_code:
-            # Actualizar la contraseña del usuario
-            cursor.execute("UPDATE users SET password = ? WHERE id = ?", (new_password, user_id))
-            conn.commit()
 
-            # Eliminar el código de verificación (ya no es necesario)
-            cursor.execute("DELETE FROM verification_codes WHERE user_id = ?", (user_id,))
-            conn.commit()
+@sms_recover_bp.route("/verify-reset-code", methods=["POST"])
+def verify_reset_code():
+    data = request.get_json()
+    phone = data.get("phone")  # Recibe el número de teléfono
+    code = data.get("code")
 
-            print("Contraseña restablecida exitosamente.")
-        else:
-            print("Código de verificación incorrecto.")
-    else:
-        print("No se encontró un usuario con ese email.")
+    user = User.query.filter_by(phone=phone).first()  # Busca por teléfono
+    if not user:
+        return jsonify({"error": "Número de teléfono no registrado"}), 400
 
-    # Cerrar la conexión a la base de datos
-    conn.close()
+    reset_code = PasswordResetCode.query.filter_by(user_id=user.id, code=code).first()
+    if not reset_code:
+        return jsonify({"error": "Código incorrecto o expirado"}), 400
 
-# Ejemplo de uso
-email = "usuario@example.com"  # Esto podría venir de un formulario o solicitud API
-recover_password(email)  # Envía el código de verificación
+    # Verificar la validez del código según la fecha de creación
+    if datetime.datetime.utcnow() - reset_code.created_at > datetime.timedelta(minutes=20):
+        return jsonify({"error": "Código expirado"}), 400
 
-# Supongamos que el usuario ingresa el código y una nueva contraseña
-user_code = int(input("Ingresa el código de verificación: "))  # Código que el usuario recibe
-new_password = input("Ingresa tu nueva contraseña: ")  # Nueva contraseña
-reset_password(email, user_code, new_password)  # Valida el código y restablece la contraseña
+    # Generar la URL de redirección (usando el número de teléfono en lugar de un token)
+    reset_url = url_for('sms_recover.reset_password', phone=phone, _external=True)
+    
+    print(f"Redirigiendo a: {reset_url}")  # Debugging
+
+    return jsonify({"message": "Código válido, redirigiendo...", "reset_url": reset_url}), 200
+
+
+
+
+@sms_recover_bp.route("/reset-password/<phone>", methods=["GET", "POST"])
+def reset_password(phone):
+    user = User.query.filter_by(phone=phone).first()  # Busca por teléfono
+
+    if not user:
+        flash("Número de teléfono no registrado", "danger")
+        return redirect(url_for("sms_recover.request_password_reset"))
+
+    if request.method == "POST":
+        nueva_contrasena = request.form.get("password")
+        confirmar_contrasena = request.form.get("confirm_password")
+
+        if not nueva_contrasena or not confirmar_contrasena:
+            flash("Debes completar ambos campos", "danger")
+            return render_template("contra/reset_password.jinja", phone=phone)
+
+        if nueva_contrasena != confirmar_contrasena:
+            flash("Las contraseñas no coinciden", "danger")
+            return render_template("contra/reset_password.jinja", phone=phone)
+
+        # Actualizar la contraseña del usuario
+        user.password = generate_password_hash(nueva_contrasena)
+        db.session.commit()
+        
+        flash("Contraseña restablecida con éxito", "success")
+        return redirect(url_for("auth.login"))  # Redirigir al login
+
+    return render_template("contra/reset_password.jinja", phone=phone)
+
+
+
+
+@sms_recover_bp.route('/request-password-reset', methods=['GET'])
+def request_password_reset():
+    return render_template("contra/send_reset_code.jinja")
+
+@sms_recover_bp.route("/verify-code", methods=["GET"])
+def verify_code():
+    return render_template("contra/verify_reset_code.jinja")

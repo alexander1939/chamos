@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restablecer Contraseña</title>
+</head>
+<body>
+    <h1>Restablecer Contraseña</h1>
+    <form id="resetCodeForm">
+        <label for="phone">Número de teléfono (10 dígitos):</label>
+        <input type="text" id="phone" name="phone" required maxlength="10" pattern="\d{10}">
+        <button type="submit">Enviar Código</button>
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+        document.getElementById("resetCodeForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById("phone").value;
+
+            const response = await fetch("/sms-recover/send-reset-code", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ phone }),
+            });
+
+            const data = await response.json();
+            
+            if (data.redirect_url) {
+                window.location.href = data.redirect_url;  // Redirige a la página de verificación
+            } else {
+                document.getElementById("message").textContent = data.message || data.error;
+            }
+        });
+    </script>
+</body>
+</html>

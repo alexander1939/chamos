@@ -14,6 +14,7 @@ class User(BaseModel, UserMixin):
     phone = Column(String(15), nullable=False)
     role_id = Column(Integer, ForeignKey('roles.id'), nullable=False)
     role = relationship('Role')
-
+    reset_codes = relationship('PasswordResetCode', back_populates='user')
+    
     def __repr__(self):
         return f'<User {self.email} - Role: {self.role.name}>'

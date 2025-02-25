@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Código</title>
+</head>
+<body>
+    <h1>Verificar Código</h1>
+    <form id="verifyCodeForm">
+        <label for="phone">Número de teléfono:</label>
+        <input type="text" id="phone" name="phone" required>
+        <label for="code">Código de recuperación:</label>
+        <input type="text" id="code" name="code" required>
+        <button type="submit">Verificar Código</button>
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+        document.getElementById("verifyCodeForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById("phone").value;
+            const code = document.getElementById("code").value;
+
+            try {
+                const response = await fetch("/sms-recover/verify-reset-code", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ phone, code }),
+                });
+
+                const data = await response.json();
+                document.getElementById("message").textContent = data.message || data.error;
+
+                if (response.ok) {
+                    // Use the reset_url returned by the backend
+                    window.location.href = data.reset_url;
+                }
+            } catch (error) {
+                document.getElementById("message").textContent = "Error al verificar el código. Inténtalo de nuevo.";
+                console.error("Error:", error);
+            }
+        });
+    </script>
+</body>
+</html>

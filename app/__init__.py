@@ -18,6 +18,7 @@ from app.features.router_catalago import catalo_bp
 from app.api.search_api import searchApi
 from app.features.router_search import search_bp
 from app.api.breadcrumbs_api import breadcrumbs_bp
+from app.features.sms.recover_password import sms_recover_bp
 
 mail = Mail()
 def create_app():
@@ -58,7 +59,7 @@ def create_app():
     app.register_blueprint(search_bp)
     app.register_blueprint(breadcrumbs_bp)
     app.register_blueprint(recovery_bp, url_prefix='/contra')    
-
+    app.register_blueprint(sms_recover_bp, url_prefix='/sms-recover')
 
     
     @app.errorhandler(410)

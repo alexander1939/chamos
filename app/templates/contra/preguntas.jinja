@@ -27,6 +27,7 @@
                     <form action="{{ url_for('recovery.verificar_respuestas') }}" method="POST">
     <input type="hidden" name="email" value="{{ email }}">
     <input type="hidden" name="token" value="{{ token }}">
+    <input type="hidden" id="bloqueo_hasta" value="{{ bloqueo_hasta }}">
 
     {% for id, text in preguntas %}
         <div class="mb-3">
@@ -42,15 +43,6 @@
             </div>
         </div>
     </div>
-     <script>
-        window.onload = function() {
-            const flashMessage = document.getElementById('flash-message');
-            if (flashMessage) {
-                setTimeout(function() {
-                    flashMessage.style.display = 'none';
-                }, 5000);  // 5000 milisegundos = 5 segundos
-            }
-        };
-    </script>
+     <script src="{{ url_for('static', filename='js/components/validacion_pre.js') }}"></script>
 </body>
 </html>

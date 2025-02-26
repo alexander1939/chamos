@@ -1,11 +1,34 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/token.css') }}">
+<script src="{{ url_for('static', filename='js/components/validacionrestablecer.js') }}"></script>
+
 <form action="{{ url_for('recovery.restablecer_contra', token=token) }}" method="POST">
     <input type="hidden" name="token" value="{{ token }}">
     
-    <label for="new_password">Nueva Contraseña:</label>
-    <input type="password" id="new_password" name="new_password" required>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="alert alert-{{ messages[0][0] }}">
+        {{ messages[0][1] }}
+    </div>
+    {% endif %}
+    {% endwith %}
+    
+    <div class="form-group">
+        <label for="new_password">Nueva Contraseña:</label>
+        <input type="password" id="new_password" name="new_password" class="form-control" required>
 
-    <label for="confirm_password">Confirmar Contraseña:</label>
-    <input type="password" id="confirm_password" name="confirm_password" required>
+        <div class="text-danger" id="error-nueva-contrasena" style="display: none;">
+            <p>Debe contener al menos 8 caracteres, una mayúscula y un número.</p>
+        </div>
+    </div>
 
-    <button type="submit">Restablecer Contraseña</button>
+    <div class="form-group">
+        <label for="confirm_password">Confirmar Contraseña:</label>
+        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+
+        <div class="text-danger" id="error-contrasena" style="display: none;">
+            <p>Las contraseñas no coinciden.</p>
+        </div>
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Restablecer Contraseña</button>
 </form>

@@ -30,10 +30,6 @@ def get_users(current_user):
             "surnames": u.surnames,
             "phone": u.phone,
             "role": u.role.name,
-            "pregunta1": u.pregunta1,
-            "respuesta1": u.respuesta1,
-            "pregunta2": u.pregunta2,
-            "respuesta2": u.respuesta2,
             "privileges": [
                 {
                     "id": p.privilege.id,

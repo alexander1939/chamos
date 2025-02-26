@@ -12,21 +12,23 @@ def validar_intentos_preguntas(email):
     Valida si un usuario puede realizar intentos de preguntas
     teniendo en cuenta el número de intentos fallidos y el tiempo de espera.
     """
-    # Verificar si el usuario tiene intentos fallidos registrados
+    bloqueo_hasta = None
+
     if email in failed_attempts_cache:
         user_data = failed_attempts_cache[email]
 
-        # Si el usuario ha alcanzado el límite de intentos fallidos
         if user_data['failed_attempts'] >= MAX_FAILED_ATTEMPTS:
-            # Verificar si ha pasado más de 1 minuto desde el último intento
-            if datetime.now() - user_data['last_failed_attempt'] < TIME_LIMIT:
+            tiempo_restante = TIME_LIMIT - (datetime.now() - user_data['last_failed_attempt'])
+
+            if tiempo_restante.total_seconds() > 0:
+                bloqueo_hasta = (datetime.now() + tiempo_restante).timestamp()  # Enviar timestamp UNIX
                 flash("Demasiados intentos fallidos. Intenta de nuevo en 1 minuto.", "warning")
-                return False
+                return False, bloqueo_hasta
             else:
-                # Resetear los intentos fallidos si ha pasado más de 1 minuto
                 failed_attempts_cache[email] = {'failed_attempts': 0, 'last_failed_attempt': None}
 
-    return True
+    return True, bloqueo_hasta
+
 
 def registrar_intento_fallido(email):
     """

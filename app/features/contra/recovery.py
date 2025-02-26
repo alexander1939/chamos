@@ -141,10 +141,17 @@ def verificar_respuestas():
         flash("El correo no está registrado.", "danger")
         return redirect(url_for('recovery.op_preguntas'))
 
-    # Verificar los intentos fallidos antes de continuar
-    if not validar_intentos_preguntas(email):
-        # Si el usuario ha alcanzado el límite de intentos, no redirigir, sino mostrar el mensaje y quedarse en la misma página.
-        return render_template('contra/preguntas.jinja', token=token, preguntas=[(answer.question.id, answer.question.text) for answer in Answer.query.filter_by(user_id=user.id).all()])
+    # Verificar intentos fallidos
+    puede_intentar, bloqueo_hasta = validar_intentos_preguntas(email)
+    
+    if not puede_intentar:
+        
+        return render_template(
+            'contra/preguntas.jinja', 
+            token=token, 
+            preguntas=[(answer.question.id, answer.question.text) for answer in Answer.query.filter_by(user_id=user.id).all()], 
+            bloqueo_hasta=bloqueo_hasta
+        )
 
     # Obtener respuestas de la base de datos
     answers = Answer.query.filter_by(user_id=user.id).all()
@@ -169,9 +176,12 @@ def verificar_respuestas():
         # Registrar intento fallido
         registrar_intento_fallido(email)
         flash("Las respuestas no son correctas. Intente de nuevo.", "danger")
-        # Mostrar las mismas preguntas, con el token y los mensajes de error
-        return render_template('contra/preguntas.jinja', token=token, preguntas=[(answer.question.id, answer.question.text) for answer in answers])
-
+        return render_template(
+            'contra/preguntas.jinja', 
+            token=token, 
+            preguntas=[(answer.question.id, answer.question.text) for answer in answers],
+            bloqueo_hasta=bloqueo_hasta
+        )
 
 @recovery_bp.route('/restablecer-contra', methods=['GET', 'POST'])
 def restablecer_contra():

@@ -16,7 +16,7 @@ from app.api.menu_api import get_user_menu
 from app.api.auth_api import register_user,login_user
 from app.middleware.auth_middleware import validate_user_data, check_existing_user,guest_only,TOKEN_EXPIRATION_TIME
 from app.middleware.menu_middleware import menu_required, get_privilege_content
-
+from app.db.preguntas_model import Question
 
 
 auth_bp = Blueprint('auth', __name__)
@@ -31,20 +31,29 @@ def index(user):  # Acepta el argumento `user`
 @auth_bp.get('/register/')
 @guest_only
 def register():
-    return render_template("auth/register.jinja")
-
+    questions = Question.query.all()  # Obtener todas las preguntas
+    preguntas_1 = questions[:3]  # Primeras 3 preguntas
+    preguntas_2 = questions[3:6]  # Otras 3 preguntas
+    return render_template("auth/register.jinja", preguntas_1=preguntas_1, preguntas_2=preguntas_2)
 
 @auth_bp.post('/register/')
 @guest_only
 @check_existing_user
 def register_post():
+    print(request.form)
     form_data = {
         "name": request.form.get('name', '').strip(),
         "surnames": request.form.get('surnames', '').strip(),
         "phone": request.form.get('phone', '').strip(),
         "email": request.form.get('email', '').strip(),
         "password": request.form.get('password', '').strip(),
+        "pregunta1": request.form.get('pregunta1', '').strip(),
+        "respuesta1": request.form.get('respuesta1', '').strip(),
+        "pregunta2": request.form.get('pregunta2', '').strip(),
+        "respuesta2": request.form.get('respuesta2', '').strip(),
     }
+
+    print("Datos recibidos:", form_data)
 
     validation_error = validate_user_data(form_data)
     if validation_error:

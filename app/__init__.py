@@ -18,6 +18,7 @@ from app.features.router_catalago import catalo_bp
 from app.api.search_api import searchApi
 from app.features.router_search import search_bp
 from app.api.breadcrumbs_api import breadcrumbs_bp
+from app.db.preguntas_model import Question
 from app.features.sms.recover_password import sms_recover_bp
 
 mail = Mail()
@@ -71,6 +72,7 @@ def create_app():
         create_roles()
         create_privileges()
         create_admin_user()
+        Question.insert_default_questions() 
 
     return app
 

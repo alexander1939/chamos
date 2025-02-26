@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opciones de Recuperación</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Opciones de Recuperación de Contraseña</h2>
+        <div class="row mt-4">
+            <div class="col-md-6 text-center">
+                <div class="card p-4">
+                    <h4>Recuperación por Correo</h4>
+                    <p>Recibe un enlace de recuperación en tu correo electrónico.</p>
+                    <a href="{{ url_for('recovery.recuperar_contrasena') }}" class="btn btn-primary">Recuperar por Correo</a>
+                </div>
+            </div>
+            <div class="col-md-6 text-center">
+                <div class="card p-4">
+                    <h4>Recuperación por Preguntas de Seguridad</h4>
+                    <p>Responde a tus preguntas de seguridad para restablecer tu contraseña.</p>
+                    <a href="{{ url_for('recovery.op_preguntas') }}" class="btn btn-primary">Recuperar por Preguntas</a>
+                </div>
+            </div>
+            <div class="col-md-6 text-center">
+                <div class="card p-4">
+                    <h4>Recuperación por Preguntas de Seguridad</h4>
+                    <p>Responde a tus preguntas de seguridad para restablecer tu contraseña.</p>
+                    <a href="{{ url_for('sms_recover.request_password_reset') }}" class="btn btn-primary">Recuperar por Mensaje</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

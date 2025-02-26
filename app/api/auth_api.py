@@ -1,8 +1,10 @@
-from flask import Blueprint, jsonify, request, make_response,url_for,flash
+from flask import Blueprint, jsonify, request, make_response,url_for,flash,redirect, render_template
 from app.db.db import db
 from app.db.users_model import User
 from app.db.Privilege_model import Privilege
 from app.db.UserPrivilege_model import UserPrivilege
+from app.db.preguntas_model import Question
+from app.db.respuesta_model import Answer
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.middleware.auth_middleware import (
     check_existing_user, generate_secure_token, active_tokens, refresh_tokens, 
@@ -19,6 +21,7 @@ def register_user():
 
     hashed_password = generate_password_hash(data["password"])
     
+    # 1️⃣ Crear el usuario sin preguntas ni respuestas
     new_user = User(
         email=data["email"],
         password=hashed_password,
@@ -27,10 +30,21 @@ def register_user():
         phone=data["phone"],
         role_id=2
     )
-
+    
     db.session.add(new_user)
-    db.session.flush()
+    db.session.flush()  # Se usa para obtener el ID del usuario antes de hacer commit
 
+    # 2️⃣ Registrar solo las respuestas sin crear preguntas
+    for i in range(1, 3):  # Solo procesamos las 2 preguntas
+        pregunta_id = data.get(f"pregunta{i}")  # Obtener el ID de la pregunta seleccionada
+        respuesta_texto = data.get(f"respuesta{i}")
+
+        if pregunta_id and respuesta_texto:
+            # Crear la respuesta asociada al usuario y la pregunta predefinida
+            answer = Answer(user_id=new_user.id, question_id=pregunta_id, response=respuesta_texto)
+            db.session.add(answer)
+
+    # 3️⃣ Asignar privilegios al usuario
     privileges = db.session.query(Privilege).filter(
         Privilege.name.in_(["Materias", "Juegos", "Proyectos"])
     ).all()
@@ -39,8 +53,9 @@ def register_user():
         db.session.add(UserPrivilege(user_id=new_user.id, privilege_id=privilege.id, can_create=1, can_edit=1, can_view=1, can_delete=1))
 
     db.session.commit()
-    
-    return jsonify({"message": "Usuario registrado con privilegios"}), 201  
+
+    return jsonify({"message": "Usuario registrado con privilegios"}), 201
+ 
 
 
 @authApi.post('/api/login/')

@@ -7,4 +7,6 @@ from .UserPrivilege_model import UserPrivilege
 from .Juegos_model import Juegos
 from .proyectos_model import Proyectos
 from .Materias_model import Materia
+from .preguntas_model import Question
+from .respuesta_model import Answer
 from .pass_codes import PasswordResetCode

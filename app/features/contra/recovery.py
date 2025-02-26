@@ -2,9 +2,13 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer
 from app.features.contra.forms import RecuperarContrasenaForm, RestablecerContrasenaForm
-from app.db.users_model import User
 from app.db.db import db
 from werkzeug.security import generate_password_hash
+
+from app.db.users_model import User
+from app.db.respuesta_model import Answer
+from app.db.preguntas_model import Question
+from app.middleware.contra_middleware import validar_intentos_preguntas, registrar_intento_fallido
 
 
 recovery_bp = Blueprint('recovery', __name__)
@@ -72,3 +76,158 @@ def restablecer_contrasena(token):
             flash('No se ha encontrado un usuario con este correo.', 'danger')
 
     return render_template('contra/restablecer_contraseña.jinja', form=form)
+
+
+@recovery_bp.route('/op_recuperacion')
+def op_recuperacion():
+    return render_template('contra/opcion_recuperacion.jinja')
+
+
+
+@recovery_bp.route('/op_preguntas')
+def op_preguntas():
+    return render_template('contra/correo.jinja')
+
+@recovery_bp.route('/recuperacion-preguntas', methods=['POST'])
+def recuperacion_preguntas():
+    email = request.form.get("email")
+
+    if not email:
+        flash("Correo electrónico requerido.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        flash("El correo no está registrado.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))
+
+    # Generar un token con el email del usuario
+    token = serializer.dumps(email, salt='recover-password')
+
+    # Traer respuestas de seguridad con la relación a las preguntas
+    answers = Answer.query.filter_by(user_id=user.id).join(Question, Answer.question_id == Question.id).all()
+
+    if len(answers) < 2:
+        flash("El usuario no tiene suficientes preguntas de seguridad registradas.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))
+
+    # Lista de preguntas
+    preguntas = [(answer.question.id, answer.question.text) for answer in answers]
+
+    return render_template('contra/preguntas.jinja', token=token, preguntas=preguntas)
+
+
+    
+
+
+@recovery_bp.route('/verificar-respuestas', methods=['POST'])
+def verificar_respuestas():
+    token = request.form.get("token")
+
+    if not token:
+        flash("Token inválido.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))
+
+    try:
+        email = serializer.loads(token, salt='recover-password', max_age=3600)  # Expira en 1 hora
+    except Exception:
+        flash("El token ha expirado o es inválido.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        flash("El correo no está registrado.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))
+
+    # Verificar intentos fallidos
+    puede_intentar, bloqueo_hasta = validar_intentos_preguntas(email)
+    
+    if not puede_intentar:
+        
+        return render_template(
+            'contra/preguntas.jinja', 
+            token=token, 
+            preguntas=[(answer.question.id, answer.question.text) for answer in Answer.query.filter_by(user_id=user.id).all()], 
+            bloqueo_hasta=bloqueo_hasta
+        )
+
+    # Obtener respuestas de la base de datos
+    answers = Answer.query.filter_by(user_id=user.id).all()
+
+    if not answers:
+        flash("No hay respuestas registradas para este usuario.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))
+
+    # Validar respuestas
+    correctas = 0
+    for answer in answers:
+        user_input = request.form.get(str(answer.question_id), "").strip().lower()
+        correct_answer = answer.response.strip().lower()
+
+        if user_input == correct_answer:
+            correctas += 1
+
+    if correctas >= 2:
+        flash("Respuestas correctas. Puede restablecer su contraseña.", "success")
+        return redirect(url_for('recovery.restablecer_contra', token=token))  # Pasar el token
+    else:
+        # Registrar intento fallido
+        registrar_intento_fallido(email)
+        flash("Las respuestas no son correctas. Intente de nuevo.", "danger")
+        return render_template(
+            'contra/preguntas.jinja', 
+            token=token, 
+            preguntas=[(answer.question.id, answer.question.text) for answer in answers],
+            bloqueo_hasta=bloqueo_hasta
+        )
+
+@recovery_bp.route('/restablecer-contra', methods=['GET', 'POST'])
+def restablecer_contra():
+    token = request.args.get("token")
+
+    if not token:
+        flash("Token inválido o ausente.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))
+
+    try:
+        email = serializer.loads(token, salt='recover-password', max_age=3600)  # Expira en 1 hora
+    except Exception:
+        flash("El token ha expirado o es inválido.", "danger")
+        return redirect(url_for('recovery.op_preguntas'))
+
+    if request.method == 'POST':
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
+
+        if not new_password or not confirm_password:
+            flash("Todos los campos son obligatorios.", "danger")
+            return redirect(url_for('recovery.restablecer_contra', token=token))
+
+        if new_password != confirm_password:
+            flash("Las contraseñas no coinciden.", "danger")
+            return redirect(url_for('recovery.restablecer_contra', token=token))
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            flash("El usuario no existe.", "danger")
+            return redirect(url_for('recovery.op_preguntas'))
+
+        # Generar el hash de la nueva contraseña
+        hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256', salt_length=16)
+
+        # Asignar la nueva contraseña
+        user.password = hashed_password
+
+        try:
+            db.session.commit()
+            flash("Contraseña restablecida con éxito.", "success")
+            return redirect(url_for('auth.login'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error al actualizar la contraseña: {e}", "danger")
+            return redirect(url_for('recovery.restablecer_contra', token=token))
+
+    return render_template('contra/res_contraseña.jinja', token=token)

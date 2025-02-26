@@ -9,6 +9,7 @@ class User(BaseModel, UserMixin):
     id = Column(Integer, primary_key=True)
     email = Column(String(120), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
+    reset_token = Column(String(256), nullable=True) # Nuevo campo
     name = Column(String(80), nullable=False)
     surnames = Column(String(255), nullable=False)
     phone = Column(String(15), nullable=False)

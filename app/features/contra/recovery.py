@@ -4,7 +4,7 @@ from itsdangerous import URLSafeTimedSerializer
 from app.features.contra.forms import RecuperarContrasenaForm, RestablecerContrasenaForm
 from app.db.db import db
 from werkzeug.security import generate_password_hash
-
+import secrets
 from app.db.users_model import User
 from app.db.respuesta_model import Answer
 from app.db.preguntas_model import Question
@@ -102,17 +102,18 @@ def recuperacion_preguntas():
         flash("El correo no está registrado.", "danger")
         return redirect(url_for('recovery.op_preguntas'))
 
-    # Generar un token con el email del usuario
-    token = serializer.dumps(email, salt='recover-password')
+    # Generar un token seguro y almacenarlo en la base de datos
+    token = secrets.token_urlsafe(32)  # Genera un token seguro
+    user.reset_token = token
+    db.session.commit()  # Guarda el token en la base de datos
 
-    # Traer respuestas de seguridad con la relación a las preguntas
+    # Traer respuestas de seguridad
     answers = Answer.query.filter_by(user_id=user.id).join(Question, Answer.question_id == Question.id).all()
 
     if len(answers) < 2:
         flash("El usuario no tiene suficientes preguntas de seguridad registradas.", "danger")
         return redirect(url_for('recovery.op_preguntas'))
 
-    # Lista de preguntas
     preguntas = [(answer.question.id, answer.question.text) for answer in answers]
 
     return render_template('contra/preguntas.jinja', token=token, preguntas=preguntas)
@@ -129,23 +130,15 @@ def verificar_respuestas():
         flash("Token inválido.", "danger")
         return redirect(url_for('recovery.op_preguntas'))
 
-    try:
-        email = serializer.loads(token, salt='recover-password', max_age=3600)  # Expira en 1 hora
-    except Exception:
+    user = User.query.filter_by(reset_token=token).first()
+
+    if not user:
         flash("El token ha expirado o es inválido.", "danger")
         return redirect(url_for('recovery.op_preguntas'))
 
-    user = User.query.filter_by(email=email).first()
-
-    if not user:
-        flash("El correo no está registrado.", "danger")
-        return redirect(url_for('recovery.op_preguntas'))
-
-    # Verificar intentos fallidos
-    puede_intentar, bloqueo_hasta = validar_intentos_preguntas(email)
+    puede_intentar, bloqueo_hasta = validar_intentos_preguntas(user.email)
     
     if not puede_intentar:
-        
         return render_template(
             'contra/preguntas.jinja', 
             token=token, 
@@ -153,14 +146,12 @@ def verificar_respuestas():
             bloqueo_hasta=bloqueo_hasta
         )
 
-    # Obtener respuestas de la base de datos
     answers = Answer.query.filter_by(user_id=user.id).all()
 
     if not answers:
         flash("No hay respuestas registradas para este usuario.", "danger")
         return redirect(url_for('recovery.op_preguntas'))
 
-    # Validar respuestas
     correctas = 0
     for answer in answers:
         user_input = request.form.get(str(answer.question_id), "").strip().lower()
@@ -171,10 +162,9 @@ def verificar_respuestas():
 
     if correctas >= 2:
         flash("Respuestas correctas. Puede restablecer su contraseña.", "success")
-        return redirect(url_for('recovery.restablecer_contra', token=token))  # Pasar el token
+        return redirect(url_for('recovery.restablecer_contra', token=token))
     else:
-        # Registrar intento fallido
-        registrar_intento_fallido(email)
+        registrar_intento_fallido(user.email)
         flash("Las respuestas no son correctas. Intente de nuevo.", "danger")
         return render_template(
             'contra/preguntas.jinja', 
@@ -182,6 +172,7 @@ def verificar_respuestas():
             preguntas=[(answer.question.id, answer.question.text) for answer in answers],
             bloqueo_hasta=bloqueo_hasta
         )
+
 
 @recovery_bp.route('/restablecer-contra', methods=['GET', 'POST'])
 def restablecer_contra():
@@ -191,9 +182,9 @@ def restablecer_contra():
         flash("Token inválido o ausente.", "danger")
         return redirect(url_for('recovery.op_preguntas'))
 
-    try:
-        email = serializer.loads(token, salt='recover-password', max_age=3600)  # Expira en 1 hora
-    except Exception:
+    user = User.query.filter_by(reset_token=token).first()
+
+    if not user:
         flash("El token ha expirado o es inválido.", "danger")
         return redirect(url_for('recovery.op_preguntas'))
 
@@ -209,17 +200,12 @@ def restablecer_contra():
             flash("Las contraseñas no coinciden.", "danger")
             return redirect(url_for('recovery.restablecer_contra', token=token))
 
-        user = User.query.filter_by(email=email).first()
-
-        if not user:
-            flash("El usuario no existe.", "danger")
-            return redirect(url_for('recovery.op_preguntas'))
-
         # Generar el hash de la nueva contraseña
         hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256', salt_length=16)
 
-        # Asignar la nueva contraseña
+        # Asignar la nueva contraseña e invalidar el token
         user.password = hashed_password
+        user.reset_token = None  # Invalidar token
 
         try:
             db.session.commit()

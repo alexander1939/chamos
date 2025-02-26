@@ -46,7 +46,8 @@ def send_reset_code():
         url = "https://rest.clicksend.com/v3/sms/send"
         username = os.getenv("CLICKSEND_USERNAME")  # Tu usuario de ClickSend
         api_key = os.getenv("CLICKSEND_API_KEY")  # Tu API key de ClickSend
-        
+        print(f"Username: {username}, API Key: {api_key}")
+
         payload = {
             "messages": [
                 {

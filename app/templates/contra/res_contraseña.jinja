@@ -1,34 +1,143 @@
-<link rel="stylesheet" href="{{ url_for('static', filename='css/token.css') }}">
-<script src="{{ url_for('static', filename='js/components/validacionrestablecer.js') }}"></script>
+<!DOCTYPE html>
+<html lang="es">
 
-<form action="{{ url_for('recovery.restablecer_contra', token=token) }}" method="POST">
-    <input type="hidden" name="token" value="{{ token }}">
-    
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="alert alert-{{ messages[0][0] }}">
-        {{ messages[0][1] }}
-    </div>
-    {% endif %}
-    {% endwith %}
-    
-    <div class="form-group">
-        <label for="new_password">Nueva Contraseña:</label>
-        <input type="password" id="new_password" name="new_password" class="form-control" required>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restablecer Contraseña</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f8fc;
+        }
 
-        <div class="text-danger" id="error-nueva-contrasena" style="display: none;">
-            <p>Debe contener al menos 8 caracteres, una mayúscula y un número.</p>
+        .card {
+            width: 100%;
+            max-width: 400px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            background-color: #ffffff;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .card h3 {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-control {
+            border-radius: 8px;
+        }
+
+        .text-danger {
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            border-radius: 8px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            border: none;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #5a67d8, #6b46c1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h3 class="text-center mb-4">🔒 Restablecer Contraseña</h3>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="alert alert-{{ messages[0][0] }} text-center">
+            {{ messages[0][1] }}
         </div>
+        {% endif %}
+        {% endwith %}
+
+        <form id="password-reset-form" action="{{ url_for('recovery.restablecer_contra', token=token) }}" method="POST"
+            onsubmit="return validarContrasena()">
+            <input type="hidden" name="token" value="{{ token }}">
+
+            <div class="mb-3">
+                <label for="new_password" class="form-label">🔑 Nueva Contraseña:</label>
+                <input type="password" id="new_password" name="new_password" class="form-control"
+                    placeholder="Tu nueva contraseña" required>
+
+                <div class="text-danger" id="error-nueva-contrasena" style="display: none;">
+                    ⚠️ La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="confirm_password" class="form-label">🔄 Confirmar Contraseña:</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control"
+                    placeholder="Confirma tu contraseña" required>
+
+                <div class="text-danger" id="error-contrasena" style="display: none;">
+                    ⚠️ Las contraseñas no coinciden.
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">✅ Restablecer Contraseña</button>
+        </form>
     </div>
 
-    <div class="form-group">
-        <label for="confirm_password">Confirmar Contraseña:</label>
-        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+    <script>
+        function validarContrasena() {
+            const nuevaContrasena = document.getElementById('new_password').value;
+            const confirmarContrasena = document.getElementById('confirm_password').value;
+            const errorNuevaContrasena = document.getElementById('error-nueva-contrasena');
+            const errorContrasena = document.getElementById('error-contrasena');
 
-        <div class="text-danger" id="error-contrasena" style="display: none;">
-            <p>Las contraseñas no coinciden.</p>
-        </div>
-    </div>
-    
-    <button type="submit" class="btn btn-primary">Restablecer Contraseña</button>
-</form>
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+            let valido = true;
+
+            if (!regex.test(nuevaContrasena)) {
+                errorNuevaContrasena.style.display = 'block';
+                valido = false;
+            } else {
+                errorNuevaContrasena.style.display = 'none';
+            }
+
+            if (nuevaContrasena !== confirmarContrasena) {
+                errorContrasena.style.display = 'block';
+                valido = false;
+            } else {
+                errorContrasena.style.display = 'none';
+            }
+
+            return valido;
+        }
+    </script>
+</body>
+
+</html>

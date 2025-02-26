@@ -85,7 +85,7 @@ def verify_reset_code():
         return jsonify({"error": "Código incorrecto o expirado"}), 400
 
     # Verificar la validez del código según la fecha de creación
-    if datetime.datetime.utcnow() - reset_code.created_at > datetime.timedelta(minutes=20):
+    if datetime.datetime.utcnow() - reset_code.created_at > datetime.timedelta(minutes=2):
         return jsonify({"error": "Código expirado"}), 400
 
     # Generar la URL de redirección (usando el número de teléfono en lugar de un token)

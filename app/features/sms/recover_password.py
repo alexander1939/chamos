@@ -33,9 +33,6 @@ def send_reset_code():
     if not user:
         return jsonify({"error": "Número de teléfono no registrado"}), 400
 
-    # Eliminar códigos existentes para este usuario
-    PasswordResetCode.query.filter_by(user_id=user.id).delete()
-
     # Generar código
     codigo = generar_codigo()
 
@@ -49,8 +46,7 @@ def send_reset_code():
         url = "https://rest.clicksend.com/v3/sms/send"
         username = os.getenv("CLICKSEND_USERNAME")  # Tu usuario de ClickSend
         api_key = os.getenv("CLICKSEND_API_KEY")  # Tu API key de ClickSend
-        print(f"Username: {username}, API Key: {api_key}")
-
+        
         payload = {
             "messages": [
                 {
@@ -85,20 +81,19 @@ def verify_reset_code():
     if not user:
         return jsonify({"error": "Número de teléfono no registrado"}), 400
 
-    reset_code = PasswordResetCode.query.filter_by(user_id=user.id, code=code, used=False).first()
+    reset_code = PasswordResetCode.query.filter_by(user_id=user.id, code=code).first()
     if not reset_code:
-        return jsonify({"error": "Código incorrecto, expirado o ya utilizado"}), 400
+        return jsonify({"error": "Código incorrecto o expirado"}), 400
 
     # Verificar la validez del código según la fecha de creación
-    if datetime.datetime.utcnow() - reset_code.created_at > datetime.timedelta(minutes=5):
+    if datetime.datetime.utcnow() - reset_code.created_at > datetime.timedelta(minutes=10):  # Cambia 2 a 10 (o el tiempo que desees)
         return jsonify({"error": "Código expirado"}), 400
 
-    # Marcar el código como usado
-    reset_code.used = True
-    db.session.commit()
+    # Guardar el número de teléfono en la sesión
+    session["reset_phone"] = phone
 
-    # Generar la URL de redirección (usando el número de teléfono en lugar de un token)
-    reset_url = url_for('sms_recover.reset_password', phone=phone, _external=True)
+    # Redirigir a la página de restablecimiento de contraseña
+    reset_url = url_for('sms_recover.reset_password', _external=True)
     
     print(f"Redirigiendo a: {reset_url}")  # Debugging
 
@@ -150,9 +145,3 @@ def request_password_reset():
 @sms_recover_bp.route("/verify-code", methods=["GET"])
 def verify_code():
     return render_template("contra/verify_reset_code.jinja")
-
-# def delete_expired_codes():
-#     # Eliminar códigos expirados (más de 2 minutos de antigüedad)
-#     expiration_time = datetime.datetime.utcnow() - datetime.timedelta(minutes=4)
-#     PasswordResetCode.query.filter(PasswordResetCode.created_at < expiration_time).delete()
-#     db.session.commit()

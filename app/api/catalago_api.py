@@ -10,6 +10,21 @@ from app.db.users_model import User
 
 catalogo_api = Blueprint('catalogo', __name__)
 
+
+@catalogo_api.get('/api/validate_token')
+def validate_token():
+    token = request.cookies.get("token")
+    if not token:
+        return jsonify({"error": "Token no proporcionado."}), 401
+
+    user = get_user_from_token(token)
+    if not user:
+        return jsonify({"error": "Token inválido o expirado."}), 401
+
+    return jsonify({"message": "Token válido"}), 200
+
+
+
 @catalogo_api.get('/api/catalogo/')
 def get_user_catalog():
     token = request.cookies.get("token")

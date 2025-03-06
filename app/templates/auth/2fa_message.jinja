@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensaje de 2FA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/sweetalert2.min.css') }}">
+    <script src="{{ url_for('static', filename='js/libs/sweetalert2.min.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let countdown = 4;  // 5 segundos de cuenta regresiva
+
+            // Mostrar SweetAlert2 con el mensaje de 2FA y el mensaje de error (si existe)
+            const swalInstance = Swal.fire({
+                title: 'Autenticación de dos factores',
+                html: `<p style="font-size: 18px; color: red;">{{ message }}</p><p style="font-size: 16px;">Serás redirigido al login en <strong>${countdown}</strong> segundos...</p>`, 
+                icon: 'info',  // Icono de información
+                showConfirmButton: false,
+                timer: 4000,  // Redirigir al login después de 5 segundos
+            });
+
+            // Actualizar el texto cada segundo
+            let interval = setInterval(function() {
+                countdown--;
+                swalInstance.update({
+                    html: `<p style="font-size: 18px; color: red;">{{ message }}</p><p style="font-size: 16px;">Serás redirigido al login en <strong>${countdown}</strong> segundos...</p>`
+                });
+
+                // Cuando la cuenta regresiva llegue a 0, redirigir
+                if (countdown <= 0) {
+                    clearInterval(interval); // Detener la cuenta regresiva
+                    window.location.href = "{{ url_for('auth.login') }}"; // Redirigir
+                }
+            }, 1000);  // Actualizar cada segundo
+        });
+    </script>
+</head>
+<body>
+    <!-- El contenido ya no es necesario, ya que se maneja con SweetAlert2 -->
+</body>
+</html>

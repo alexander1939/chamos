@@ -89,14 +89,16 @@ def login_user():
         "refresh_token": refresh_token
     })
 
-    # Configura la cookie para que sea accesible desde JavaScript
+    # Depuración: Imprimir el valor de httponly
+    print("Configurando cookie 'token' con httponly=False")
     response.set_cookie("token", token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME, path='/')
+    
+    print("Configurando cookie 'refresh_token' con httponly=False")
     response.set_cookie("refresh_token", refresh_token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24, path='/')
 
-    print("Cookie configurada:", token)  # Depuración
+    print("Cookie 'token' configurada:", token)  # Depuración
+    print("Cookie 'refresh_token' configurada:", refresh_token)  # Depuración
     return response, 200
-
-
 
 @authApi.post('/api/refresh/')
 def refresh_access_token():

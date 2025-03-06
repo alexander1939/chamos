@@ -60,7 +60,6 @@ def register_user():
 
 @authApi.post('/api/login/')
 def login_user():
-
     data = request.json if request.is_json else request.form.to_dict()
 
     if not data or 'email' not in data or 'password' not in data:
@@ -90,9 +89,11 @@ def login_user():
         "refresh_token": refresh_token
     })
 
-    response.set_cookie("token", token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
-    response.set_cookie("refresh_token", refresh_token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24)
+    # Configura la cookie para que sea accesible desde JavaScript
+    response.set_cookie("token", token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME, path='/')
+    response.set_cookie("refresh_token", refresh_token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24, path='/')
 
+    print("Cookie configurada:", token)  # Depuración
     return response, 200
 
 
@@ -116,7 +117,7 @@ def refresh_access_token():
     }
 
     response = make_response(jsonify({"token": new_access_token}), 200)
-    response.set_cookie("token", new_access_token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
+    response.set_cookie("token", new_access_token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
 
     return response
 

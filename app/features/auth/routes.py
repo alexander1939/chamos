@@ -199,8 +199,8 @@ def confirm_2fa(token):
 
         # 🔹 Crear la respuesta y establecer cookies
         resp = make_response(redirect(url_for('auth.index')))
-        resp.set_cookie("token", token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
-        resp.set_cookie("refresh_token", refresh_token, httponly=True, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24)
+        resp.set_cookie("token", token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
+        resp.set_cookie("refresh_token", refresh_token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24)
 
         # Eliminar tokens temporales
         if token in two_fa_session_tokens:

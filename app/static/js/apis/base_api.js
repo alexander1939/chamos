@@ -78,11 +78,11 @@ Carga y genera el menú de navegación dinámicamente:
 2. Muestra los módulos y las opciones según los privilegios del usuario.
 3. Para cada módulo, genera un dropdown con las opciones correspondientes (agregar, listar, detalles).
 */
-function cargarMenu(menu, privilegios) {
+function cargarMenu(menu, privilegios, Admin) {
     const menuList = document.getElementById("menu-list");
     if (!menuList) return;
 
-    menuList.innerHTML = `<li><a href="/"class="home-link"><i class="fas fa-home"></i> Inicio</a></li>`;
+    menuList.innerHTML = `<li><a href="/" class="home-link"><i class="fas fa-home"></i> Inicio</a></li>`;
 
     if (!Array.isArray(menu) || menu.length === 0) {
         console.warn("No hay módulos en el menú.");
@@ -93,7 +93,7 @@ function cargarMenu(menu, privilegios) {
         if (!privilegios.includes(modulo.nombre)) return;
 
         const { nombre, contenido, can_create, can_view } = modulo;
-        menuList.innerHTML += createDropdown(nombre, contenido, can_create, can_view);
+        menuList.innerHTML += createDropdown(nombre, contenido, can_create, can_view, Admin);
     });
 
     activarDropdowns();
@@ -105,7 +105,7 @@ Crea el dropdown de un módulo con sus opciones (agregar, listar, detalles):
 2. Agrega enlaces para agregar, listar y ver detalles de los elementos.
 3. Si no hay elementos, muestra un mensaje indicando que no hay elementos disponibles.
 */
-function createDropdown(nombre, contenido, canCreate, canView) {
+function createDropdown(nombre, contenido, canCreate, canView, Admin) {
     let dropdown = `
         <li>
             <a href="#" class="dropdown-btn">
@@ -113,20 +113,26 @@ function createDropdown(nombre, contenido, canCreate, canView) {
                 <i class="fas fa-chevron-down dropdown-icon"></i>
             </a>
             <ul class="dropdown-options" style="display: none;">
-                        <li><a href="/contact" class="nav-link">Contacto</a></li>
+                <li><a href="/contact" class="nav-link">Contacto</a></li>
     `;
 
     if (canCreate) {
         dropdown += `<li><a href="/catalogo/agregar/${nombre}/" class="btn-agregar" data-modulo="${nombre}"><i class="fas fa-plus-circle"></i> Agregar</a></li>`;
     }
 
-    if (canView) {
-        dropdown += `<li><a href="/catalogo/${nombre}/" class="list-link" data-modulo="${nombre}"><i class="fas fa-list"></i> Listar</a></li>`;
+    if (canView && nombre === "Gestionar Privilegios") {
+        dropdown += `
+            <li>
+                <a href="/gestionar_privilegios/" class="privilege-link">
+                    <i class="fas fa-user-shield"></i> Gestionar privilegios
+                </a>
+            </li>`;
     }
+    
 
     if (Array.isArray(contenido) && contenido.length > 0) {
         contenido.forEach(item => {
-            dropdown += `<li><a href="/catalogo/${nombre}/detalle/${item.id}/" class="deta-link" >
+            dropdown += `<li><a href="/catalogo/${nombre}/detalle/${item.id}/" class="deta-link">
                             <i class="fas fa-file-alt"></i> ${item.nombre}
                          </a></li>`;
         });
@@ -137,7 +143,6 @@ function createDropdown(nombre, contenido, canCreate, canView) {
     dropdown += `</ul></li>`;
     return dropdown;
 }
-
 /*
 Activa la funcionalidad de los botones de dropdown:
 1. Al hacer clic en el botón de un dropdown, muestra u oculta el submenú correspondiente.

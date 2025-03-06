@@ -74,9 +74,8 @@ if (document.readyState !== "loading") {
 */
 function obtenerModulo() {
     const pathSegments = window.location.pathname.split("/");
-    return pathSegments[2] || null;
+    return pathSegments[2] ? decodeURIComponent(pathSegments[2]) : null; // Decodificar el módulo
 }
-
 /*
     La función obtenerDatos es asíncrona y se encarga de hacer una solicitud HTTP GET al servidor
     para obtener los datos asociados al módulo especificado. 

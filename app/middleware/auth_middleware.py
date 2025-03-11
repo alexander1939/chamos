@@ -1,11 +1,14 @@
 import re
-from flask import request, jsonify, redirect, url_for, make_response,flash
+from flask import render_template, request, jsonify, redirect, url_for, make_response,flash
 from functools import wraps
 from app.db.users_model import User
 from app.db.db import db
 from werkzeug.security import check_password_hash
 import uuid
 import time
+from flask import redirect, url_for, make_response, flash
+from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer
 
 active_tokens = {}
 refresh_tokens = {}
@@ -121,3 +124,77 @@ def guest_only(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
+# Serializer para 2FA
+serializer_2fa = URLSafeTimedSerializer(
+    'UUr09BTA_9ZGHjl6Mz75FuUn-ftJli7yN2XMyt1myeA',
+    salt='2fa-confirmation'
+)
+
+# Diccionarios para manejar sesiones temporales
+two_fa_session_tokens = {}
+
+def generate_2fa_token(email):
+    """Genera un token seguro para 2FA y lo almacena temporalmente."""
+    two_fa_token = serializer_2fa.dumps(email, salt='2fa-confirmation')
+    return two_fa_token
+
+def store_2fa_session(token, access_token, refresh_token):
+    """Almacena temporalmente el token de sesión para la verificación 2FA."""
+    two_fa_session_tokens[token] = {
+        "token": access_token,
+        "refresh_token": refresh_token,
+        "expires": time.time() + 300  # 5 minutos de expiración
+    }
+    clean_expired_tokens()  # Elimina tokens expirados automáticamente
+
+def clean_expired_tokens():
+    """Elimina tokens expirados del diccionario two_fa_session_tokens."""
+    current_time = time.time()
+    expired_tokens = [token for token, data in two_fa_session_tokens.items() if data.get("expires", 0) <= current_time]
+    for token in expired_tokens:
+        del two_fa_session_tokens[token]
+
+def send_2fa_email(email, two_fa_token):
+    from app import mail
+    """Envía un correo con el enlace para confirmar 2FA."""
+    confirmation_link = url_for('auth.confirm_2fa', token=two_fa_token, _external=True)
+    html_body = render_template('auth/2fa_email.jinja', confirmation_link=confirmation_link)
+
+    msg = Message('Confirmación de inicio de sesión', recipients=[email])
+    msg.html = html_body
+
+    try:
+        mail.send(msg)
+        return True
+    except Exception as e:
+        print(f'Error al enviar correo: {e}')
+        return False
+
+def validate_2fa_token(token):
+    """Valida el token de 2FA y devuelve el email asociado si es válido."""
+    try:
+        email = serializer_2fa.loads(token, salt='2fa-confirmation', max_age=300)
+        return email
+    except Exception as e:
+        print(f"Error al validar el token: {e}")
+        return None
+
+def complete_2fa_login(token):
+    """Completa el proceso de inicio de sesión tras la validación de 2FA."""
+    session_tokens = two_fa_session_tokens.get(token)
+    if not session_tokens:
+        return None
+
+    access_token = session_tokens.get("token")
+    refresh_token = session_tokens.get("refresh_token")
+
+    # Eliminar tokens temporales después del uso
+    del two_fa_session_tokens[token]
+
+    # Crear respuesta con cookies
+    resp = make_response(redirect(url_for('auth.index')))
+    resp.set_cookie("token", access_token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
+    resp.set_cookie("refresh_token", refresh_token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24)
+    
+    return resp

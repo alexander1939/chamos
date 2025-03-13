@@ -61,6 +61,56 @@ async function cargarDatos() {
     }
 }
 
+async function actualizarModuloEnMenu(modulo) {
+    try {
+        const response = await fetch("/api/menu", {
+            method: "GET",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error al obtener el menú: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const menuList = document.getElementById("menu-list");
+
+        // Buscamos el módulo actualizado
+        const moduloActualizado = data.menu.find(m => m.nombre === modulo);
+
+        if (!moduloActualizado) {
+            console.warn(`No se encontró el módulo ${modulo} en el menú.`);
+            return;
+        }
+
+        // Quitamos el módulo viejo si existe
+        const moduloViejo = menuList.querySelector(`[data-modulo="${modulo}"]`);
+        if (moduloViejo) {
+            moduloViejo.remove();
+        }
+
+        // Creamos el nuevo HTML, pasando "Admin" si el usuario tiene ese privilegio
+        const nuevoModuloHTML = createDropdown(
+            moduloActualizado.nombre,
+            moduloActualizado.contenido,
+            moduloActualizado.can_create,
+            moduloActualizado.can_view,
+            data.usuario.name === "Admin" // <- Aquí pasamos si es Admin o no
+        );
+
+        // Agregamos el módulo actualizado al menú
+        menuList.innerHTML += nuevoModuloHTML;
+
+        // Volvemos a activar los dropdowns
+        activarDropdowns();
+
+    } catch (error) {
+        console.error("Error al actualizar el menú:", error);
+    }
+}
+
+
 /*
     La función `actualizarNombreUsuario` actualiza el nombre del usuario en la interfaz de usuario.
     Si se recibe un nombre de usuario válido, se muestra. Si no, se muestra "Usuario desconocido".
@@ -107,7 +157,7 @@ Crea el dropdown de un módulo con sus opciones (agregar, listar, detalles):
 */
 function createDropdown(nombre, contenido, canCreate, canView, Admin) {
     let dropdown = `
-        <li>
+        <li data-modulo="${nombre}">
             <a href="#" class="dropdown-btn">
                 <i class="fas fa-folder"></i> ${nombre} 
                 <i class="fas fa-chevron-down dropdown-icon"></i>
@@ -127,23 +177,24 @@ function createDropdown(nombre, contenido, canCreate, canView, Admin) {
                 </a>
             </li>`;
     }
-    
 
-    if (Array.isArray(contenido) && contenido.length > 0) {
+    if (canView && Array.isArray(contenido) && contenido.length > 0) {
         contenido.forEach(item => {
             dropdown += `<li><a href="/catalogo/${nombre}/detalle/${item.id}/" class="deta-link">
                             <i class="fas fa-file-alt"></i> ${item.nombre}
                          </a></li>`;
         });
+
         if (contenido.length > 1) {
             dropdown += `
             <li>
                 <a href="/catalogo/${nombre}/" class="list-link" data-modulo="${nombre}">
                     <i class="fas fa-eye"></i> Ver más
                 </a>
-
             </li>`;
         }
+    } else if (!canView) {
+        dropdown += `<li><span class="no-items">No tienes permisos para ver este contenido</span></li>`;
     } else {
         dropdown += `<li><span class="no-items">No hay elementos disponibles</span></li>`;
     }
@@ -151,6 +202,9 @@ function createDropdown(nombre, contenido, canCreate, canView, Admin) {
     dropdown += `</ul></li>`;
     return dropdown;
 }
+
+
+
 /*
 Activa la funcionalidad de los botones de dropdown:
 1. Al hacer clic en el botón de un dropdown, muestra u oculta el submenú correspondiente.

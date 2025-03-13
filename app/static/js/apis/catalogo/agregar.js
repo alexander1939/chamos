@@ -96,6 +96,8 @@ async function enviarFormularioAgregar(modulo) {
             history.pushState({}, '', `/catalogo/${modulo}/`);
             cargarCatalogo(modulo);
         });
+        
+        actualizarModuloEnMenu(modulo);
 
     } catch (error) {
         console.error("Error al agregar:", error);

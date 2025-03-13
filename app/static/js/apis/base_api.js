@@ -113,7 +113,6 @@ function createDropdown(nombre, contenido, canCreate, canView, Admin) {
                 <i class="fas fa-chevron-down dropdown-icon"></i>
             </a>
             <ul class="dropdown-options" style="display: none;">
-                <li><a href="/contact" class="nav-link">Contacto</a></li>
     `;
 
     if (canCreate) {
@@ -136,6 +135,15 @@ function createDropdown(nombre, contenido, canCreate, canView, Admin) {
                             <i class="fas fa-file-alt"></i> ${item.nombre}
                          </a></li>`;
         });
+        if (contenido.length > 1) {
+            dropdown += `
+            <li>
+                <a href="/catalogo/${nombre}/" class="list-link" data-modulo="${nombre}">
+                    <i class="fas fa-eye"></i> Ver más
+                </a>
+
+            </li>`;
+        }
     } else {
         dropdown += `<li><span class="no-items">No hay elementos disponibles</span></li>`;
     }

@@ -12,7 +12,7 @@ from itsdangerous import URLSafeTimedSerializer
 
 active_tokens = {}
 refresh_tokens = {}
-TOKEN_EXPIRATION_TIME = 180  # 1 hora
+TOKEN_EXPIRATION_TIME = 3600  # 1 hora
 
 def generate_secure_token():
     """Genera un token único usando UUID"""

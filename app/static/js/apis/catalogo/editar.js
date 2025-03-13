@@ -117,6 +117,8 @@ async function enviarEdicion(modulo, itemId) {
             history.pushState({}, '', `/catalogo/${modulo}/`);
             cargarCatalogo(modulo); // 🔄 Actualizar solo el main sin recargar la página
         });
+        actualizarModuloEnMenu(modulo);
+
 
     } catch (error) {
         console.error("Error editando contenido:", error);

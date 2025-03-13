@@ -76,6 +76,7 @@ async function eliminarElemento(modulo, itemId) {
         }
 
         document.querySelector(`[data-id="${itemId}"]`).closest(".content-item").remove();
+        actualizarModuloEnMenu(modulo);
 
     } catch (error) {
         console.error("Error al eliminar:", error);

@@ -18,6 +18,7 @@ class User(BaseModel, UserMixin):
     reset_codes = relationship('PasswordResetCode', back_populates='user')
 
     sessions = relationship('ActiveSession', back_populates='user', cascade='all, delete-orphan')
+    session_settings = relationship("UserSessionSettings", uselist=False, back_populates="user")
     
     def __repr__(self):
         return f'<User {self.email} - Role: {self.role.name}>'

@@ -5,6 +5,7 @@ from app.db.session_model import ActiveSession
 from datetime import datetime,timedelta
 from app.db.Privilege_model import Privilege
 from app.db.UserPrivilege_model import UserPrivilege
+from app.db.UserSessionSettings_model import UserSessionSettings
 from app.db.preguntas_model import Question
 from app.db.respuesta_model import Answer
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -23,7 +24,7 @@ def register_user():
 
     hashed_password = generate_password_hash(data["password"])
     
-    # 1️⃣ Crear el usuario sin preguntas ni respuestas
+    # 1️⃣ Crear el usuario
     new_user = User(
         email=data["email"],
         password=hashed_password,
@@ -34,8 +35,17 @@ def register_user():
     )
     
     db.session.add(new_user)
-    db.session.flush() 
+    db.session.flush()  # Se usa flush() para obtener el ID del usuario antes de commit
 
+    # 2️⃣ Crear la configuración de sesión con valores predeterminados (sin 2FA y sin múltiples sesiones)
+    session_settings = UserSessionSettings(
+        user_id=new_user.id,
+        allow_multiple_sessions=False,  # ❌ No permite múltiples sesiones por defecto
+        enable_2fa=False  # ❌ No activa 2FA por defecto
+    )
+    db.session.add(session_settings)
+
+    # 3️⃣ Agregar preguntas de seguridad
     for i in range(1, 3):  
         pregunta_id = data.get(f"pregunta{i}")  
         respuesta_texto = data.get(f"respuesta{i}")
@@ -44,6 +54,7 @@ def register_user():
             answer = Answer(user_id=new_user.id, question_id=pregunta_id, response=respuesta_texto)
             db.session.add(answer)
 
+    # 4️⃣ Asignar privilegios
     privileges = db.session.query(Privilege).filter(
         Privilege.name.in_(["Materias", "Juegos", "Proyectos"])
     ).all()
@@ -51,10 +62,12 @@ def register_user():
     for privilege in privileges:
         db.session.add(UserPrivilege(user_id=new_user.id, privilege_id=privilege.id, can_create=1, can_edit=1, can_view=1, can_delete=1))
 
+    # 5️⃣ Confirmar todos los cambios en la base de datos
     db.session.commit()
 
     return jsonify({"message": "Usuario registrado con privilegios"}), 201
- 
+
+
 
 
 @authApi.post('/api/login/')
@@ -93,7 +106,8 @@ def login_user():
     response = jsonify({
         "message": "Login exitoso",
         "token": token,
-        "refresh_token": refresh_token
+        "refresh_token": refresh_token,
+        "user_id": user.id 
     })
 
     response.set_cookie("token", token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME, path='/')

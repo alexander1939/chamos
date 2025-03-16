@@ -17,11 +17,14 @@ from app.db.Juegos_model import Juegos
 from app.db.Materias_model import Materia
 from app.db.proyectos_model import Proyectos
 from app.db.UserPrivilege_model import UserPrivilege
+from app.db.UserSessionSettings_model import UserSessionSettings
 from app.api.menu_api import get_user_menu
 from app.api.auth_api import register_user,login_user
 from app.middleware.auth_middleware import validate_user_data, check_existing_user,guest_only,TOKEN_EXPIRATION_TIME
 from app.middleware.menu_middleware import menu_required, get_privilege_content
 from app.db.preguntas_model import Question
+from werkzeug.security import check_password_hash
+
 
 
 auth_bp = Blueprint('auth', __name__)
@@ -95,6 +98,16 @@ def login():
             flash("Faltan datos", "danger")
             return redirect(url_for('auth.login'))
 
+        # 🔹 Obtener el usuario y verificar su configuración de sesiones
+        user = db.session.query(User).filter_by(email=form_data["email"]).first()
+        if not user:
+            flash("Usuario no encontrado", "danger")
+            return redirect(url_for('auth.login'))
+
+        session_settings = db.session.query(UserSessionSettings).filter_by(user_id=user.id).first()
+        allow_multiple_sessions = session_settings.allow_multiple_sessions if session_settings else False
+
+        # 🔹 Continuar con el proceso de login
         response, status_code = login_user()
         response_json = response.get_json()
 
@@ -106,22 +119,68 @@ def login():
                 flash("Error al generar token", "danger")
                 return redirect(url_for('auth.login'))
 
-            # Generar y almacenar token 2FA
-            two_fa_token = generate_2fa_token(form_data["email"])
-            store_2fa_session(two_fa_token, token, refresh_token)
+            if allow_multiple_sessions:
+                # 🔹 Generar y almacenar token 2FA
+                two_fa_token = generate_2fa_token(form_data["email"])
+                store_2fa_session(two_fa_token, token, refresh_token)
 
-            # Enviar correo de confirmación
-            if send_2fa_email(form_data["email"], two_fa_token):
-                flash('Se ha enviado un correo para confirmar tu inicio de sesión.', 'success')
+                if send_2fa_email(form_data["email"], two_fa_token):
+                    flash('Se ha enviado un correo para confirmar tu inicio de sesión.', 'success')
+                else:
+                    flash('Error al enviar el correo.', 'danger')
+
+                return redirect(url_for('auth.login'))
             else:
-                flash('Error al enviar el correo.', 'danger')
+                # 🔹 Inicio de sesión directo sin 2FA
+                resp = make_response(redirect(url_for('auth.index')))
+                resp.set_cookie("token", token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME)
+                resp.set_cookie("refresh_token", refresh_token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24)
+                flash("Inicio de sesión exitoso", "success")
+                return resp
 
-            return redirect(url_for('auth.login'))
         else:
             flash(response_json.get("error", "Error al iniciar sesión"), "danger")
             return redirect(url_for('auth.login'))
 
     return render_template("auth/login.jinja")
+
+
+@auth_bp.route('/logout_other_sessions/', methods=['POST'])
+def logout_other_sessions():
+    token = request.cookies.get("token")  # 🔹 Obtener el token desde la cookie
+
+    # 🔍 Depuración: Verifica qué está recibiendo
+    print(f"Token recibido: {token}")
+
+    # 🔹 Validar que se envió el token
+    if not token or token not in active_tokens:
+        flash("No tienes una sesión válida", "danger")
+        return redirect(url_for('auth.login'))
+
+    user_id = active_tokens[token]["user_id"]
+
+    # 🔹 Buscar usuario en la base de datos
+    user = db.session.query(User).filter_by(id=user_id).first()
+    
+    if not user:
+        flash("Usuario no encontrado", "danger")
+        return redirect(url_for('auth.login'))
+
+    # 🔹 Eliminar todas las sesiones activas del usuario **excepto la actual**
+    db.session.query(ActiveSession).filter(
+        ActiveSession.user_id == user.id,
+        ActiveSession.id != active_tokens[token]["session_id"]  # 🔹 No eliminar la sesión actual
+    ).delete()
+    db.session.commit()
+
+    # 🔹 Remover otros tokens activos del usuario, pero mantener el actual
+    active_tokens_copy = dict(active_tokens)
+    for tok, data in active_tokens_copy.items():
+        if data["user_id"] == user.id and tok != token:
+            del active_tokens[tok]
+
+    flash("Todas las sesiones anteriores han sido cerradas.", "success")
+    return redirect(url_for('auth.dashboard'))  # Redirigir a un panel de usuario
 
 
 @auth_bp.route('/confirm_2fa/<token>', methods=['GET'])

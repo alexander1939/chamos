@@ -1,0 +1,11 @@
+{% block content %}
+<h2>Sesión activa detectada</h2>
+<p>Ya tienes una sesión activa. ¿Quieres cerrarlas todas y continuar con el inicio de sesión?</p>
+
+<form method="post" action="{{ url_for('auth.logout_other_sessions') }}">
+    <input type="hidden" name="email" value="{{ email }}">
+    <button type="submit">Cerrar todas las sesiones y continuar</button>
+</form>
+
+<a href="{{ url_for('auth.login') }}">Cancelar</a>
+{% endblock %}

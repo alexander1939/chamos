@@ -1,0 +1,35 @@
+{% extends "base.jinja" %}
+
+{% block title %}Sesiones Activas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Sesiones Activas</h2>
+    <table id="sessionsTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Dirección IP</th>
+                <th>Agente de Usuario</th>
+                <th>Fecha de Creación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in sessions %}
+            <tr id="session-{{ session.id }}">
+                <td>{{ session.id }}</td>
+                <td>{{ session.ip_address }}</td>
+                <td>{{ session.user_agent }}</td>
+                <td>{{ session.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>
+                    <button class="btn btn-danger delete-session" data-session-id="{{ session.id }}">Eliminar</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="{{ url_for('static', filename='js/apis/sessions.js') }}"></script>
+{% endblock %}

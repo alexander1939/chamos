@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request, make_response,url_for,flash,redirect, render_template
 from app.db.db import db
 from app.db.users_model import User
+from app.db.session_model import ActiveSession
+from datetime import datetime,timedelta
 from app.db.Privilege_model import Privilege
 from app.db.UserPrivilege_model import UserPrivilege
 from app.db.preguntas_model import Question
@@ -13,7 +15,7 @@ from app.middleware.auth_middleware import (
 import time
 
 authApi = Blueprint('authApi', __name__)
-
+ 
 @authApi.post('/api/register/')
 @check_existing_user
 def register_user():
@@ -32,19 +34,16 @@ def register_user():
     )
     
     db.session.add(new_user)
-    db.session.flush()  # Se usa para obtener el ID del usuario antes de hacer commit
+    db.session.flush() 
 
-    # 2️⃣ Registrar solo las respuestas sin crear preguntas
-    for i in range(1, 3):  # Solo procesamos las 2 preguntas
-        pregunta_id = data.get(f"pregunta{i}")  # Obtener el ID de la pregunta seleccionada
+    for i in range(1, 3):  
+        pregunta_id = data.get(f"pregunta{i}")  
         respuesta_texto = data.get(f"respuesta{i}")
 
         if pregunta_id and respuesta_texto:
-            # Crear la respuesta asociada al usuario y la pregunta predefinida
             answer = Answer(user_id=new_user.id, question_id=pregunta_id, response=respuesta_texto)
             db.session.add(answer)
 
-    # 3️⃣ Asignar privilegios al usuario
     privileges = db.session.query(Privilege).filter(
         Privilege.name.in_(["Materias", "Juegos", "Proyectos"])
     ).all()
@@ -72,33 +71,36 @@ def login_user():
     token = generate_secure_token()
     refresh_token = generate_secure_token()
 
+    ip_address = request.remote_addr  
+    user_agent = request.headers.get('User-Agent', 'Desconocido')
+
+    new_session = ActiveSession(
+        user_id=user.id,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        created_at=datetime.utcnow()
+    )
+
+    db.session.add(new_session)
+    db.session.commit()
+
     active_tokens[token] = {
         "user_id": user.id,
+        "session_id": new_session.id,  
         "expires": time.time() + TOKEN_EXPIRATION_TIME
-    }
-
-    refresh_tokens[refresh_token] = {
-        "user_id": user.id,
-        "expires": time.time() + TOKEN_EXPIRATION_TIME * 24
     }
 
     response = jsonify({
         "message": "Login exitoso",
-        "redirect_url": url_for('auth.index'),
         "token": token,
         "refresh_token": refresh_token
     })
 
-    # Depuración: Imprimir el valor de httponly
-    print("Configurando cookie 'token' con httponly=False")
     response.set_cookie("token", token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME, path='/')
-    
-    print("Configurando cookie 'refresh_token' con httponly=False")
     response.set_cookie("refresh_token", refresh_token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24, path='/')
 
-    print("Cookie 'token' configurada:", token)  # Depuración
-    print("Cookie 'refresh_token' configurada:", refresh_token)  # Depuración
     return response, 200
+
 
 @authApi.post('/api/refresh/')
 def refresh_access_token():
@@ -159,3 +161,59 @@ def get_user():
         "surnames": user.surnames,
         "phone": user.phone
     }), 200
+
+@authApi.delete('/api/sessions/')
+def delete_all_sessions_except_current():
+    token = request.cookies.get("token")
+
+    if not token or token not in active_tokens:
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    current_session_id = active_tokens[token]["session_id"]
+
+    sessions_to_delete = ActiveSession.query.filter(
+        ActiveSession.user_id == user_id,
+        ActiveSession.id != current_session_id
+    ).all()
+
+    for session in sessions_to_delete:
+        db.session.delete(session)
+
+        for tok, data in list(active_tokens.items()):
+            if data["user_id"] == user_id and data["session_id"] == session.id:
+                del active_tokens[tok]
+
+    db.session.commit()
+
+    return jsonify({"message": "Todas las sesiones han sido cerradas excepto la actual"}), 200
+
+
+@authApi.delete('/api/sessions/<int:session_id>/')
+def delete_session(session_id):
+    token = request.cookies.get("token")
+
+    if not token or token not in active_tokens:
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    session = ActiveSession.query.filter_by(id=session_id, user_id=user_id).first()
+
+    if not session:
+        return jsonify({"error": "Sesión no encontrada"}), 404
+
+    db.session.delete(session)
+    db.session.commit()
+
+    for tok, data in list(active_tokens.items()):
+        if data["user_id"] == user_id and data["session_id"] == session_id:
+            del active_tokens[tok]
+
+    response = jsonify({"message": "Sesión cerrada correctamente"})
+
+    if session_id == active_tokens[token].get("session_id"):
+        del active_tokens[token]
+        response.set_cookie("token", "", expires=0, path="/")
+        response.set_cookie("refresh_token", "", expires=0, path="/")
+
+    return response, 200

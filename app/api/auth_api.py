@@ -34,19 +34,16 @@ def register_user():
     )
     
     db.session.add(new_user)
-    db.session.flush()  # Se usa para obtener el ID del usuario antes de hacer commit
+    db.session.flush() 
 
-    # 2️⃣ Registrar solo las respuestas sin crear preguntas
-    for i in range(1, 3):  # Solo procesamos las 2 preguntas
-        pregunta_id = data.get(f"pregunta{i}")  # Obtener el ID de la pregunta seleccionada
+    for i in range(1, 3):  
+        pregunta_id = data.get(f"pregunta{i}")  
         respuesta_texto = data.get(f"respuesta{i}")
 
         if pregunta_id and respuesta_texto:
-            # Crear la respuesta asociada al usuario y la pregunta predefinida
             answer = Answer(user_id=new_user.id, question_id=pregunta_id, response=respuesta_texto)
             db.session.add(answer)
 
-    # 3️⃣ Asignar privilegios al usuario
     privileges = db.session.query(Privilege).filter(
         Privilege.name.in_(["Materias", "Juegos", "Proyectos"])
     ).all()
@@ -74,17 +71,6 @@ def login_user():
     token = generate_secure_token()
     refresh_token = generate_secure_token()
 
-    active_tokens[token] = {
-        "user_id": user.id,
-        "expires": time.time() + TOKEN_EXPIRATION_TIME
-    }
-
-    refresh_tokens[refresh_token] = {
-        "user_id": user.id,
-        "expires": time.time() + TOKEN_EXPIRATION_TIME * 24
-    }
-
-    # Guardar sesión en la base de datos
     ip_address = request.remote_addr  
     user_agent = request.headers.get('User-Agent', 'Desconocido')
 
@@ -98,30 +84,23 @@ def login_user():
     db.session.add(new_session)
     db.session.commit()
 
-    # Obtener todas las sesiones activas del usuario
-    sessions = ActiveSession.query.filter_by(user_id=user.id).all()
-    session_list = [
-        {
-            "id": session.id,
-            "ip_address": session.ip_address,
-            "user_agent": session.user_agent,
-            "created_at": session.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        }
-        for session in sessions
-    ]
+    active_tokens[token] = {
+        "user_id": user.id,
+        "session_id": new_session.id,  
+        "expires": time.time() + TOKEN_EXPIRATION_TIME
+    }
 
     response = jsonify({
         "message": "Login exitoso",
-        "redirect_url": url_for('auth.index'),
         "token": token,
-        "refresh_token": refresh_token,
-        "active_sessions": session_list  # Añadir sesiones activas al response
+        "refresh_token": refresh_token
     })
 
     response.set_cookie("token", token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME, path='/')
     response.set_cookie("refresh_token", refresh_token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24, path='/')
 
     return response, 200
+
 
 @authApi.post('/api/refresh/')
 def refresh_access_token():
@@ -183,62 +162,58 @@ def get_user():
         "phone": user.phone
     }), 200
 
-#APi para obtener los datos de la tabla ACtiveSession
-@authApi.get('/api/sessions/')
-def get_active_sessions():
+@authApi.delete('/api/sessions/')
+def delete_all_sessions_except_current():
     token = request.cookies.get("token")
-    print("Token recibido:", token)  # Verificar si llega el token
 
     if not token or token not in active_tokens:
-        print("No autorizado: Token no válido")
         return jsonify({"error": "No autorizado"}), 401
 
     user_id = active_tokens[token]["user_id"]
-    print("ID de usuario obtenido del token:", user_id)
+    current_session_id = active_tokens[token]["session_id"]
 
-    sessions = ActiveSession.query.filter_by(user_id=user_id).all()
-    print("Sesiones encontradas:", sessions)  # Verificar la lista de sesiones
+    sessions_to_delete = ActiveSession.query.filter(
+        ActiveSession.user_id == user_id,
+        ActiveSession.id != current_session_id
+    ).all()
 
-    session_list = [
-        {
-            "id": session.id,
-            "ip_address": session.ip_address,
-            "user_agent": session.user_agent,
-            "created_at": session.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        }
-        for session in sessions
-    ]
-    print("Lista de sesiones para enviar:", session_list)
+    for session in sessions_to_delete:
+        db.session.delete(session)
 
-    return jsonify({"sessions": session_list}), 200
+        for tok, data in list(active_tokens.items()):
+            if data["user_id"] == user_id and data["session_id"] == session.id:
+                del active_tokens[tok]
+
+    db.session.commit()
+
+    return jsonify({"message": "Todas las sesiones han sido cerradas excepto la actual"}), 200
 
 
 @authApi.delete('/api/sessions/<int:session_id>/')
 def delete_session(session_id):
     token = request.cookies.get("token")
-    
+
     if not token or token not in active_tokens:
         return jsonify({"error": "No autorizado"}), 401
 
     user_id = active_tokens[token]["user_id"]
-    current_session = ActiveSession.query.filter_by(id=session_id, user_id=user_id).first()
+    session = ActiveSession.query.filter_by(id=session_id, user_id=user_id).first()
 
-    if not current_session:
+    if not session:
         return jsonify({"error": "Sesión no encontrada"}), 404
 
-    # Eliminar la sesión específica
-    db.session.delete(current_session)
+    db.session.delete(session)
     db.session.commit()
 
-    # Verificar si quedan más sesiones activas
-    active_sessions = ActiveSession.query.filter_by(user_id=user_id).count()
-    
+    for tok, data in list(active_tokens.items()):
+        if data["user_id"] == user_id and data["session_id"] == session_id:
+            del active_tokens[tok]
+
     response = jsonify({"message": "Sesión cerrada correctamente"})
 
-    if active_sessions == 0:
-        # Si no quedan sesiones activas, eliminar el token
+    if session_id == active_tokens[token].get("session_id"):
         del active_tokens[token]
-        response.set_cookie("token", "", expires=0)
-        response.set_cookie("refresh_token", "", expires=0)
+        response.set_cookie("token", "", expires=0, path="/")
+        response.set_cookie("refresh_token", "", expires=0, path="/")
 
     return response, 200

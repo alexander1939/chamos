@@ -9,6 +9,7 @@ from app.api.menu_api import get_user_menu
 from app.middleware.auth_middleware import  auth_required, complete_2fa_login, generate_2fa_token, generate_secure_token, guest_only, send_2fa_email, store_2fa_session, validate_2fa_token
 from app.db.db import db
 from app.db.users_model import User
+from app.db.session_model import ActiveSession
 from app.db.Privilege_model import Privilege
 from app.db.UserPrivilege_model import UserPrivilege
 from werkzeug.security import generate_password_hash
@@ -155,3 +156,12 @@ def priv(user):
 @auth_bp.route("/contact")
 def contact():
     return render_template("contact.jinja")
+
+
+#Ruta de la vista de sesiones unicas
+@auth_bp.route('/active_sessions', methods=['GET'])
+@auth_required
+def active_sessions(user):
+    """Ruta para visualizar sesiones activas del usuario"""
+    sessions = ActiveSession.query.filter_by(user_id=user.id).all()
+    return render_template("auth/active_sessions.jinja", user=user, sessions=sessions)

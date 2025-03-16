@@ -5,8 +5,8 @@ from app.db.Privilege_model import Privilege
 from werkzeug.security import generate_password_hash
 
 def create_admin_user():
-    admin_email = "alexcifuentes72818@gmail.com"
-    admin_password = "Admin123"
+    admin_email = "robertocarlosnunezcruz9@gmail.com"
+    admin_password = "Admin1234"
     admin_name = "Admin"
     admin_surnames = "User"
     admin_phone = "123456789"  

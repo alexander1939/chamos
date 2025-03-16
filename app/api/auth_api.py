@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request, make_response,url_for,flash,redirect, render_template
 from app.db.db import db
 from app.db.users_model import User
+from app.db.session_model import ActiveSession
+from datetime import datetime,timedelta
 from app.db.Privilege_model import Privilege
 from app.db.UserPrivilege_model import UserPrivilege
 from app.db.preguntas_model import Question
@@ -13,7 +15,7 @@ from app.middleware.auth_middleware import (
 import time
 
 authApi = Blueprint('authApi', __name__)
-
+ 
 @authApi.post('/api/register/')
 @check_existing_user
 def register_user():
@@ -82,22 +84,43 @@ def login_user():
         "expires": time.time() + TOKEN_EXPIRATION_TIME * 24
     }
 
+    # Guardar sesión en la base de datos
+    ip_address = request.remote_addr  
+    user_agent = request.headers.get('User-Agent', 'Desconocido')
+
+    new_session = ActiveSession(
+        user_id=user.id,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        created_at=datetime.utcnow()
+    )
+
+    db.session.add(new_session)
+    db.session.commit()
+
+    # Obtener todas las sesiones activas del usuario
+    sessions = ActiveSession.query.filter_by(user_id=user.id).all()
+    session_list = [
+        {
+            "id": session.id,
+            "ip_address": session.ip_address,
+            "user_agent": session.user_agent,
+            "created_at": session.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for session in sessions
+    ]
+
     response = jsonify({
         "message": "Login exitoso",
         "redirect_url": url_for('auth.index'),
         "token": token,
-        "refresh_token": refresh_token
+        "refresh_token": refresh_token,
+        "active_sessions": session_list  # Añadir sesiones activas al response
     })
 
-    # Depuración: Imprimir el valor de httponly
-    print("Configurando cookie 'token' con httponly=False")
     response.set_cookie("token", token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME, path='/')
-    
-    print("Configurando cookie 'refresh_token' con httponly=False")
     response.set_cookie("refresh_token", refresh_token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME * 24, path='/')
 
-    print("Cookie 'token' configurada:", token)  # Depuración
-    print("Cookie 'refresh_token' configurada:", refresh_token)  # Depuración
     return response, 200
 
 @authApi.post('/api/refresh/')
@@ -159,3 +182,63 @@ def get_user():
         "surnames": user.surnames,
         "phone": user.phone
     }), 200
+
+#APi para obtener los datos de la tabla ACtiveSession
+@authApi.get('/api/sessions/')
+def get_active_sessions():
+    token = request.cookies.get("token")
+    print("Token recibido:", token)  # Verificar si llega el token
+
+    if not token or token not in active_tokens:
+        print("No autorizado: Token no válido")
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    print("ID de usuario obtenido del token:", user_id)
+
+    sessions = ActiveSession.query.filter_by(user_id=user_id).all()
+    print("Sesiones encontradas:", sessions)  # Verificar la lista de sesiones
+
+    session_list = [
+        {
+            "id": session.id,
+            "ip_address": session.ip_address,
+            "user_agent": session.user_agent,
+            "created_at": session.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for session in sessions
+    ]
+    print("Lista de sesiones para enviar:", session_list)
+
+    return jsonify({"sessions": session_list}), 200
+
+
+@authApi.delete('/api/sessions/<int:session_id>/')
+def delete_session(session_id):
+    token = request.cookies.get("token")
+    
+    if not token or token not in active_tokens:
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    current_session = ActiveSession.query.filter_by(id=session_id, user_id=user_id).first()
+
+    if not current_session:
+        return jsonify({"error": "Sesión no encontrada"}), 404
+
+    # Eliminar la sesión específica
+    db.session.delete(current_session)
+    db.session.commit()
+
+    # Verificar si quedan más sesiones activas
+    active_sessions = ActiveSession.query.filter_by(user_id=user_id).count()
+    
+    response = jsonify({"message": "Sesión cerrada correctamente"})
+
+    if active_sessions == 0:
+        # Si no quedan sesiones activas, eliminar el token
+        del active_tokens[token]
+        response.set_cookie("token", "", expires=0)
+        response.set_cookie("refresh_token", "", expires=0)
+
+    return response, 200

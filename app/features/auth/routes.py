@@ -155,3 +155,7 @@ def priv(user):
 @auth_bp.route("/contact")
 def contact():
     return render_template("contact.jinja")
+
+@auth_bp.route("/session_verification")
+def session_verification():
+    return render_template("auth/session_verification.jinja")

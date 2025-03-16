@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificación de sesión</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+<div class="bg-white p-8 rounded-lg shadow-lg max-w-md text-center">
+  <h2 class="text-2xl font-bold mb-4">Verificación de sesión</h2>
+  <p class="mb-6">Se ha detectado que tu cuenta está iniciada en otro dispositivo.</p>
+  <form action="/verify-session" method="POST">
+    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+      Cerrar sesiones anteriores y continuar aquí
+    </button>
+  </form>
+</div>
+</body>
+</html>

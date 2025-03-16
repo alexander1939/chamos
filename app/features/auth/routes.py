@@ -105,7 +105,7 @@ def login():
             return redirect(url_for('auth.login'))
 
         session_settings = db.session.query(UserSessionSettings).filter_by(user_id=user.id).first()
-        allow_multiple_sessions = session_settings.allow_multiple_sessions if session_settings else False
+        enable_2fa = session_settings.enable_2fa if session_settings else False
 
         # 🔹 Continuar con el proceso de login
         response, status_code = login_user()
@@ -119,7 +119,7 @@ def login():
                 flash("Error al generar token", "danger")
                 return redirect(url_for('auth.login'))
 
-            if allow_multiple_sessions:
+            if enable_2fa:
                 # 🔹 Generar y almacenar token 2FA
                 two_fa_token = generate_2fa_token(form_data["email"])
                 store_2fa_session(two_fa_token, token, refresh_token)

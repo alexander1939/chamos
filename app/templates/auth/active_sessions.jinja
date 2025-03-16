@@ -5,6 +5,21 @@
 {% block content %}
 <div class="container">
     <h2>Sesiones Activas</h2>
+
+    <div class="mb-3">
+        <label class="form-check-label">
+            <input type="checkbox" id="toggle-multiple-sessions" class="form-check-input">
+            Permitir múltiples sesiones
+        </label>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-check-label">
+            <input type="checkbox" id="toggle-2fa" class="form-check-input">
+            Habilitar verificación en dos pasos (2FA)
+        </label>
+    </div>
+
     <table id="sessionsTable" class="table table-striped">
         <thead>
             <tr>
@@ -16,7 +31,6 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Las filas se llenarán dinámicamente con JavaScript -->
         </tbody>
     </table>
 </div>

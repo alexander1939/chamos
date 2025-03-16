@@ -1,10 +1,15 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    await loadSessions(); // Carga las sesiones al cargar la página
+    await loadSessions(); 
+    await loadSessionSettings(); 
 
     document.addEventListener("click", async (event) => {
         if (event.target.classList.contains("delete-session")) {
             const sessionId = event.target.getAttribute("data-session-id");
             await deleteSession(sessionId);
+        } else if (event.target.id === "toggle-multiple-sessions") {
+            await updateMultipleSessions(event.target.checked);
+        } else if (event.target.id === "toggle-2fa") {
+            await updateEnable2FA(event.target.checked);
         }
     });
 });
@@ -15,7 +20,7 @@ async function loadSessions() {
         if (!response.ok) throw new Error("Error al cargar sesiones.");
 
         const sessions = await response.json();
-        console.log("Sesiones obtenidas:", sessions); // <-- Verifica si se reciben los datos
+        console.log("Sesiones obtenidas:", sessions);
 
         const tableBody = document.querySelector("#sessionsTable tbody");
         tableBody.innerHTML = ""; // Limpiar tabla antes de agregar los datos
@@ -41,12 +46,11 @@ async function loadSessions() {
     }
 }
 
-
 async function deleteSession(sessionId) {
     try {
         const response = await fetch(`/api/sessions/${sessionId}/`, {
             method: 'DELETE',
-            credentials: 'include'  // Para enviar cookies como el token de autenticación
+            credentials: 'include'
         });
 
         if (response.ok) {
@@ -59,5 +63,63 @@ async function deleteSession(sessionId) {
     } catch (error) {
         console.error("Error:", error);
         alert("Hubo un problema al eliminar la sesión.");
+    }
+}
+
+async function loadSessionSettings() {
+    try {
+        const response = await fetch("/api/session-settings/");
+        if (!response.ok) throw new Error("Error al obtener configuración de sesión.");
+
+        const settings = await response.json();
+        console.log("Configuración actual:", settings);
+
+        document.getElementById("toggle-multiple-sessions").checked = settings.allow_multiple_sessions;
+        document.getElementById("toggle-2fa").checked = settings.enable_2fa;
+    } catch (error) {
+        console.error("Error obteniendo configuración:", error);
+        alert("No se pudo cargar la configuración de la sesión.");
+    }
+}
+
+async function updateMultipleSessions(value) {
+    try {
+        const response = await fetch("/api/session-settings/multiple-sessions/", {
+            method: 'PUT',
+            headers: { "Content-Type": "application/json" },
+            credentials: 'include',
+            body: JSON.stringify({ allow_multiple_sessions: value })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert("Configuración de sesiones múltiples actualizada.");
+        } else {
+            alert(`Error: ${result.error || "No se pudo actualizar la configuración."}`);
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Hubo un problema al actualizar la configuración.");
+    }
+}
+
+async function updateEnable2FA(value) {
+    try {
+        const response = await fetch("/api/session-settings/enable-2fa/", {
+            method: 'PUT',
+            headers: { "Content-Type": "application/json" },
+            credentials: 'include',
+            body: JSON.stringify({ enable_2fa: value })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert("Verificación en dos pasos actualizada.");
+        } else {
+            alert(`Error: ${result.error || "No se pudo actualizar la configuración."}`);
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Hubo un problema al actualizar la verificación en dos pasos.");
     }
 }

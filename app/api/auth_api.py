@@ -252,3 +252,66 @@ def get_active_sessions():
     } for session in sessions]
 
     return jsonify(sessions_data), 200
+
+
+
+@authApi.get('/api/session-settings/')
+def get_session_settings():
+    token = request.cookies.get("token")
+    if not token or token not in active_tokens:
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    settings = db.session.query(UserSessionSettings).filter_by(user_id=user_id).first()
+
+    if not settings:
+        return jsonify({"error": "Configuración de sesión no encontrada"}), 404
+
+    return jsonify({
+        "allow_multiple_sessions": settings.allow_multiple_sessions,
+        "enable_2fa": settings.enable_2fa
+    }), 200
+
+
+@authApi.put('/api/session-settings/multiple-sessions/')
+def update_multiple_sessions():
+    token = request.cookies.get("token")
+    if not token or token not in active_tokens:
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    data = request.get_json()
+
+    if "allow_multiple_sessions" not in data:
+        return jsonify({"error": "Falta el valor de allow_multiple_sessions"}), 400
+
+    settings = db.session.query(UserSessionSettings).filter_by(user_id=user_id).first()
+    if not settings:
+        return jsonify({"error": "Configuración de sesión no encontrada"}), 404
+
+    settings.allow_multiple_sessions = bool(data["allow_multiple_sessions"])
+    db.session.commit()
+
+    return jsonify({"message": "Configuración actualizada", "allow_multiple_sessions": settings.allow_multiple_sessions}), 200
+
+
+@authApi.put('/api/session-settings/enable-2fa/')
+def update_enable_2fa():
+    token = request.cookies.get("token")
+    if not token or token not in active_tokens:
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    data = request.get_json()
+
+    if "enable_2fa" not in data:
+        return jsonify({"error": "Falta el valor de enable_2fa"}), 400
+
+    settings = db.session.query(UserSessionSettings).filter_by(user_id=user_id).first()
+    if not settings:
+        return jsonify({"error": "Configuración de sesión no encontrada"}), 404
+
+    settings.enable_2fa = bool(data["enable_2fa"])
+    db.session.commit()
+
+    return jsonify({"message": "Configuración actualizada", "enable_2fa": settings.enable_2fa}), 200

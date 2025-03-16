@@ -42,14 +42,16 @@
             </div>
 
             <div class="form-group">
-                <input type="password" name="password" id="password" class="form-input" placeholder="Contraseña" required>
+                <input type="password" name="password" id="password" class="form-input" placeholder="Contraseña"
+                    required>
                 <div class="invalid-feedback" id="password-error"></div>
             </div>
 
             <button type="submit" class="form-button">Iniciar sesión</button>
 
             <p style="margin-top:20px">¿No tienes cuenta? <a href="{{ url_for('auth.register') }}">Crear cuenta</a></p>
-            <p style="margin-top:20px">¿Olvidaste tu contraseña? <a href="{{ url_for('recovery.op_recuperacion') }}">Restablecer Contraseña</a></p>
+            <p style="margin-top:20px">¿Olvidaste tu contraseña? <a
+                    href="{{ url_for('recovery.op_recuperacion') }}">Restablecer Contraseña</a></p>
         </form>
     </div>
 

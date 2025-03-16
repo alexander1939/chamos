@@ -2,9 +2,10 @@ Flask
 Flask-Login
 Flask-SQLAlchemy
 Flask-WTF
-python-dotenv   
+python-dotenv
 Flask-Migrate
 email-validator
 pyjwt
 Flask-Mail
-requests 
+requests
+pymysql 

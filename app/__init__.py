@@ -2,7 +2,7 @@ from flask import Flask, render_template
 from flask_mail import Mail
 from flask_migrate import Migrate
 from app.features.components.error_handlers import init_error_handlers
-from .config import Config
+from .config import Config  # Importar la configuración
 from flask_login import LoginManager
 from .db import db
 from .features.auth.routes import auth_bp
@@ -22,9 +22,10 @@ from app.db.preguntas_model import Question
 from app.features.sms.recover_password import sms_recover_bp
 
 mail = Mail()
+
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(Config)  # Cargar la configuración
 
     # Configuración de Flask-Mail
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -46,10 +47,10 @@ def create_app():
 
     init_error_handlers(app)
 
-    db.init_app(app)
+    db.init_app(app)  # Inicializar la base de datos
     migrate = Migrate(app, db)
 
-    # Registrar el Blueprint correctamente
+    # Registrar blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(menu)  
     app.register_blueprint(authApi)
@@ -62,7 +63,6 @@ def create_app():
     app.register_blueprint(recovery_bp, url_prefix='/contra')    
     app.register_blueprint(sms_recover_bp, url_prefix='/sms-recover')
 
-    
     @app.errorhandler(410)
     def gone(error):
         return render_template('errors/410.jinja'), 410

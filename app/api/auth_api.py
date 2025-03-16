@@ -205,15 +205,36 @@ def delete_session(session_id):
     db.session.delete(session)
     db.session.commit()
 
-    for tok, data in list(active_tokens.items()):
-        if data["user_id"] == user_id and data["session_id"] == session_id:
+    # Eliminar todas las entradas del diccionario active_tokens relacionadas con la sesión eliminada
+    for tok in list(active_tokens.keys()):
+        if active_tokens[tok].get("session_id") == session_id:
             del active_tokens[tok]
 
     response = jsonify({"message": "Sesión cerrada correctamente"})
 
-    if session_id == active_tokens[token].get("session_id"):
+    # Antes de acceder a active_tokens[token], asegurarse de que el token sigue existiendo
+    if token in active_tokens and session_id == active_tokens[token].get("session_id"):
         del active_tokens[token]
         response.set_cookie("token", "", expires=0, path="/")
         response.set_cookie("refresh_token", "", expires=0, path="/")
 
     return response, 200
+
+@authApi.get('/api/active/')
+def get_active_sessions():
+    token = request.cookies.get("token")
+
+    if not token or token not in active_tokens:
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    sessions = ActiveSession.query.filter_by(user_id=user_id).all()
+
+    sessions_data = [{
+        "id": session.id,
+        "ip_address": session.ip_address,
+        "user_agent": session.user_agent,
+        "created_at": session.created_at.strftime('%Y-%m-%d %H:%M:%S')
+    } for session in sessions]
+
+    return jsonify(sessions_data), 200

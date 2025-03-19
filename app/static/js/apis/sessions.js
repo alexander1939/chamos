@@ -23,7 +23,7 @@ async function loadSessions() {
         console.log("Sesiones obtenidas:", sessions);
 
         const tableBody = document.querySelector("#sessionsTable tbody");
-        tableBody.innerHTML = ""; // Limpiar tabla antes de agregar los datos
+        tableBody.innerHTML = "";
 
         sessions.forEach(session => {
             const row = document.createElement("tr");
@@ -42,48 +42,48 @@ async function loadSessions() {
 
     } catch (error) {
         console.error("Error cargando sesiones:", error);
-        alert("No se pudieron cargar las sesiones.");
+        Swal.fire("Error", "No se pudieron cargar las sesiones.", "error");
     }
 }
 
 async function deleteSession(sessionId) {
+    const confirmDelete = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Esta acción eliminará la sesión seleccionada.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar"
+    });
+
+    if (!confirmDelete.isConfirmed) return;
+
     try {
         const response = await fetch(`/api/sessions/${sessionId}/`, {
             method: 'DELETE',
             credentials: 'include'
         });
 
-        console.log(`Intentando eliminar sesión: ${sessionId}`);
-
         if (response.status === 401) {
-            console.warn("Sesión cerrada, eliminando cookies y redirigiendo al login...");
-
-            // 🔹 Eliminar cookies manualmente SIN recargar
             document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
             document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-
-            // 🔥 Notificar a la aplicación para cerrar sesión en todas las pestañas
             localStorage.setItem("logout", Date.now());
-
             window.location.href = "/login";  
             return;
         }
 
         if (response.ok) {
             document.getElementById(`session-${sessionId}`).remove();
-            alert("Sesión eliminada correctamente.");
+            Swal.fire("Eliminado", "La sesión fue eliminada exitosamente.", "success");
         } else {
             const errorData = await response.json();
-            alert(`Error: ${errorData.error || "No se pudo eliminar la sesión"}`);
+            Swal.fire("Error", errorData.error || "No se pudo eliminar la sesión.", "error");
         }
     } catch (error) {
         console.error("Error:", error);
-        alert("Hubo un problema al eliminar la sesión.");
+        Swal.fire("Error", "Hubo un problema al eliminar la sesión.", "error");
     }
 }
-
-
-
 
 async function loadSessionSettings() {
     try {
@@ -91,13 +91,11 @@ async function loadSessionSettings() {
         if (!response.ok) throw new Error("Error al obtener configuración de sesión.");
 
         const settings = await response.json();
-        console.log("Configuración actual:", settings);
-
         document.getElementById("toggle-multiple-sessions").checked = settings.allow_multiple_sessions;
         document.getElementById("toggle-2fa").checked = settings.enable_2fa;
     } catch (error) {
         console.error("Error obteniendo configuración:", error);
-        alert("No se pudo cargar la configuración de la sesión.");
+        Swal.fire("Error", "No se pudo cargar la configuración de la sesión.", "error");
     }
 }
 
@@ -112,13 +110,13 @@ async function updateMultipleSessions(value) {
 
         const result = await response.json();
         if (response.ok) {
-            alert("Configuración de sesiones múltiples actualizada.");
+            Swal.fire("Éxito", "Configuración de sesiones múltiples actualizada.", "success");
         } else {
-            alert(`Error: ${result.error || "No se pudo actualizar la configuración."}`);
+            Swal.fire("Error", result.error || "No se pudo actualizar la configuración.", "error");
         }
     } catch (error) {
         console.error("Error:", error);
-        alert("Hubo un problema al actualizar la configuración.");
+        Swal.fire("Error", "Hubo un problema al actualizar la configuración.", "error");
     }
 }
 
@@ -133,12 +131,12 @@ async function updateEnable2FA(value) {
 
         const result = await response.json();
         if (response.ok) {
-            alert("Verificación en dos pasos actualizada.");
+            Swal.fire("Éxito", "Verificación en dos pasos actualizada.", "success");
         } else {
-            alert(`Error: ${result.error || "No se pudo actualizar la configuración."}`);
+            Swal.fire("Error", result.error || "No se pudo actualizar la configuración.", "error");
         }
     } catch (error) {
         console.error("Error:", error);
-        alert("Hubo un problema al actualizar la verificación en dos pasos.");
+        Swal.fire("Error", "Hubo un problema al actualizar la verificación en dos pasos.", "error");
     }
 }

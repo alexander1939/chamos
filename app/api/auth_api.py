@@ -206,6 +206,7 @@ def delete_all_sessions_except_current():
 @authApi.delete('/api/sessions/<int:session_id>/')
 def delete_session(session_id):
     token = request.cookies.get("token")
+    print(f"Token antes de eliminar: {token}")
 
     if not token or token not in active_tokens:
         return jsonify({"error": "No autorizado"}), 401
@@ -219,20 +220,28 @@ def delete_session(session_id):
     db.session.delete(session)
     db.session.commit()
 
-    # Eliminar todas las entradas del diccionario active_tokens relacionadas con la sesión eliminada
+    # 🔥 Eliminar todas las entradas del diccionario active_tokens relacionadas con la sesión eliminada
     for tok in list(active_tokens.keys()):
         if active_tokens[tok].get("session_id") == session_id:
             del active_tokens[tok]
 
     response = jsonify({"message": "Sesión cerrada correctamente"})
 
-    # Antes de acceder a active_tokens[token], asegurarse de que el token sigue existiendo
+    # 🔥 Si el token eliminado es el actual, invalidarlo
     if token in active_tokens and session_id == active_tokens[token].get("session_id"):
         del active_tokens[token]
-        response.set_cookie("token", "", expires=0, path="/")
-        response.set_cookie("refresh_token", "", expires=0, path="/")
+
+        # 🔥 Establecer un token inválido en las cookies sin necesidad de hacer otra petición
+        response = jsonify({"message": "Sesión cerrada correctamente"})
+        response.set_cookie("token", "", expires=0)  
+        response.set_cookie("refresh_token", "", expires=0)  
+
+        return response, 200  # 🔹 Esto hará que el frontend detecte el cambio y redirija al login
 
     return response, 200
+
+
+
 
 @authApi.get('/api/active/')
 def get_active_sessions():

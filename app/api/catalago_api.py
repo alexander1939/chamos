@@ -6,6 +6,9 @@ from app.middleware.catalogo_middleware import get_user_from_token, has_access_t
 from app.db.db import db
 from app.db.UserPrivilege_model import UserPrivilege
 from app.db.users_model import User
+from app.db.session_model import ActiveSession
+from app.middleware.auth_middleware import active_tokens
+
 
 
 catalogo_api = Blueprint('catalogo', __name__)
@@ -14,14 +17,20 @@ catalogo_api = Blueprint('catalogo', __name__)
 @catalogo_api.get('/api/validate_token')
 def validate_token():
     token = request.cookies.get("token")
+
     if not token:
         return jsonify({"error": "Token no proporcionado."}), 401
+
+    # 🔹 Verificar si el token sigue activo en active_tokens
+    if token not in active_tokens:
+        return jsonify({"error": "Sesión cerrada o token inválido."}), 401
 
     user = get_user_from_token(token)
     if not user:
         return jsonify({"error": "Token inválido o expirado."}), 401
 
     return jsonify({"message": "Token válido"}), 200
+
 
 
 

@@ -53,6 +53,22 @@ async function deleteSession(sessionId) {
             credentials: 'include'
         });
 
+        console.log(`Intentando eliminar sesión: ${sessionId}`);
+
+        if (response.status === 401) {
+            console.warn("Sesión cerrada, eliminando cookies y redirigiendo al login...");
+
+            // 🔹 Eliminar cookies manualmente SIN recargar
+            document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+            document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+
+            // 🔥 Notificar a la aplicación para cerrar sesión en todas las pestañas
+            localStorage.setItem("logout", Date.now());
+
+            window.location.href = "/login";  
+            return;
+        }
+
         if (response.ok) {
             document.getElementById(`session-${sessionId}`).remove();
             alert("Sesión eliminada correctamente.");
@@ -65,6 +81,9 @@ async function deleteSession(sessionId) {
         alert("Hubo un problema al eliminar la sesión.");
     }
 }
+
+
+
 
 async function loadSessionSettings() {
     try {

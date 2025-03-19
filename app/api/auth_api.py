@@ -144,11 +144,20 @@ def logout_user():
     token = request.cookies.get("token")
 
     if token in active_tokens:
+        session_id = active_tokens[token]["session_id"]
+
+        # Eliminar la sesión de la base de datos
+        session = ActiveSession.query.filter_by(id=session_id).first()
+        if session:
+            db.session.delete(session)
+            db.session.commit()
+
+        # Eliminar el token activo
         del active_tokens[token]
 
     response = jsonify({"message": "Sesión cerrada correctamente"})
-    response.set_cookie("token", "", expires=0)  
-    response.set_cookie("refresh_token", "", expires=0)  
+    response.set_cookie("token", "", expires=0)
+    response.set_cookie("refresh_token", "", expires=0)
 
     return response, 200
 

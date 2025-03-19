@@ -1,3 +1,4 @@
+/* 
 document.addEventListener("DOMContentLoaded", async () => {
     const tableBody = document.querySelector("tbody");
     
@@ -138,3 +139,5 @@ async function updateUserPrivileges(userId, privileges) {
         });
     }
 }
+
+*/

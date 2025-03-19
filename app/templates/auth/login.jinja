@@ -25,16 +25,27 @@
             {% endif %}
             {% endwith %}
 
+            <!-- Mensaje si ya hay una sesión activa -->
+            {% if user_has_active_session %}
+            <div class="alert alert-warning">
+                Ya tienes una sesión activa. Si deseas continuar aquí, la otra sesión se cerrará.
+                <form method="POST" action="{{ url_for('auth.force_login') }}">
+                    <input type="hidden" name="user_id" value="{{ user_id }}">
+                    <button type="submit" class="btn btn-danger mt-2">Cerrar sesión anterior y continuar</button>
+                </form>
+            </div>
+            {% endif %}
+
             <div class="form-group">
-    <input type="email" name="email" id="email" class="form-input" placeholder="Correo" required>
-    <div class="invalid-feedback" id="email-error"></div>
-</div>
+                <input type="email" name="email" id="email" class="form-input" placeholder="Correo" required>
+                <div class="invalid-feedback" id="email-error"></div>
+            </div>
 
-<div class="form-group">
-    <input type="password" name="password" id="password" class="form-input" placeholder="Contraseña" required>
-    <div class="invalid-feedback" id="password-error"></div>
-</div>
-
+            <div class="form-group">
+                <input type="password" name="password" id="password" class="form-input" placeholder="Contraseña"
+                    required>
+                <div class="invalid-feedback" id="password-error"></div>
+            </div>
 
             <button type="submit" class="form-button">Iniciar sesión</button>
 

@@ -1,0 +1,11 @@
+{% block content %}
+<h2>Cierre de sesiones activas</h2>
+<p>Detectamos que tienes sesiones activas en otros dispositivos. ¿Quieres cerrarlas antes de continuar?</p>
+
+<form action="{{ url_for('auth.process_close_sessions') }}" method="POST">
+    <input type="hidden" name="temp_token" value="{{ temp_token }}">
+    <button type="submit">Cerrar sesiones y continuar</button>
+</form>
+
+<a href="{{ url_for('auth.login') }}">Cancelar</a>
+{% endblock %}

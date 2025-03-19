@@ -5,6 +5,7 @@ from app.db.session_model import ActiveSession
 from datetime import datetime,timedelta
 from app.db.Privilege_model import Privilege
 from app.db.UserPrivilege_model import UserPrivilege
+from app.db.UserSessionSettings_model import UserSessionSettings
 from app.db.preguntas_model import Question
 from app.db.respuesta_model import Answer
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -23,7 +24,7 @@ def register_user():
 
     hashed_password = generate_password_hash(data["password"])
     
-    # 1️⃣ Crear el usuario sin preguntas ni respuestas
+    # 1️⃣ Crear el usuario
     new_user = User(
         email=data["email"],
         password=hashed_password,
@@ -34,8 +35,17 @@ def register_user():
     )
     
     db.session.add(new_user)
-    db.session.flush() 
+    db.session.flush()  # Se usa flush() para obtener el ID del usuario antes de commit
 
+    # 2️⃣ Crear la configuración de sesión con valores predeterminados (sin 2FA y sin múltiples sesiones)
+    session_settings = UserSessionSettings(
+        user_id=new_user.id,
+        allow_multiple_sessions=False,  # ❌ No permite múltiples sesiones por defecto
+        enable_2fa=False  # ❌ No activa 2FA por defecto
+    )
+    db.session.add(session_settings)
+
+    # 3️⃣ Agregar preguntas de seguridad
     for i in range(1, 3):  
         pregunta_id = data.get(f"pregunta{i}")  
         respuesta_texto = data.get(f"respuesta{i}")
@@ -44,6 +54,7 @@ def register_user():
             answer = Answer(user_id=new_user.id, question_id=pregunta_id, response=respuesta_texto)
             db.session.add(answer)
 
+    # 4️⃣ Asignar privilegios
     privileges = db.session.query(Privilege).filter(
         Privilege.name.in_(["Materias", "Juegos", "Proyectos"])
     ).all()
@@ -51,10 +62,12 @@ def register_user():
     for privilege in privileges:
         db.session.add(UserPrivilege(user_id=new_user.id, privilege_id=privilege.id, can_create=1, can_edit=1, can_view=1, can_delete=1))
 
+    # 5️⃣ Confirmar todos los cambios en la base de datos
     db.session.commit()
 
     return jsonify({"message": "Usuario registrado con privilegios"}), 201
- 
+
+
 
 
 @authApi.post('/api/login/')
@@ -93,7 +106,8 @@ def login_user():
     response = jsonify({
         "message": "Login exitoso",
         "token": token,
-        "refresh_token": refresh_token
+        "refresh_token": refresh_token,
+        "user_id": user.id 
     })
 
     response.set_cookie("token", token, httponly=False, samesite='Lax', max_age=TOKEN_EXPIRATION_TIME, path='/')
@@ -130,11 +144,20 @@ def logout_user():
     token = request.cookies.get("token")
 
     if token in active_tokens:
+        session_id = active_tokens[token]["session_id"]
+
+        # Eliminar la sesión de la base de datos
+        session = ActiveSession.query.filter_by(id=session_id).first()
+        if session:
+            db.session.delete(session)
+            db.session.commit()
+
+        # Eliminar el token activo
         del active_tokens[token]
 
     response = jsonify({"message": "Sesión cerrada correctamente"})
-    response.set_cookie("token", "", expires=0)  
-    response.set_cookie("refresh_token", "", expires=0)  
+    response.set_cookie("token", "", expires=0)
+    response.set_cookie("refresh_token", "", expires=0)
 
     return response, 200
 
@@ -192,6 +215,7 @@ def delete_all_sessions_except_current():
 @authApi.delete('/api/sessions/<int:session_id>/')
 def delete_session(session_id):
     token = request.cookies.get("token")
+    print(f"Token antes de eliminar: {token}")
 
     if not token or token not in active_tokens:
         return jsonify({"error": "No autorizado"}), 401
@@ -205,15 +229,107 @@ def delete_session(session_id):
     db.session.delete(session)
     db.session.commit()
 
-    for tok, data in list(active_tokens.items()):
-        if data["user_id"] == user_id and data["session_id"] == session_id:
+    # 🔥 Eliminar todas las entradas del diccionario active_tokens relacionadas con la sesión eliminada
+    for tok in list(active_tokens.keys()):
+        if active_tokens[tok].get("session_id") == session_id:
             del active_tokens[tok]
 
     response = jsonify({"message": "Sesión cerrada correctamente"})
 
-    if session_id == active_tokens[token].get("session_id"):
+    # 🔥 Si el token eliminado es el actual, invalidarlo
+    if token in active_tokens and session_id == active_tokens[token].get("session_id"):
         del active_tokens[token]
-        response.set_cookie("token", "", expires=0, path="/")
-        response.set_cookie("refresh_token", "", expires=0, path="/")
+
+        # 🔥 Establecer un token inválido en las cookies sin necesidad de hacer otra petición
+        response = jsonify({"message": "Sesión cerrada correctamente"})
+        response.set_cookie("token", "", expires=0)  
+        response.set_cookie("refresh_token", "", expires=0)  
+
+        return response, 200  # 🔹 Esto hará que el frontend detecte el cambio y redirija al login
 
     return response, 200
+
+
+
+
+@authApi.get('/api/active/')
+def get_active_sessions():
+    token = request.cookies.get("token")
+
+    if not token or token not in active_tokens:
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    sessions = ActiveSession.query.filter_by(user_id=user_id).all()
+
+    sessions_data = [{
+        "id": session.id,
+        "ip_address": session.ip_address,
+        "user_agent": session.user_agent,
+        "created_at": session.created_at.strftime('%Y-%m-%d %H:%M:%S')
+    } for session in sessions]
+
+    return jsonify(sessions_data), 200
+
+
+
+@authApi.get('/api/session-settings/')
+def get_session_settings():
+    token = request.cookies.get("token")
+    if not token or token not in active_tokens:
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    settings = db.session.query(UserSessionSettings).filter_by(user_id=user_id).first()
+
+    if not settings:
+        return jsonify({"error": "Configuración de sesión no encontrada"}), 404
+
+    return jsonify({
+        "allow_multiple_sessions": settings.allow_multiple_sessions,
+        "enable_2fa": settings.enable_2fa
+    }), 200
+
+
+@authApi.put('/api/session-settings/multiple-sessions/')
+def update_multiple_sessions():
+    token = request.cookies.get("token")
+    if not token or token not in active_tokens:
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    data = request.get_json()
+
+    if "allow_multiple_sessions" not in data:
+        return jsonify({"error": "Falta el valor de allow_multiple_sessions"}), 400
+
+    settings = db.session.query(UserSessionSettings).filter_by(user_id=user_id).first()
+    if not settings:
+        return jsonify({"error": "Configuración de sesión no encontrada"}), 404
+
+    settings.allow_multiple_sessions = bool(data["allow_multiple_sessions"])
+    db.session.commit()
+
+    return jsonify({"message": "Configuración actualizada", "allow_multiple_sessions": settings.allow_multiple_sessions}), 200
+
+
+@authApi.put('/api/session-settings/enable-2fa/')
+def update_enable_2fa():
+    token = request.cookies.get("token")
+    if not token or token not in active_tokens:
+        return jsonify({"error": "No autorizado"}), 401
+
+    user_id = active_tokens[token]["user_id"]
+    data = request.get_json()
+
+    if "enable_2fa" not in data:
+        return jsonify({"error": "Falta el valor de enable_2fa"}), 400
+
+    settings = db.session.query(UserSessionSettings).filter_by(user_id=user_id).first()
+    if not settings:
+        return jsonify({"error": "Configuración de sesión no encontrada"}), 404
+
+    settings.enable_2fa = bool(data["enable_2fa"])
+    db.session.commit()
+
+    return jsonify({"message": "Configuración actualizada", "enable_2fa": settings.enable_2fa}), 200

@@ -49,3 +49,7 @@ function verificarCambioToken() {
 document.addEventListener("DOMContentLoaded", () => {
     setInterval(verificarCambioToken, 1000); // Verificar cada 1 segundo
 });
+
+document.addEventListener("click", hacerPeticionApi);
+// document.addEventListener("keydown", hacerPeticionApi);
+// document.addEventListener("mousemove", hacerPeticionApi);

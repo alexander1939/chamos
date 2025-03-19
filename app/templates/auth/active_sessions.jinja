@@ -5,6 +5,21 @@
 {% block content %}
 <div class="container">
     <h2>Sesiones Activas</h2>
+
+    <div class="mb-3">
+        <label class="form-check-label">
+            <input type="checkbox" id="toggle-multiple-sessions" class="form-check-input">
+            Permitir múltiples sesiones
+        </label>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-check-label">
+            <input type="checkbox" id="toggle-2fa" class="form-check-input">
+            Habilitar verificación en dos pasos (2FA)
+        </label>
+    </div>
+
     <table id="sessionsTable" class="table table-striped">
         <thead>
             <tr>
@@ -16,17 +31,6 @@
             </tr>
         </thead>
         <tbody>
-            {% for session in sessions %}
-            <tr id="session-{{ session.id }}">
-                <td>{{ session.id }}</td>
-                <td>{{ session.ip_address }}</td>
-                <td>{{ session.user_agent }}</td>
-                <td>{{ session.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                <td>
-                    <button class="btn btn-danger delete-session" data-session-id="{{ session.id }}">Eliminar</button>
-                </td>
-            </tr>
-            {% endfor %}
         </tbody>
     </table>
 </div>

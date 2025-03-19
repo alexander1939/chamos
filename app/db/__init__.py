@@ -10,3 +10,4 @@ from .Materias_model import Materia
 from .preguntas_model import Question
 from .respuesta_model import Answer
 from .pass_codes import PasswordResetCode
+from .UserSessionSettings_model import UserSessionSettings

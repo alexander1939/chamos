@@ -20,7 +20,34 @@ def generate_secure_token():
 
 def is_token_valid(token):
     """Valida si el token existe y no ha expirado"""
-    return token in active_tokens and active_tokens[token]["expires"] > time.time()
+    exists = token in active_tokens
+    current_time = time.time()
+    expires = active_tokens[token]["expires"] if exists else None
+
+    print(f"[DEBUG] Validando token: {token}")
+    print(f"[DEBUG] Existe en active_tokens: {exists}")
+    print(f"[DEBUG] Tiempo actual: {current_time}")
+    print(f"[DEBUG] Expira en: {expires}")
+    print(f"[DEBUG] Diferencia de tiempo: {expires - current_time if expires else 'N/A'}")
+
+    return exists and expires > current_time
+
+
+def get_active_tokens():
+    """Devuelve una lista de los tokens activos con su información."""
+    active_sessions = []
+
+    for token, data in active_tokens.items():
+        session_info = {
+            "token": token,
+            "user_id": data["user_id"],
+            "session_id": data.get("session_id"),
+            "expires_in": int(data["expires"] - time.time())  # Tiempo restante en segundos
+        }
+        active_sessions.append(session_info)
+
+    return jsonify({"active_tokens": active_sessions}), 200
+
 
 def validate_user_data(data):
     """Valida los datos del usuario"""

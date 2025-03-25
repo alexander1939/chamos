@@ -1,6 +1,6 @@
-/* 
+
 document.addEventListener("DOMContentLoaded", async () => {
-    const tableBody = document.querySelector("tbody");
+    const tableBody = document.querySelector("#user-table-body");
     
     let usersData = [];
 
@@ -140,4 +140,3 @@ async function updateUserPrivileges(userId, privileges) {
     }
 }
 
-*/

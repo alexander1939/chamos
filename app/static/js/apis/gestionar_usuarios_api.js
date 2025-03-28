@@ -1,7 +1,9 @@
-
 document.addEventListener("DOMContentLoaded", async () => {
-    const tableBody = document.querySelector("#user-table-body");
-    
+    // Verificar primero si estamos en la página correcta
+    const tableBody = document.getElementById("user-table-body");
+    if (!tableBody) return; // Salir silenciosamente si no es la página correcta
+
+    // El resto del código solo se ejecuta si existe tableBody
     let usersData = [];
 
     try {
